@@ -30,6 +30,10 @@ type FreezeSceneProps = {
   readonly title: React.ReactNode;
   // Caption word ranges the sticker already shows, e.g. [[0, 2]] for "Yep. That's me."
   readonly hideWords?: readonly (readonly [number, number])[];
+  // For Reels, TikTok and Shorts, raise both above the app's buttons:
+  // titleTop about 1080 and captionTop 1300 (styles.md, "Formats and safe zones").
+  readonly titleTop?: number;
+  readonly captionTop?: number;
 };
 
 // The "Yep, that's me. You're probably wondering how I got here." opener:
@@ -44,6 +48,8 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
   kicker,
   title,
   hideWords,
+  titleTop = 1360,
+  captionTop,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -114,7 +120,7 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
       </Interactive.Div>
       <Interactive.Div
         name="Title"
-        style={{ position: "absolute", left: 100, right: 100, top: 1360, ...fadeUp(frame, titleAt, fps, 50) }}
+        style={{ position: "absolute", left: 100, right: 100, top: titleTop, ...fadeUp(frame, titleAt, fps, 50) }}
       >
         <div style={{ fontFamily: monoFont, fontSize: 40, color: colors.accent }}>{kicker}</div>
         <div style={{ fontFamily: headingFont, fontSize: 120, fontWeight: 700, lineHeight: 1, color: colors.text }}>
@@ -128,7 +134,7 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
         volume={0.6}
         premountFor={fps}
       />
-      <Narration id={id} hideWords={hideWords} />
+      <Narration id={id} hideWords={hideWords} top={captionTop} />
     </>
   );
 };
