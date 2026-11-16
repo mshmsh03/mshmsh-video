@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: website-launch-editable
+expected_outcome: |
+  A plan for a ~30 s vertical launch video of the salon's real booking page, built in the HyperFrames
+  engine because the sister will edit the text and the offer herself, with the interview and brief,
+  three different storylines with a recommendation, a design file in numbers with banned defaults,
+  editable fields with limits and a short monthly edit routine for the sister,
+  real UI from the site (captured to a scratch folder), sound on visible actions, a review pass and a
+  preview gate before the final render, and HyperFrames telemetry mentioned to the person.

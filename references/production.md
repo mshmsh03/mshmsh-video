@@ -118,7 +118,9 @@ use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
 - **Platform safe zones.** Instagram Reels, TikTok and Shorts lay their own
   username, caption and buttons over roughly the bottom 400 px and the right
   140 px. For those, pass `top={1300}` to `Narration` (or `captionTop` to
-  `BeatScene`), move titles up, and keep stickers off the right edge. WhatsApp
+  `BeatScene` and `FreezeScene`), move titles up (`FreezeScene`'s
+  `titleTop={1080}`; its default 1360 sits under the buttons), and keep
+  stickers off the right edge. WhatsApp
   Status covers far less, so the default 1470 is fine there. Tell the person to
   turn off the app's auto-captions and not to add the app's music on top.
 
@@ -127,6 +129,24 @@ use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
 The composition size sets the format (styles.md, "Formats and safe zones"). The `Root.tsx` example in "Project setup" is vertical; for landscape use `width={1920} height={1080}`, for square `1080 x 1080`, for portrait feed `1080 x 1350`, and reposition captions, titles and visuals for that size instead of reusing the 1080 x 1920 layout numbers.
 
 Start `npx remotion studio` as soon as the project runs and keep the preview open while building. Render the MP4 when the person asks for the file or when delivering a video to post.
+
+## No narration: the music is the clock
+
+With no voice, `make-voice.mjs` is skipped and nothing else sets the scene lengths, so the track does:
+
+1. **Pick the music right after the script gate**, before building, not after (music.md).
+2. **Get its grid:** `hf beats public/bgm/track.mp3 --json` for the tempo and beat times, `hf audio ... --only sections` for where it is strongest (hyperframes.md). On calm music, cut on phrase changes instead.
+3. **Give every scene a whole number of beats** (a bar is 4) in `story.json`, with the track's `"bpm"`, and each scene's on-screen words in `text`. Land the payoff and the end card on strong beats. Trim the music so one of its beats falls on frame 0 (start the `<Audio>` at a beat time from `hf beats`).
+4. **Run `node scripts/make-timing.mjs`.** It writes `src/story/timing.json` in `voice.json`'s shape, with every scene starting exactly on its beat (computed from the beat's index, so nothing drifts), and flags any scene too short to read its `text` (0.5 s + 0.3 s a word). Import it where the template imports `voice.json`. Then `stills.mjs <id> review --voice src/story/timing.json` works as usual; `check-audio.mjs` without a voice file still reports the peak, clipped samples and any `--at` windows, and `hf audio out/<file>.mp4 --only loudness --json` gives the loudness (about -14 LUFS for music alone). Re-run it when the real track's tempo is known.
+5. **Large titles carry the words**, each held long enough to read, with the screen never depending on sound (story-and-comedy.md, "Words on screen and in the voice").
+
+## Text someone else will edit later
+
+When the person (or their staff) will change words, prices or the monthly offer themselves after delivery:
+
+- **Remotion:** a Zod `schema` on the `<Composition>` with `defaultProps` turns every field into a form in Remotion Studio's props panel, and saving there writes the values back to the code (`remotion-interactivity`). It needs Node and the Studio running on their PC; a double-click `.bat` that starts the Studio and another that renders to a new file name help a non-coder.
+- **HyperFrames:** the same fields as composition variables, edited in its Studio or desktop app, which also lets them move and trim clips on a timeline (hyperframes.md, "Remotion or HyperFrames").
+- **Either way, timing doesn't follow their edits.** Cap each field's length, hold every line long enough for its longest allowed text, let text shrink between its design size and a floor (never under 28 px at 1080 wide), and give a field that can be empty (no offer this month) a fixed fallback. Don't narrate editable text: a recorded line can't change when the text does. Test the longest allowed text and the empty case in the review sheets before delivery.
 
 ## Screenshots and app images
 
@@ -141,6 +161,22 @@ Start `npx remotion studio` as soon as the project runs and keep the preview ope
 
   Use `--window-size=390,844` for phone shots. Take a phone shot of every site
   that appears on the laptop, so the phone matches.
+- **A whole site as material** (a promo built on their website):
+  `hf capture <url> -o <scratch>/capture/<site> --skip-vision --json`
+  (hyperframes.md) gets, in about a minute, a full-page screenshot at 1920 wide
+  plus scroll shots, the logos and images, the font files, the colours and the
+  site's own words. Capture to a scratch folder, never the project root (it
+  writes its own `CLAUDE.md` and `AGENTS.md`), and copy what you use into
+  `public/`. To show the site as it is, use its screenshots: rebuilding the
+  page in code drifts from the real layout, so rebuild only the part that
+  moves. Pushing in past 1:1 needs its own 2× screenshot of that region
+  (`--force-device-scale-factor=2` with headless Chrome).
+- **Brand colours and fonts from a site:** link blue (`#0000EE`) and status
+  reds and greens are never the accent; the accent is the colour that recurs
+  in the most roles. Icon fonts (Font Awesome, icomoon) are never the headline
+  or body font. Use only the weights the brand font ships, or 600 and 700
+  render as fake bold. A dark brand swaps background and text in a light
+  template.
 - **Apps:** look in the projects for `docs/screenshots/` or golden test images
   (`test/**/goldens/*.png`) before taking new screenshots.
 - Read each image before using it: check for private data, empty areas, and
@@ -159,6 +195,13 @@ You can't hear the video, so measure it and look at frames:
      `&nbsp;`)
    - nothing peeks out from behind a zoom
    - each scene's last gag lands before its fade starts (`end:<scene>`)
+
+   `start:<scene>` (just after its transition) and `mid:<scene>` work as specs
+   too. `node scripts/stills.mjs StoryVideo review` renders every scene's
+   start and middle and every seam, and tiles them into
+   `out/stills/review/scenes.png`, `seams.png` and `phone.png` (360 px wide);
+   that is the input to the review pass (review.md). It took 2 min 20 s for a
+   7-scene, 45 s reel on the laptop (2026-11-17).
 2. **Render to a new filename** each time (`out/<name>-v2.mp4`, `-v3`). On
    Windows, a video open in the player locks the file, and Remotion's final
    rename fails with `EPERM`. The finished render is then still in
@@ -229,3 +272,11 @@ You can't hear the video, so measure it and look at frames:
   first cut's timing and reported the music louder than the speech.
 - **The length creeps up** as jokes are added. Tell the person the length and
   offer the easiest scene to cut.
+- **`hf capture` drops a HyperFrames scaffold** (`CLAUDE.md`, `AGENTS.md`,
+  `.cursorrules`) into its output folder. Captured into a
+  Remotion project's root, those files would change how the next session
+  behaves there. Always capture to a scratch folder (2026-11-17).
+- **Screenshots shrink to nothing on a phone.** In a 1080-wide reel, a laptop
+  mockup of a full desktop screen shows its text at a few pixels; the phone
+  review sheet makes it obvious. Crop to the part that matters, or push in on
+  it, so its text stays at least 26 px.

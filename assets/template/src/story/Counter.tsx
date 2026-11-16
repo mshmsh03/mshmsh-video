@@ -57,6 +57,8 @@ export const Counter: React.FC<CounterProps> = ({
           fontSize: 150,
           fontWeight: 700,
           lineHeight: 1,
+          // Equal-width digits, so the number doesn't jitter while it counts.
+          fontVariantNumeric: "tabular-nums",
           color: colors.accent,
           // The mono ∞ is drawn small; bring it up to the digits' size.
           scale: finalText && landed ? 1.6 : 1,

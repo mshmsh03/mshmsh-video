@@ -4,6 +4,7 @@ Everything this workflow uses, and when to reach for it. Check what is installed
 
 ## Contents
 - The Remotion skills
+- HyperFrames (a second engine and file tools)
 - media-use (HyperFrames Agent Media OS)
 - Voice: Kokoro, Edge TTS, Sorani Kurdish (F5), HeyGen, ElevenLabs, their own recording
 - Music and sound effects
@@ -34,6 +35,15 @@ Installed as `remotion-*` skills (the router is `remotion-best-practices`; they 
 Remotion packages this skill's template uses: `@remotion/transitions` (fades and slides in a `TransitionSeries`), `@remotion/google-fonts`, `@remotion/media` (the `Audio` component), `@remotion/captions`. Sound effects come from remotion.media as `.wav` files (`whoosh`, `mouse-click`, `record-scratch`, `vine-boom`, `windows-xp-error`, `ding`); the full list is in the `remotion-markup` skill's `sfx.md`.
 
 Preview first: run `npx remotion studio` (add `--no-open` if the agent client has an in-app browser, then open the printed URL and confirm the composition loads). Visit one composition at `/<composition-id>`.
+
+## HyperFrames (a second engine and file tools)
+
+The `hyperframes` and `hyperframes-cli` skills (`heygen-com/hyperframes`, Apache-2.0; installed and read 2026-11-17). Full notes in hyperframes.md. In short:
+
+- **As an engine:** HTML and GSAP rendered to video, with a Studio and a desktop app where the person can keep editing without code. Remotion stays the default; build in HyperFrames when the person asks, wants to edit the video themselves afterwards, or the video is mostly a captured website or a ready-made HyperFrames block.
+- **As file tools inside a Remotion video:** `hf beats` (tempo and beat times), `hf audio` (a track's sections, loudness and true peak; a sound effect's peak; a render's loudness), `hf capture` (a website's screenshots, colours, fonts, logos and words), `hf transcribe` (word timings for the person's own recording) and `hf remove-background` (a cut-out of the person). `hf` means `node "<skills>/hyperframes/scripts/plugin-cli.mjs"`.
+- **Telemetry** goes to HeyGen unless turned off (`hf telemetry disable`, `HYPERFRAMES_NO_TELEMETRY=1`); tell the person.
+- **Their craft rules** (storylines, numbers instead of adjectives, the banned defaults, motion, sound, captions, review) are folded into this skill's references: story-and-comedy.md, storyboard-and-gates.md, motion.md, music.md, styles.md and review.md.
 
 ## media-use (HyperFrames Agent Media OS)
 
@@ -74,7 +84,7 @@ Install: `npx skills add heygen-com/hyperframes@media-use -g -y`. Avoid skills l
 | F5-TTS Central Kurdish (`aranemini/central-kurdish-tts`) | Free, offline; **CC BY-NC-ND 4.0, non-commercial only** | Sorani Kurdish: three single-speaker voices (studio male, audiobook male, audiobook female), 24 kHz, the best free Sorani voice found (2026-10-25). Slow on a CPU, about 40 times real time. Steps under "Sorani voices" below. |
 | MMS Sorani (`razhan/mms-tts-ckb`) | Free, offline; Meta's MMS base is non-commercial | Flat and robotic, but it speaks a scene in seconds: a stand-in voice for building and timing while F5 runs. |
 | kurdishtts.com | Paid (about $12/month for public use; the free plan is evaluation only) | Many Sorani and Kurmanji voices with word timings. Needs the person's own account and API key. Not tested here. |
-| The person's own recording | Free | Best for tributes. Needs the same per-word timings, so transcribe it (`remotion-captions`, or the `media-use` audio engine) to get them. |
+| The person's own recording | Free | Best for tributes. Needs the same per-word timings, so transcribe it (`remotion-captions`, `hf transcribe` with `--model` and `--language` set (hyperframes.md), or the `media-use` audio engine) to get them. |
 | HeyGen TTS | Free allowance with OAuth sign-in | Through `media-use resolve --type voice`. |
 | ElevenLabs | Paid API key | Offer it, don't assume it. |
 
@@ -157,7 +167,8 @@ The HeyGen CLI is Linux and macOS only. On Windows, install it inside WSL and ru
 | `scripts/sorani/speak_story.py` | Speaks every scene in Sorani with F5-TTS Central Kurdish (or the MMS stand-in) to `out/voice-raw/`; copy it into the project's `tts/` |
 | `scripts/sorani/fetch_ema.py` | Downloads only the EMA weights from a remote PyTorch checkpoint (1.35 GB of 5.4 GB for an F5 voice) |
 | `scripts/heygen-music.mjs` | Search the HeyGen music catalog and download picks (calls the CLI through `wsl` on Windows) |
-| `scripts/stills.mjs` | Single-frame checks |
+| `scripts/stills.mjs` | Single-frame checks, and `review` for the contact sheets of every scene, seam and the phone view (review.md) |
+| `scripts/make-timing.mjs` | Scene lengths from the music's beat grid for a video with no narration, in `voice.json`'s shape, with a read-time check (production.md, "No narration") |
 | `scripts/check-audio.mjs` | Loudness and balance measurement |
 | `assets/template/src/` | `theme.ts`, `ChapterLabel.tsx`, and `story/` with `StoryVideo.tsx` (timeline, music ducking, transitions), `Narration.tsx` (captions), `PhotoCard.tsx`, `Devices.tsx` (laptop, phone, screenshot), `Terminal.tsx`, `Counter.tsx`, `motion.ts`, `voice.ts`, `scenes/BeatScene.tsx`, `scenes/FreezeScene.tsx`, a sample `story.json` |
 | `assets/examples/` | The finished "My Life with Claude" scenes and timeline, to copy staging from |
@@ -171,7 +182,7 @@ The template and example scenes were built for the funny story style (freeze-fra
 
 Searched skills.sh for video skills. The strong matches are all from `heygen-com/hyperframes` (HeyGen's own repo, about 62.7k stars, Apache-2.0, security audits pass or warn): `product-launch-video`, `faceless-explainer`, `general-video`, `motion-graphics`, `embedded-captions`, `talking-head-recut`, `slideshow`, `music-to-video`, `pr-to-video`, `hyperframes-audio`, `hyperframes-creative`, and `media-use` (already used here). They build **HTML compositions with the `hyperframes` CLI, not Remotion**, so they are not installed here: they would run a second pipeline next to this one. Their workflow ideas were adopted instead (storyboard-and-gates.md): a brief file as the contract, a design file, a storyboard before building, user approval gates, one worker per scene, freshness checks, and embedded captions kept for one or two peaks.
 
-If the person ever wants the HyperFrames engine instead, install a single skill with `npx skills add https://github.com/heygen-com/hyperframes --skill <name>` (for example `product-launch-video` for a website-based promo, or `faceless-explainer` for a text-to-video explainer), and tell them it replaces the Remotion steps for that video. Not recommended without checking: `*/superpowers@ai-video-generation` and `prime-skills/*` (huge install counts, repos with a handful of stars), and `remotion-to-hyperframes` (only for porting).
+Update 2026-11-17: the main `hyperframes` skill and `hyperframes-cli` are now installed on the author's PC (telemetry off), and this skill uses HyperFrames as an optional second engine and for its file tools (hyperframes.md). Their craft rules were folded into this skill's references. The other skills in that repo are still not installed. Not recommended without checking: `*/superpowers@ai-video-generation` and `prime-skills/*` (huge install counts, repos with a handful of stars), and `remotion-to-hyperframes` (only for porting).
 
 Second pass (2026-10-21, `npx skills find` with 29 queries on the PC; it returns nothing from the cloud sandbox, even for "remotion"):
 - **Installed:** `affaan-m/ecc@ui-demo` (repo about 285k stars) for screen recordings. Also added: the full ffmpeg, and Edge TTS under "Voice".

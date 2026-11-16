@@ -1,11 +1,17 @@
 # Story, scripting and comedy
 
-Finding the material, the privacy rules, writing `story.json` and timing visuals to words apply to every style that has narration. "Shape of the story" and the comedy playbook are for the funny and sincere story styles; other styles use the shapes in styles.md.
+Finding the material, the privacy rules, writing `story.json` and timing visuals to words apply to every style that has narration. "Shape of the story" and the comedy playbook are for the funny and sincere story styles; other styles use the shapes in styles.md. "The one thing", "Three storylines", "The hook", "Words" and "Tells" come from HeyGen's HyperFrames `story.md` (Apache-2.0, adopted 2026-11-17) and apply to every video that tells something.
 
 ## Contents
 - Finding the story (and what to keep out)
+- The one thing
+- Three storylines, then one
+- The hook
 - Shape of the story
 - Writing story.json
+- Words on screen and in the voice
+- The brand and the end card
+- Tells of a generated video
 - The comedy playbook
 - Timing gags to the voice
 
@@ -35,6 +41,64 @@ notes":
   them out with `focusY`; check several frames, because hand-held clips pan)
 
 Client names and their public websites are fine only when the person said so.
+
+## The one thing
+
+Most weak videos are good motion around no story: a list of features, three cards in a row, a logo, a link. Before any script, write down:
+
+- **What it is, in one line:** "You can now..." for a launch, the one idea the viewer must understand for an explainer, the one feeling for a tribute. A whole release ("what's new in 2.0") is not one thing: take its headline.
+- **The one thing to remember** after the video ends, in the viewer's words, not the brand's slogan.
+- **One viewer doing one real task** (for a promo or tutorial), from the moment they need it to the result. That task is the spine, and one real piece of data (a query, a file, a photo, a number) travels through it from the hook to the payoff. An explainer's spine is one concrete example worked through.
+- **Facts apart from choices.** What it does, real numbers and real labels come from the source (the person, their site, their docs); the angle, tone and look are yours. Use the person's own words as written. What the source doesn't say stays unsaid: "40 min to 2 min" is not "20× faster"; mark an example number as illustrative; show a screen you can't get as a labelled placeholder ("Screenshot: Settings"), never a drawn one.
+
+## Three storylines, then one
+
+**When:** a video over about 15 s whose story is still open after the brief: most promos, explainers, recaps, announcements and music videos. **Skip it** when the person already gave the story (the funny or sincere story of their year, "X told me to buy it"), a script, a storyboard or a reference video to follow, and for edits, captions on footage and one-idea pieces (one kinetic line, a map move); there the request is the story.
+
+Write three. They are three different videos, not three titles on one video: each has its own **world** (where it happens and what it looks like), its own **device** (what the story is) and its own **form** (how the camera and the cuts carry it). Sketch five or more ideas first, one line each pairing a device with a form (tables below), drop those the subject can't carry, and keep the three that differ most. Make one of them the bold one you wouldn't have picked first. Each says:
+
+- its name, its device and form in a few words, and in two sentences what the viewer sees and feels;
+- the first two seconds, exactly;
+- its beats in one line (`hook → ... → end card`);
+- its look in one line, taken from the subject or the brand (the medium, the background, the type);
+- its sound in one line (music.md, "Sound design").
+
+They are words: build nothing for any of them before one is picked. Pick for the story, the one a stranger would follow and remember, with people or a situation they know, ahead of the most striking picture. Put your recommendation first with its reason in one clause, and save all three as `STORYLINES.md` in the project so a later session can switch.
+
+- **The person is there:** show the three and wait for the pick (storyboard-and-gates.md, gate 1b). Ask nothing else in that message unless only they can answer it.
+- **"Just make it":** take your recommendation, build it, and name the other two in one line each in your reply.
+
+| Device | What the viewer sees |
+| --- | --- |
+| A moment in someone's day | a person, a time stamp, the message that creates the need ("launch is tomorrow") |
+| A character does the work | a mascot or a cursor carries, drags, draws and reacts; every cut has a cause |
+| The feature as the hook | the feature happening to a recognisable image in the first half second |
+| The result first | the finished result plays, then the camera pulls back to show where it came from |
+| One object across apps | the thing being made travels from one app into the product, which keeps working on it |
+| Life before and after | the old way as a scene (one person drowning in tabs), then the new way |
+| Type carries the argument | giant moving type, colour fields and grids that cut on the beat |
+| A number lands | one real number earned by a scene, then made physical |
+| A question with the input | "What if you could make a video from your ⟨website⟩?", the blank filled by a real input |
+| The object is the explanation | a machine or model whose working is the idea; the camera tours through it |
+
+| Form | What the viewer sees |
+| --- | --- |
+| One continuous take | the camera never cuts; it pushes, pulls and travels from one world into the next |
+| Object-to-object chain | every shot ends on the thing that opens the next: a button becomes a card becomes a phone |
+| An endless zoom | the camera dives into a detail that turns out to be the next world, again and again |
+| A flight through one world | a 3D set, a map or a desk the camera travels across; each idea is a stop on the route |
+| Cut on the beat | hard cuts on the music, type and colour fields changing every half beat |
+| Match cuts | one shape holds while everything around it changes: a circle becomes a lens, a wheel, a logo |
+| Split screen to one | several panes play at once, then collapse into the one that matters |
+| One frame that rebuilds | a single composition keeps rearranging itself and never leaves the frame |
+
+Three storylines that are all plain cuts between scenes haven't tried the forms. Before and after: the new side moves calmly while the old side churns; never mock a named competitor. A recap asks one question first, so each highlight answers it.
+
+**Worlds.** A video visits several worlds, each with its own background, light and scale (a desk, the product on a brand colour, a white space with a character, real footage), never one dark canvas with small UI floating in it. Enter each world through an object already on screen: the thing clicked becomes the next shot. Keep one home stage to come back to, one thing the eye follows, and the palette and type the same across worlds.
+
+## The hook
+
+The first two seconds are the densest of the video, and frame 0 is the thumbnail: never black, never a logo alone. Open on the feature working on something recognisable, a real moment that creates the need, a question with the input inside it, a sentence whose last word becomes the picture, or the problem itself. The funny story's freeze-frame on the person's own clip is a hook of this kind. Then let the old way fail on screen (the wait, the wall of text, the wrong result) before the product brings relief; the proof is often the same shot improved in front of the viewer. Typing into a prompt box as the opener, with nothing else on screen, is the tell of a generated video; a few seconds in, as a story step, it is fine.
 
 ## Shape of the story (funny and sincere story videos)
 
@@ -94,6 +158,32 @@ a CV.
   with `bm_george` gives snappy comedic delivery.
 - Each scene's length is computed from its voice. Never hand-set durations;
   re-run `make-voice.mjs` after every text change.
+
+## Words on screen and in the voice
+
+- **Voice pacing.** A narrator reads about 2.2 words a second. Keep a scene to about 19 spoken words (9 s); at most two scenes may reach 26 words (12 s). A 30 to 90 s video is about 155 words or fewer, a whole video about 400 at most.
+- **A voice longer than its visuals** makes the visuals pad with idle drift. Trim the script; never stretch the motion.
+- **Reveal as it is named.** Everything on screen in the first quarter of a scene, then frozen, reads as a slideshow. Bring each piece in when the voice names it (`wordAt`), across the back half of the scene, and write the line as separate phrases so it has cue points.
+- **Titles** take at most 6 words a line, one line on screen at a time, no full stop at the end; an explainer's lines may run to about 10 words. A line holds about 0.5 s plus 0.3 s a word, the last line at least 2 s.
+- **Show, don't list:** no bullet slides or rows of three cards. When similar things repeat, each gets its own idea and layout.
+- **Real numbers only**, from the source.
+- **The first line is never** "Introducing", "Meet" or the logo; after the problem, "Introducing X" is fine. Never "unlock", "seamless", "supercharge", "game-changer", "revolutionize", "effortless", or "in seconds" unless it was measured.
+- **Two tests:** read the lines alone, and a stranger gets the point; watch the pictures alone, and they tell the same story.
+- **Narrated or not.** With a voice, the screen never repeats the spoken sentence word for word (hide those caption words with `hideWords`). Without a voice, large titles and the product's own text carry the words, over music and sound.
+
+## The brand and the end card
+
+The logo lands once, with weight, usually on the end card. Before that the brand shows only inside the product and the story, never docked small in a corner. The end card is built, not a still: the mark is carried in, typed or wiped in (for a launch: in the last 5 to 10% of the video, centred, 15 to 30% of the frame width, then the call to action held 1.5 to 3 s). The accent colour is rationed: one highlighted word, the payoff, the end card.
+
+## Tells of a generated video
+
+Besides the defaults banned in storyboard-and-gates.md ("Banned by default") and the moves in motion.md ("Moves that look generated"):
+
+- every scene entering the same way, or the same move beat after beat;
+- side-by-side panels and floating cards standing in for a scene;
+- titles that keep sliding or shrinking after they land; breathing or floating loops standing in for motion on titles and UI.
+
+When the stills show any of them, name which, take the replacement from the subject, the brand or the medium, and add it to the Never line of `design.md`.
 
 ## The comedy playbook (funny style only)
 
