@@ -5,7 +5,11 @@
 - HeyGen setup (incl. Windows/WSL sign-in)
 - Searching and picking a track
 - Mixing it in: level, ducking, comedic silence
+- Sound design
+- Cutting to music
 - If HeyGen isn't an option
+
+"Sound design", "Cutting to music" and the loudness targets come from HeyGen's HyperFrames `sound.md` and `film.md` (Apache-2.0, adopted 2026-11-17).
 
 ## Where music comes from
 
@@ -19,6 +23,11 @@ People notice and say "the music is not nice". Use real music:
    a paid API key.
 3. A track the person supplies. This is fine for WhatsApp, but copyrighted songs
    get muted or blocked on Instagram, TikTok and YouTube. Say so.
+
+For a business, a client or a paid post, check the chosen track's licence
+covers commercial use on that platform before delivering (and the voice's:
+toolbox.md, "Voice"), and say in the delivery message what you checked rather
+than assuming it.
 
 Avoid `*/superpowers@ai-video-generation`-style skills and `prime-skills/*`: they
 show huge install counts from repos with a handful of stars.
@@ -77,6 +86,13 @@ compute RMS per second:
 - **Where it ends.** Most tracks end with a natural fade (quiet last 3 s). Plan
   for that rather than `loop`, because loop seams are audible. Let it end under
   the sincere beat and restart it for the ending credits.
+- **Where it is strongest.** `hf audio public/bgm/track.mp3 --only bpm,sections,loudness --json`
+  (hyperframes.md) labels the sections A, B, C... in about 5 s; a label that
+  repeats (D, E, D, E) is the chorus-like part. Start the music at the track's
+  strongest bar, not a quiet intro: a slow build drains a short video. End on a
+  bar line, with a short fade under the end card.
+- **Short tracks are loops.** A 15 to 30 s library track is made to loop: loop
+  it with a 0.4 s fade-in and a 1.5 s fade-out, or pick a longer one.
 
 ## Mixing it in: level, ducking, comedic silence
 
@@ -95,7 +111,73 @@ Verify with `scripts/check-audio.mjs` (production.md). If the speech level and
 the between-lines level are within about 2 dB of each other and the
 between-lines measurement covers mostly music, the music is too loud.
 
+**Loudness targets** for a video posted to social apps: the whole mix around
+-16 to -14 LUFS, and every file's true peak at -1 dBTP or lower (AI audio and
+library tracks often hit 0 dB). `hf audio out/<file>.mp4 --only loudness --json`
+reports both; the louder-copy command in toolbox.md fixes a quiet render.
+
+## Sound design
+
+The viewer notices a silent video before any frame, and no frame check catches
+it, so plan sound on purpose.
+
+- **The default.** A video over about 15 s that tells something gets a music
+  bed and sounds on its visible actions, unless the person asked for silence or
+  it is made to play muted (a looping background, a feed that autoplays without
+  sound). Each storyline says its sound in one line: the bed's feel and tempo,
+  the one moment the music changes, which actions get effects, or silence and
+  why.
+- **The clock.** Narrated, the voice is the clock: each beat starts on its
+  word. Music only, the music is the clock: land the payoff and the logo on its
+  strong beats (`hf beats`, "Cutting to music" below); cuts follow the motion,
+  not the drums.
+- **Let the sound act out the story:** the old way sits near silence, the music
+  opens when the product appears, or the music holds back until the payoff. The
+  funny style's comedic silence is the same idea.
+- **Effects are few and exact.** Every effect has a cause on screen; too many
+  read as a template:
+
+  | Sound | Only on |
+  | --- | --- |
+  | click | a real cursor click on screen |
+  | whoosh | a scene cut, or a large card moving fast |
+  | soft key tick | text arriving letter by letter or line by line |
+  | pop | a badge, sticker or number landing |
+  | riser into an impact | the payoff or the logo, once in the video |
+
+  The funny style's meme effects (record scratch, vine boom, XP error) follow
+  their own rule: three or four a video (story-and-comedy.md).
+- **One frame late.** Place an effect so its loudest point lands one frame
+  after its picture: light arrives before sound, and a sound early feels wrong
+  sooner than one late. Most files peak after their start;
+  `hf audio public/sfx/<file>.wav --only moments --json` says where.
+- **Rotate two or three takes** of a repeated sound: the same whoosh on every
+  cut is the most common tell.
+- **Levels:** each hit 3 to 6 dB over the bed. A bed with most of its energy
+  under 150 Hz plays as nothing on a phone speaker.
+- Over strong music, a typing-heavy video can drop the clicks and keys. No
+  synthesised tones, chimes or dings.
+
+## Cutting to music
+
+- **Trust the beat only on rhythmic stretches.** On calm music the tracker
+  invents a beat, often at double tempo (a 160 BPM reading may feel like 80).
+  Cut calm parts on phrase and energy changes instead
+  (`hf audio <track> --only sections,onsets,moments --json`).
+- **The grid in frames** is in motion.md ("Rhythm and the beat grid"). Cut on
+  the beat, change the layout on the bar.
+- **Hits.** A move that must land on a hit starts 40 to 190 ms early; a reaction
+  starts 0 to 45 ms after. The hit itself is an instant change, never eased.
+  Scenes cover the track with no gaps.
+- **Holds.** A word meant to be read holds at least one beat. Any single
+  treatment goes stale after about 6 s: lengthen a section with a hold or a new
+  treatment, never by slowing the motion. On rhythmic sections give footage one
+  clip per strong beat; on calm ones, one slow push from 1.0 to 1.08.
+
 ## If HeyGen isn't an option
 
 Ask which of the other two sources the person wants. Don't fall back to
-synthesized music without telling them it will sound synthetic.
+synthesized music without telling them it will sound synthetic. If they have
+none, deliver the video silent and say so in one line, with how to add music
+later, rather than spending the session writing music in code that nobody can
+hear.

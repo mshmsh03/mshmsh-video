@@ -26,7 +26,7 @@ The point of the interview is to turn "make me a video" into a written brief tha
 
 Ask these four together.
 
-1. **Style** (header "Style"): Funny story / Sincere tribute / Product or service promo / Explainer or tutorial. "Other" covers recap, announcement and edit-only. Recommend from the purpose (a friend's birthday: tribute or funny story; a launch: promo; "teach people X": tutorial).
+1. **Style** (header "Style"): Funny story / Sincere tribute / Product or service promo / Explainer or tutorial. "Other" covers recap, announcement, music video, number or data story, pull request or changelog, talking head with cards, 3D, character short and edit-only (styles.md). Recommend from the purpose (a friend's birthday: tribute or funny story; a launch: promo; "teach people X": tutorial; "a video for my song": music video). When the request already names a style that isn't among the four, offer it as the first option instead.
 2. **Where** (header "Where"): Reels, TikTok or Shorts (vertical 9:16) / YouTube, website or LinkedIn (landscape 16:9) / Instagram feed (4:5 or square) / WhatsApp Status (vertical 9:16, fewer overlays). This sets the format and the safe zones (styles.md).
 3. **Length** (header "Length"): about 15 to 30 seconds / about 1 minute / about 2 minutes / longer. Offer the lengths that fit the style (styles.md has typical lengths).
 4. **Voice** (header "Voice"): Free local AI narrator (Recommended) / My own recorded voice / HeyGen or ElevenLabs voice / No narration (captions and music only). If they choose an AI voice, they pick the actual voice later from samples, by ear.
@@ -60,8 +60,9 @@ Multiple choice can't capture these. Ask them in chat in one short message, as a
 3. **The sincere line, in their own words** (story, tribute), or **the exact call to action** (promo): handle, link, phone number, address, date and time.
 4. **What to avoid or never show:** people, places, topics, screens, numbers, anything private.
 5. **Who is who:** names and roles of everyone who appears, and which file is which person.
-6. **References:** a video, a page or a design they like, and what they like about it.
+6. **References:** a video, a page or a design they like, and what they like about it. A reference gives its grammar (shot lengths, how titles enter and leave, transitions, colour roles), never its content.
 7. **Files:** where the photos, clips, screenshots, logo, fonts and brand guide are.
+8. **Editing it yourself afterwards** (ask only when it might matter, such as a business that will update the video): do they want to change text, colours or timing themselves later without code? If yes, recommend the HyperFrames engine (hyperframes.md); otherwise Remotion.
 
 Don't invent answers. If they skip one that matters (for example the call to action in a promo), ask once more, then proceed with a clearly marked placeholder and say so in the delivery message.
 
@@ -90,6 +91,7 @@ Brief
 - Must include: <moments, facts, numbers, steps>
 - Never show: <private or avoided things>
 - Who is who: <names and roles>
+- Engine: <Remotion | HyperFrames, and why in a few words>
 - Assumptions I made: <anything defaulted>
 - Still needed from you: <files, call to action, etc.>
 ```
