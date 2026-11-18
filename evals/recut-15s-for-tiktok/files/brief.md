@@ -1,0 +1,11 @@
+# Brief
+- Style and tone: product promo, warm and local
+- Where and format: Instagram Reels, 9:16, ~45 s
+- Voice and language: bm_george (picked by ear), English
+- Look: their photos and the order screen in a phone mockup, brand colours
+- Music and captions: real track (warm acoustic), big word-by-word captions
+- Names and screens: shop name fine, no staff faces
+- Ending: call to action @shirin_sweets
+- Point: Shirin's new menu is here and you can order in two taps
+- Never show: prices, staff faces
+- Engine: Remotion

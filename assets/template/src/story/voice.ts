@@ -1,15 +1,20 @@
 import voice from "./voice.json";
 
-// Written by scripts/make-voice.mjs from story.json. Run that script before
-// opening the Studio or rendering; scene lengths and captions come from here.
+// Written by scripts/make-voice.mjs from story.json (or by make-timing.mjs for
+// a video without narration). Run it before opening the Studio or rendering;
+// scene lengths and captions come from here. `--draft` writes estimated
+// timings with silent audio, so the preview works before a voice is picked.
 export const STORY_VOICE = voice;
+export const IS_DRAFT_VOICE = Boolean((voice as { draft?: boolean }).draft);
 
 export type SceneId = string;
 
 export const sceneVoice = (id: SceneId) => {
   const scene = voice.scenes.find((s) => s.id === id);
   if (!scene) {
-    throw new Error(`No narration for scene "${id}". Run scripts/make-voice.mjs.`);
+    throw new Error(
+      `No narration for scene "${id}". Run scripts/make-voice.mjs.`,
+    );
   }
   return scene;
 };
@@ -32,4 +37,13 @@ export const wordAt = (id: SceneId, match: string, nth = 0) => {
 export const voiceEnd = (id: SceneId) => {
   const scene = sceneVoice(id);
   return scene.voiceFrom / voice.fps + scene.voiceSeconds;
+};
+
+// Frames this scene overlaps the one before it (its incoming transition): 0
+// for the first scene and for a hard cut ("enter": "cut" in story.json).
+export const overlapOf = (id: SceneId) => {
+  const index = voice.scenes.findIndex((s) => s.id === id);
+  if (index <= 0) return 0;
+  const scene = voice.scenes[index] as { overlap?: number };
+  return scene.overlap ?? voice.transitionFrames;
 };

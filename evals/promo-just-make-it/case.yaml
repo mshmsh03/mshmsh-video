@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: promo-just-make-it
+expected_outcome: |
+  Quick mode: asks only round 1 (or states round-1 defaults) and still leaves the voice for the person to pick by ear, recaps assumptions, sets up a 9:16 project with the Reels safe zones, uses the real logo unchanged and the exact handle as the call to action, and names its storyline choice with the other two in one line each.
+context:
+  scaffold_script: place-files.sh

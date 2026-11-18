@@ -1,0 +1,11 @@
+{ "voice": "bm_george", "speed": 1.1, "fps": 30, "transitionFrames": 15, "leadIn": 0.35, "tail": 0.45,
+  "scenes": [
+    { "id": "hook", "text": "This is Shirin. Fresh sweets, every morning in Erbil.", "hold": 0.6 },
+    { "id": "menu", "text": "Three new flavours: pistachio, rose and saffron.", "hold": 0.8 },
+    { "id": "kitchen", "text": "Made by hand, every single morning, before the shop opens.", "hold": 0.5 },
+    { "id": "order", "text": "Order in two taps. Open the menu, pick, done.", "hold": 1, "silence": "done" },
+    { "id": "delivery", "text": "Delivered across Erbil in under an hour.", "hold": 0.5 },
+    { "id": "reviews", "text": "Our customers keep coming back for the saffron.", "hold": 0.5 },
+    { "id": "eid", "text": "This Eid, share something sweet.", "hold": 0.8 },
+    { "id": "end", "text": "Find us on Instagram.", "hold": 2.2 }
+  ] }

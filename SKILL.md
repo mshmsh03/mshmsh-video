@@ -20,7 +20,27 @@ What makes any of them look custom is real material: the person's own clip, thei
 - `references/music.md`: HeyGen music setup (including the Windows/WSL sign-in), picking a track, ducking and silence, sound design and cutting to music.
 - `references/review.md`: the review pass before the preview gate: the measurable checks, the review sheets, P0/P1/P2 notes and `REVIEW.md`.
 - `references/hyperframes.md`: HyperFrames as a second engine (when to choose it and how this pipeline maps onto it), its telemetry, and its file tools that help a Remotion video too (beats, audio analysis, website capture, transcription, cut-outs, map flights).
-- `references/toolbox.md`: every tool, skill and CLI this workflow uses and when to reach for it: the Remotion skills, HyperFrames, `media-use`, `ui-demo`, HeyGen, Kokoro, Edge TTS, ElevenLabs, ffmpeg, headless Chrome and the bundled scripts.
+- `references/toolbox.md`: every tool, skill and CLI this workflow uses and when to reach for it: the Remotion skills, HyperFrames, `media-use`, `ui-demo`, HeyGen, the narrator voices (Kokoro, Supertonic, Pocket TTS, Gemini, Edge, F5 Sorani, ElevenLabs) with what each may be used for, ffmpeg, headless Chrome and the bundled scripts.
+- `references/updates.md`: coming back to a video (a fix, a shorter cut, another format, another language, a new month's offer) and brand kits for repeat clients. Read it whenever the person returns to a project that already has a `brief.md`.
+
+## The scripts do the busywork
+
+Each of these replaces steps that used to be done by hand and went wrong in the same ways every time. Run them instead of retyping their steps:
+
+| Script | What it does |
+| --- | --- |
+| `scripts/setup-project.mjs <dir> --format 9:16 --platform reels [--script sorani] [--brand brand.json] [--local-fonts]` | The whole project in one command, in the folder that already holds the plan: Remotion, packages, template, scripts, composition size and safe zones, `theme.ts` from `design.md`'s palette and fonts (or the brand kit), a font with the Sorani letters, the brand's logo, sound effects, `story.json` from `STORYBOARD.md`, draft timings. `--local-fonts` saves the font files in the project so renders never need the internet. Run it with the skill's own copy. `--update` brings an older project's components up to date and never touches its per-video files. |
+| `scripts/sync-story.mjs` | Writes `story.json`'s scenes from `STORYBOARD.md` (id, line, on-screen note), keeping each scene's `say`, `hold`, `enter` and `silence`. Run it after every storyboard change; `--seconds` fills the storyboard's Seconds column after the voice. |
+| `scripts/pronounce.mjs` | How a Kokoro voice will say every name, number and odd word, as phonemes: you can't hear the voice, so this is how a misread name ("xoshaka" as zuh-SHAH-kuh) is caught. `pronounce.mjs "spelling" "other spelling"` compares fixes for `say`. |
+| `scripts/doctor.mjs` | Checks the machine and the project before a build: ffmpeg, the voice engine, HeyGen, mixed Remotion versions, a stale `voice.json`, files the code points at that don't exist, phone clips that need converting. |
+| `scripts/voice-samples.mjs "<line>" --voices kokoro,supertonic,pocket` | One numbered file of candidate narrators (each says "Voice 1", "Voice 2"...) at the same loudness, plus `list.txt` with what each may be used for. Groups: `kokoro`, `supertonic`, `pocket`, `gemini`, `edge-ar`; a voice that can't run (no key, no network) is skipped. |
+| `scripts/make-voice.mjs --draft` | Timings without a voice (estimated, silent), so the preview runs while the person picks a voice. Without `--draft` it speaks only the scenes whose words changed. The voice name picks the engine: Kokoro (`af_heart`), `supertonic:F2`, `pocket:alba` or `pocket:me.wav`, `gemini:Charon`, Edge (`ar-IQ-RanaNeural`), `f5:` for Sorani, and `"recorded"` for audio made elsewhere (the person's own recording, an ElevenLabs download), one file per scene in `out/voice-raw/`. |
+| `scripts/stills.mjs <id> review` | The review sheets, rendered in one browser (about 4 times faster than one browser per frame). |
+| `scripts/review-check.mjs [video]` | The measurable review checks in one pass: pacing, banned words, words stretched over a second, small type, flicker sources, missing files, unbuilt scenes, and on the render an empty first frame, scenes that are empty or leave small things floating in empty space, black or frozen stretches, silence, loudness and true peak. |
+| `scripts/render.mjs [--draft]` | Renders to the next free `out/<name>-vN.mp4` (never over a file a player holds open), then runs review-check on it. `--draft` is half size and about 3 times faster. |
+| `scripts/master-audio.mjs <video>` | Brings the mix to about -14 LUFS with the true peak under -1 dBTP, without re-encoding the picture. |
+
+If a script named here isn't in the skill folder, that copy of the skill is older than this file: do the step by hand from production.md.
 
 ## Workflow
 
@@ -36,6 +56,8 @@ The person's answers decide what you build, so ask before doing anything else. F
 6. **Recap and confirm:** restate the brief as a short list in their words, ask "Anything to change?", then save it as `brief.md` in the project root.
 
 Skip anything the person already said, recommend a default for each question, adapt the options to the style, and ask only what you need. If they say "just make it", ask round 1 only, list your assumptions in the recap, and still leave the voice, who may be named or shown, and what is private for them to decide. Create `public/photos/` and tell them the file names: `me` plus one per person in the story. Video clips and GIFs work too.
+
+**A brand kit answers half the interview.** For a business or a repeat client, look for its `brand.json` first (updates.md, "Brand kits"): its colours, fonts, logo, handle, call to action, voice and music mood are already decided, so confirm them in the recap instead of asking again. After the first video for a new brand, offer once to save one.
 
 `brief.md` is the contract. Every later step follows it. When the person changes their mind, update `brief.md` first, then the work. In the delivery message, say how the result matches the brief and name anything that doesn't.
 
@@ -57,21 +79,21 @@ If they gave a story ("X told me to buy it, I did it with my friend Y") or a mes
 2. **Three storylines, when the story is open** (most promos, explainers, recaps, announcements and music videos over about 15 s; skip it when the person gave the story, a script or a reference to follow). Three different videos in words, each with its own world, device and form, the first two seconds exactly, its beats, look and sound in a line each, your pick first. Save them as `STORYLINES.md`. **Gate:** wait for the pick. In "just make it" mode, build your pick and name the other two in one line each.
 3. **`design.md`** from the brief, the picked storyline and the person's real brand assets (template in storyboard-and-gates.md): every adjective turned into a number (hex, px, %, a named font and weight, eases by job, durations in frames), and a Never line with the banned defaults that apply.
 4. **`story.json`** following story-and-comedy.md and the shape for the chosen style in styles.md: about 19 spoken words a scene, each visual revealed when the voice names it.
-5. **`STORYBOARD.md`:** one row per scene with the line, what is on screen, the sound, and the word each visual lands on. Open with a hook in the first two or three seconds; frame 0 is the thumbnail, never black or a logo alone.
+5. **`STORYBOARD.md`:** one row per scene with the line, what is on screen, the sound, and the word each visual lands on. Open with a hook in the first two or three seconds; frame 0 is the thumbnail, never black or a logo alone. `sync-story.mjs` turns its rows into `story.json` (each row's line becomes the captions, its "on screen" the placeholder's `board`); set each scene's transition (`enter`: `fade`, `slide`, `wipe` or `cut`) and `hold` there.
 
-**Gate:** show the person the lines and the storyboard table and wait for a yes before building. Changing words is cheap now and expensive later. Ask the person for the true stories behind any jokes and for the sincere line in their own words, rather than inventing them. Note where it will be posted: Reels, TikTok and Shorts need captions placed higher (styles.md, "Safe zones").
+**Gate:** show the person the lines and the storyboard table and wait for a yes before building. Changing words is cheap now and expensive later. Ask the person for the true stories behind any jokes and for the sincere line in their own words, rather than inventing them. Note where it will be posted: Reels, TikTok and Shorts need captions placed higher (styles.md, "Safe zones"); `--platform reels` does that for every component.
 
 ### 4. Voice
 
-Skip this step for a no-narration video: then large titles carry the words and the music sets the scene lengths (production.md, "No narration: the music is the clock"), so pick the track before building. Otherwise generate samples with `scripts/voice-samples.mjs` (for Arabic, Edge voices with `--voices`; for Sorani Kurdish, the F5 voices' demo files; toolbox.md, "Voice" and "Sorani voices"), open the folder, and let the person pick by ear (`bm_george` worked well for comedy at speed 1.1; calmer voices suit tributes and tutorials). Then run `scripts/make-voice.mjs`. It prints each scene's length and a "breaks" alignment line (or "words timed by Edge" for an Edge voice). Print the word timings and check that no word spans over a second (production.md, "Pitfalls"). Other voice sources are in toolbox.md.
+Skip this step for a no-narration video: then large titles carry the words and the music sets the scene lengths (production.md, "No narration: the music is the clock"), so pick the track before building. Otherwise don't wait on it: build against `make-voice.mjs --draft` timings while the person listens. Generate samples with `scripts/voice-samples.mjs "<a line from the script>" --voices kokoro,supertonic,pocket` for English (for Arabic `supertonic,edge-ar`; for Sorani Kurdish `gemini` plus the F5 demo files; add `gemini` to any of them when the person has a free Gemini key; toolbox.md, "Voice"). It writes one file, `out/voice-samples/all.mp3`, in which each voice says its number, and `list.txt` with what each voice may be used for: for client or paid work, offer only the voices whose line allows it. Send the file and let the person pick by ear, by number. Keep `speed` at 1.0 unless they ask for faster: a sped-up voice sounds rushed. To narrate in the person's own voice without recording every line, record 10 to 20 s of them talking and use `pocket:<that file>` (English only; copy only their own voice, or one they have permission to use). Before speaking a Kokoro voice, run `scripts/pronounce.mjs`: every name, brand and odd word is shown as the voice will say it, and a wrong one gets a spelling in `say` that `pronounce.mjs "a" "b"` confirms. Then run `scripts/make-voice.mjs`. It prints each scene's length and a "breaks" alignment line (or "words timed by Edge" for an Edge voice). Print the word timings and check that no word spans over a second (production.md, "Pitfalls"). For the person's own recording (or audio from ElevenLabs or HeyGen), set `"voice": "recorded"` and put one file per scene in `out/voice-raw/<id>.wav`; make-voice trims, levels and times it the same way. Other voice sources are in toolbox.md.
 
 ### 5. Open the preview early
 
-As soon as the project runs, start Remotion Studio (`npx remotion studio`; for HyperFrames, `hf preview`) and open the preview, so the person can watch and steer while you build. Render an MP4 when they ask for the file or when delivering a video to post; while they are still iterating, the preview is the deliverable.
+Right after the script gate, run `setup-project.mjs` in the project folder (it reads `design.md` and `STORYBOARD.md` and ends with draft timings), start Remotion Studio (`npx remotion studio`; for HyperFrames, `hf preview`) and open the preview. Every scene not built yet plays as a placeholder with its `board` line and the real captions, so the person watches the whole video as an animatic and can judge its length and pace before a single scene exists, then sees each one arrive. When the person can't open the Studio (on a phone, in a remote session), send a `render.mjs --draft` file instead. Render a full MP4 when they ask for the file or when delivering a video to post; while they are still iterating, the preview is the deliverable.
 
 ### 6. Build
 
-Scaffold and copy the template and scripts (production.md). For each scene, write a component, usually a `BeatScene` with visuals, adapted from `assets/template/src/story/scenes/` (and from `assets/examples/scenes/` when that folder exists). Time every visual to a word with `wordAt(...)`. Keep the timeline in `StoryVideo.tsx`: fade transitions between scenes that share a look, a slide plus whoosh at chapter changes, and an object on screen carrying the eye into any new world. Move things the way motion.md says: eases by job, one hero move per shot, titles dead still once they land, varied entrances, 3 to 5 kinds of transition each with a cause. Set the composition size from the chosen format. Build from `STORYBOARD.md` and `design.md`, not from memory. Up to about six short scenes, build them yourself; beyond that, give each subagent two or three scenes and start them all at once (storyboard-and-gates.md), then assemble and check the seams yourself. Use the Remotion skills for Remotion itself (toolbox.md). If the person edited code outside the chat, don't overwrite it; assume it was intentional or ask.
+Write each scene into `src/story/scenes.tsx`, one entry per scene id, usually a `BeatScene` with visuals. The timeline (`StoryVideo.tsx`) builds itself from `story.json`: order, transitions (`enter`), the music bed, its ducking under the voice and its silences, and a rotating whoosh on slides and wipes, so you don't edit it. Positions come from `useLayout()`, which knows the format and the platform's safe zones. The shared pieces (production.md, "Components cheat sheet"): `Title` (several entrances, safe for Kurdish), `EndCard` (the real logo carried in, then the call to action), `PhotoFill` (a slow push, or the reaction slam and shake), `PhotoCard`, `Laptop`/`Phone` with `Shot` and `ShotVideo`, `Cursor` (a big cursor whose click causes the next thing), `Stamp`, `Counter`, `Terminal`, `Sfx` (skips a missing file instead of failing the render) and the moves in `motion.ts`. Time every visual to a word with `wordAt(...)`. Fade between scenes that share a look, slide at chapter changes, and carry the eye into any new world with an object on screen. Move things the way motion.md says: eases by job, one hero move per shot, titles dead still once they land, varied entrances, 3 to 5 kinds of transition each with a cause. Set the composition size from the chosen format. Build from `STORYBOARD.md` and `design.md`, not from memory. Up to about six short scenes, build them yourself; beyond that, give each subagent two or three scenes and start them all at once (storyboard-and-gates.md), then assemble and check the seams yourself. Use the Remotion skills for Remotion itself (toolbox.md). If the person edited code outside the chat, don't overwrite it; assume it was intentional or ask.
 
 For a HyperFrames build, read the `hyperframes` skill and follow hyperframes.md, "Building a video in HyperFrames"; the voice, captions and music carry across from this pipeline.
 
@@ -81,12 +103,12 @@ Use real music (music.md), at the mood the style calls for (styles.md), searched
 
 ### 8. Review, then get approval to render
 
-- **Review pass** (review.md): check the measurable faults (lines on screen too briefly to read, dead stretches over 3 s, text under 28 px at 1080 wide, an empty first frame, a silent video), render the review sheets (`node scripts/stills.mjs <id> review`), describe each scene's middle frame as a stranger would, name every banned default on screen, and fix every P0 and the P1s worth their time. Write `REVIEW.md`.
+- **Review pass** (review.md): run `node scripts/review-check.mjs` (and again on the render) for the measurable faults, render the review sheets (`node scripts/stills.mjs <id> review`), describe each scene's middle frame as a stranger would, name every banned default on screen, and fix every P0 and the P1s worth their time. Write `REVIEW.md`.
 - **Look at stills** of every key visual and every scene end (`scripts/stills.mjs`).
 - **Check facts** on promos and tutorials: every number, name and step against its source.
 - **Preview gate:** show the Studio preview or the review sheets and ask what to change. Render the final MP4 only after the person approves the preview, or when they explicitly ask for the file.
-- **Render** to a new versioned filename.
-- **Measure the audio** (`scripts/check-audio.mjs`, and `hf audio <file> --only loudness --json` for LUFS and true peak).
+- **Render** with `node scripts/render.mjs` (a new versioned file, checked on the way out).
+- **Measure the audio** (`scripts/check-audio.mjs` for speech against music; review-check reports LUFS and true peak). For a post, run `scripts/master-audio.mjs` and deliver the `-master` file.
 - **Check frames** from the final MP4 for anything time-sensitive.
 - **Open the video** for them.
 
@@ -99,6 +121,10 @@ Report back, from the short form of `REVIEW.md`:
 - what you measured, what you only looked at, and that you couldn't hear the audio
 - the weakest shot, and what you'd change with more time
 - the open questions: who's who, music mood, whether to cut length
+
+### Coming back to a video
+
+When the person returns to a project (a wrong price, a 15-second cut, a landscape version, the Kurdish version, next month's offer), read `brief.md`, `design.md`, `STORYBOARD.md` and `REVIEW.md` before changing anything, then follow updates.md: change the earliest file the request touches, keep every approved render, give a new cut its own composition, re-speak only the lines that changed, and run the review on what changed. The interview shrinks to what is new.
 
 ## Principles
 

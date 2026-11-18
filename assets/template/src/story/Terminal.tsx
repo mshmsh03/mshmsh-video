@@ -1,10 +1,11 @@
-import { Audio } from "@remotion/media";
 import type React from "react";
-import { staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 import { colors, monoFont } from "../theme";
+import { Sfx } from "./Sfx";
 
 export type TerminalLine = {
-  // Seconds into the scene when the line starts.
+  // Seconds into the scene when the line starts. A typed line with `at` below
+  // zero is already typed on the scene's first frame (a command run before it).
   readonly at: number;
   readonly text: string;
   // Typed lines appear letter by letter; the others all at once.
@@ -69,7 +70,15 @@ export const Terminal: React.FC<TerminalProps> = ({
         }}
       >
         {["#E5534B", "#E3B341", "#7FB77E"].map((c) => (
-          <div key={c} style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: c }} />
+          <div
+            key={c}
+            style={{
+              width: 18,
+              height: 18,
+              borderRadius: 9,
+              backgroundColor: c,
+            }}
+          />
         ))}
         <div style={{ marginLeft: 14 }}>{title}</div>
       </div>
@@ -99,13 +108,12 @@ export const Terminal: React.FC<TerminalProps> = ({
       </div>
       {lines.map((line, i) =>
         line.sound ? (
-          <Audio
+          <Sfx
             key={i}
             name={`Terminal sound ${i + 1}`}
-            from={Math.round((line.at + typedSeconds(line)) * fps)}
-            src={staticFile(line.sound)}
+            at={Math.round((line.at + typedSeconds(line)) * fps)}
+            src={line.sound}
             volume={line.kind === "error" ? 0.5 : 0.25}
-            premountFor={fps}
           />
         ) : null,
       )}

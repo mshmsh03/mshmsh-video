@@ -6,20 +6,24 @@ Adapted from HeyGen's HyperFrames `review.md` and its `check` warnings (Apache-2
 
 ## 1. Measure, then look
 
-1. **The numbers.** Go through `voice.json`, `story.json` and the scene code once for each of these. A hit is a question, not a rule: fix it, or keep it on purpose and say why in `REVIEW.md`.
+1. **The numbers.** `node scripts/review-check.mjs` measures most of these from `story.json`, `voice.json` and the code, and `node scripts/review-check.mjs out/<file>.mp4` adds the rendered file (`render.mjs` runs it for you). It writes `out/review-check.md`. Go through what it can't measure by hand. A hit is a question, not a rule: fix it, or keep it on purpose and say why in `REVIEW.md`.
 
-   | Check | Fails when |
-   | --- | --- |
-   | Line unread | a line meant to be read is on screen for less than 0.5 s + 0.3 s a word (the last line: under 2 s) |
-   | Dead stretch | more than 3 s with nothing new on screen |
-   | Text too small | text meant to be read under 2.6% of the frame's short side (28 px at 1080 wide) |
-   | Empty first frame | frame 0 is black, empty or only a logo; it is the thumbnail on social players |
-   | Silent film | a video over 15 s that tells something has no music or sound (unless the person asked for silence) |
-   | Off the safe area | words outside the platform's safe band (styles.md, "Formats and safe zones") |
+   | Check | Fails when | Measured by review-check |
+   | --- | --- | --- |
+   | Line unread | a line meant to be read is on screen for less than 0.5 s + 0.3 s a word (the last line: under 2 s) | the ending's hold; titles by hand |
+   | Dead stretch | more than 3 s with nothing new on screen | on the render (frozen picture) |
+   | Text too small | text meant to be read under 2.6% of the frame's short side (28 px at 1080 wide) | every literal `fontSize` in the code |
+   | Empty first frame | frame 0 is black, empty or only a logo; it is the thumbnail on social players | on the render (black or empty; a logo alone by eye) |
+   | Floating in a void | at a scene's start or middle, the picture above the captions is empty, or everything in it sits in under 30% of the frame (the hero should fill 40%) | on the render, every scene's start and middle (the last scene is let off: an end card is compact) |
+   | Silent film | a video over 15 s that tells something has no music or sound (unless the person asked for silence) | on the render (no audio, silence, loudness) |
+   | Off the safe area | words outside the platform's safe band (styles.md, "Formats and safe zones") | a `top` under y 1330 on Reels; the rest on the phone sheet |
+   | Stale or draft voice | `voice.json` older than the words, or still draft timings | yes |
+   | Script tells | scenes over 26 words, "Introducing" first, the banned words, words stretched over 1 s | yes |
+   | Render faults | `Math.random()`, CSS animations, `staticFile` paths that don't exist, scenes still placeholders | yes |
 
 2. **The review sheets.** `node scripts/stills.mjs <CompositionId> review` renders every scene just after it starts and at its middle, every seam (just before the transition, its middle, just after), and tiles them into `out/stills/review/scenes.png`, `seams.png` and `phone.png` (the middles at 360 px wide, the size a phone shows them). Open all three. `legend.txt` says which file is which moment.
 3. **Motion between the frames.** For the hero move and the payoff, render 6 to 8 stills across the move (`node scripts/stills.mjs <id> 412 416 420 ...`), or a word spec on each side of it.
-4. **The rendered file.** `scripts/check-audio.mjs` for speech against music; `hyperframes audio out/<file>.mp4 --only loudness,silence --json` for integrated loudness, true peak and where the silences are (hyperframes.md). You can't hear it; say so.
+4. **The rendered file.** review-check reports integrated loudness, true peak and the silences; `scripts/check-audio.mjs` gives speech against music; `scripts/master-audio.mjs` fixes the loudness. You can't hear it; say so.
 
 Trust the numbers over your eye where they disagree: a clipped label or a 0.6 s line looks fine on a contact sheet.
 

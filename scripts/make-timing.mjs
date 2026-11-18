@@ -36,8 +36,10 @@ const scenes = story.scenes.map((scene, i) => {
   const start = frameAt(beat);
   const next = frameAt(beat + scene.beats);
   beat += scene.beats;
-  // The scene overlaps the next one by the transition, so the next starts on its beat.
+  // The scene overlaps the next one by the transition, so the next starts on
+  // its beat; a next scene that enters on a hard cut ("enter": "cut") doesn't.
   const last = i === story.scenes.length - 1;
+  const cutNext = !last && story.scenes[i + 1].enter === "cut";
   const words = (scene.text ?? "").split(/\s+/).filter(Boolean).length;
   const need = words ? 0.5 + 0.3 * words : 0;
   const shown = (next - start) / fps;
@@ -48,7 +50,8 @@ const scenes = story.scenes.map((scene, i) => {
   return {
     id: scene.id,
     src: null,
-    durationInFrames: next - start + (last ? 0 : transitionFrames),
+    durationInFrames: next - start + (last || cutNext ? 0 : transitionFrames),
+    overlap: i === 0 || scene.enter === "cut" ? 0 : transitionFrames,
     voiceFrom: 0,
     voiceSeconds: 0,
     startSeconds: Number((start / fps).toFixed(4)),

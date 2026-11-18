@@ -1,0 +1,12 @@
+{
+  "name": "Shirin Sweets",
+  "colors": { "background": "#FFF6EC", "panel": "#F3E4D2", "border": "#E2CBB0", "text": "#2B1A12", "muted": "#8A6F5E", "accent": "#C2410C" },
+  "fonts": { "heading": "Poppins", "mono": "IBM Plex Mono", "script": "Vazirmatn" },
+  "logo": "logo.svg",
+  "handle": "@shirin_sweets",
+  "cta": "Order on Instagram: @shirin_sweets",
+  "voice": "bm_george",
+  "music": "warm acoustic, light percussion, 100 bpm",
+  "tone": "warm and local, never corporate",
+  "never": ["prices on screen", "staff faces"]
+}

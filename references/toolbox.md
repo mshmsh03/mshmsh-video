@@ -77,16 +77,25 @@ Install: `npx skills add heygen-com/hyperframes@media-use -g -y`. Avoid skills l
 
 ## Voice
 
-| Source | Cost | Notes |
+What to put in the samples (checked 2026-11-18). The person always picks by ear from `voice-samples.mjs`'s numbered file; this only decides which voices go in it:
+- **English:** `kokoro`, `supertonic` and `pocket`, plus `gemini` when they have a key. Kokoro's best voices are female (`af_heart` is graded A, `af_bella` A-); its male voices grade C+ at best, so for a male narrator the other engines often sound better.
+- **Arabic:** `supertonic` (offline) and `edge-ar` (personal videos), plus `gemini`.
+- **Sorani Kurdish:** `gemini` (online), the F5 voices (offline, non-commercial) and the person's own recording.
+- **Client or paid work:** only the voices whose line in `list.txt` allows it.
+
+| Source | Cost and licence | Notes |
 | --- | --- | --- |
-| Kokoro (`kokoro-js` 1.2.1) | Free, offline after the first ~330 MB model download | `scripts/voice-samples.mjs` writes samples of `am_michael`, `am_fenrir`, `bm_george`, `af_heart` and `bf_emma`; `scripts/make-voice.mjs` narrates a `story.json` and writes one WAV per scene plus `voice.json` (scene lengths in frames, word timings). Every scene is normalized to -20 dBFS RMS with silence trimmed. |
-| Edge TTS (`edge-tts` 7.3.1, Python) | Free, online, no key | Microsoft's neural voices in many languages, including Iraqi Arabic (`ar-IQ-RanaNeural`, `ar-IQ-BasselNeural`), Saudi, Egyptian and Persian. No Kurdish voice. The same two scripts handle it, with measured word timings (below). It is the Edge browser's read-aloud service, not a licensed API: fine for personal videos; for client or paid work use the same voices through Azure AI Speech, or ElevenLabs. |
+| Kokoro (`kokoro-js` 1.2.1) | Free, offline after a ~330 MB download; Apache-2.0, fine for client work | Where kokoro-js can't download its model from Hugging Face (the Claude app's cloud workspace), the voice scripts run the same model through Python by themselves (`kokoro-voice.py`, model from GitHub; needs `python -m pip install kokoro-onnx soundfile`). `--voices kokoro` samples `af_heart`, `af_bella`, `bf_emma`, `am_michael` and `am_fenrir`. make-voice writes one WAV per scene plus `voice.json` (scene lengths in frames, word timings); every scene is normalized to -20 dBFS RMS with the silence trimmed. `pronounce.mjs` shows how it will say names. |
+| Supertonic 3 (`supertonic:F1` to `F5`, `M1` to `M5`) | Free, offline; weights under OpenRAIL-M: client work allowed, but no imitating real people, and say it's an AI voice | Ten voices, 31 languages including Arabic (no Kurdish), 44.1 kHz, and the fastest here: eight scenes in 12 s on a 2-core machine. `speed` works. The language comes from `"lang"` in `story.json` (`en`, `ar`, `fr`...) or from the script of the line. Runs through `sherpa-onnx-node`; the 139 MB model downloads once. Its maker, Supertone, closed in 2026 and archived the project, so the model won't change. |
+| Pocket TTS (`pocket:<voice>`) | Free, offline; model CC BY 4.0 (credit Kyutai); presets `bill_boerst`, `caro_davy`, `peter_yearsley`, `stuart_bell` CC0, `alba` CC BY 4.0 | English. Copies a voice from a clean 10 to 20 s recording: `pocket:voice/me.wav`. Only the person's own voice, or one they have permission to use: Kyutai's terms forbid copying a voice without consent. `bria` and `loona` come with the model, for trying only. It ignores `speed`, and each run is a slightly different take (make-voice keeps the scenes it already spoke). Runs through `sherpa-onnx-node`; the 98 MB model downloads once, a preset voice on first use. |
+| Gemini TTS (`gemini:<Voice>`) | Free tier with a Google AI Studio key. Google doesn't claim the audio, but on the free tier it may use and have people review the text, so no confidential scripts | 30 voices (`Kore` firm, `Charon` informative, `Puck` upbeat, `Sulafat` warm...), over 100 languages detected automatically, including Arabic and Central Kurdish. `"voiceStyle"` in `story.json` sets the delivery ("warm and unhurried"); there is no speed setting, so `speed` becomes a pace hint. Default model `gemini-3.1-flash-tts-preview` (free of charge on Google's pricing page, 2026-11-18); `"voiceModel"` picks another. **Written from Google's docs and tested against a mock of the API, not against Google itself** (the sandbox it was built in can't reach it): sample it before promising it. Free-tier rate limits are low; make-voice waits and retries. |
+| Edge TTS (`edge-tts`, Python) | Free, online, no key; personal videos only | Microsoft's neural voices in many languages, including Iraqi Arabic (`ar-IQ-RanaNeural`, `ar-IQ-BasselNeural`), Saudi, Egyptian and Persian. No Kurdish voice. The same two scripts handle it, with measured word timings (below). Browser-based clients stopped working in December 2025 when Microsoft added a header check; the Python package kept being updated, so if it fails, update it first (`python -m pip install -U edge-tts`). It is the Edge browser's read-aloud service, not a licensed API: for client or paid work use the same voices through Azure AI Speech, or Supertonic or Gemini. |
 | F5-TTS Central Kurdish (`aranemini/central-kurdish-tts`) | Free, offline; **CC BY-NC-ND 4.0, non-commercial only** | Sorani Kurdish: three single-speaker voices (studio male, audiobook male, audiobook female), 24 kHz, the best free Sorani voice found (2026-10-25). Slow on a CPU, about 40 times real time. Steps under "Sorani voices" below. |
 | MMS Sorani (`razhan/mms-tts-ckb`) | Free, offline; Meta's MMS base is non-commercial | Flat and robotic, but it speaks a scene in seconds: a stand-in voice for building and timing while F5 runs. |
 | kurdishtts.com | Paid (about $12/month for public use; the free plan is evaluation only) | Many Sorani and Kurmanji voices with word timings. Needs the person's own account and API key. Not tested here. |
-| The person's own recording | Free | Best for tributes. Needs the same per-word timings, so transcribe it (`remotion-captions`, `hf transcribe` with `--model` and `--language` set (hyperframes.md), or the `media-use` audio engine) to get them. |
+| The person's own recording | Free | Best for tributes. One take per scene, saved as `out/voice-raw/<scene id>.wav` (or .m4a, .mp3: a phone recording is fine), with `"voice": "recorded"` in `story.json`: make-voice trims, levels and times the words from the pauses like any other voice. For exact word times, transcribe it instead (`remotion-captions`, `hf transcribe` with `--model` and `--language` set (hyperframes.md), or the `media-use` audio engine). The same path takes audio downloaded from ElevenLabs or HeyGen. For English, Pocket TTS can copy their voice from one short recording instead (above). |
 | HeyGen TTS | Free allowance with OAuth sign-in | Through `media-use resolve --type voice`. |
-| ElevenLabs | Paid API key | Offer it, don't assume it. |
+| ElevenLabs | Free plan: 10,000 credits a month (about 10 minutes), non-commercial and credit required; commercial use from the paid Starter plan | Download one file per scene and use `"recorded"`. Offer it, don't assume it. |
 
 Edge voices (end-to-end tested 2026-10-21 with Iraqi Arabic, including a render):
 1. Install once: `python -m pip install edge-tts` (set `PYTHON` if the command isn't `python` on Windows or `python3` elsewhere). `kokoro-js` isn't needed for Edge.
@@ -95,9 +104,27 @@ Edge voices (end-to-end tested 2026-10-21 with Iraqi Arabic, including a render)
 
 Each scene's line reads "x/y words timed by Edge". Edge leaves punctuation out of its words, so they are matched back to the script's own words, and a word after a pause starts where the sound comes back: Edge puts it 120 to 160 ms early, inside the silence. If the line reads "breaks" instead, `say` and `text` differ in word count and the times were estimated the Kokoro way; keep `say` to the same word count (`"say": "… كلود …"` for a shown "Claude" works) to keep measured times.
 
+Pocket and Supertonic (tested 2026-11-18 on Linux: samples, make-voice on an eight-scene story, the model download, and a Whisper transcript of every sample to check it's intelligible):
+1. `setup-project.mjs` installs `sherpa-onnx-node` (except for a Sorani project; `--no-sherpa` skips it). In an older project: `npm i -D sherpa-onnx-node@2.0.1`.
+2. Samples: `node scripts/voice-samples.mjs "<line>" --voices supertonic,pocket`. The first run downloads each model from sherpa-onnx's GitHub releases (with curl and tar, both built into Windows 10 and later) into `~/.cache/video-xoshaka/models`, shared by every project; `VIDEO_XOSHAKA_MODELS` moves it.
+3. Put the chosen name in `story.json`'s `voice` and run make-voice as usual. `doctor.mjs` checks the package, the model, a copied voice's file, and Kurdish text sent to Supertonic.
+
+Gemini:
+1. The person makes a free key at https://aistudio.google.com/apikey (a Google account, 18 or older).
+2. They set it in the terminal that runs the scripts: `$env:GEMINI_API_KEY="..."` in PowerShell, `export GEMINI_API_KEY=...` in Git Bash. Never write it into a project file.
+3. `voice-samples.mjs "<line>" --voices gemini`, then `"voice": "gemini:Charon"` (and, if wanted, `"voiceStyle"`).
+
+Not wired in (checked 2026-11-18); each can still be used by saving one file per scene and setting `"recorded"`:
+- **Chatterbox** (Resemble AI, MIT): expressive English (Turbo, with tags like `[laugh]`) and a 23-language model that includes Arabic. PyTorch, slow on a CPU, and it adds an inaudible watermark.
+- **Habibi** (Arabic dialects, built on F5): its Iraqi, MSA, Egyptian, Algerian and Moroccan models are Apache-2.0 (client work allowed); the unified, Saudi and Emirati ones are CC BY-NC-SA. It copies a voice from a reference clip and its transcript, slowly on a CPU, like F5.
+- **Vekol** (Sorani, by Revge): one voice, fast on a CPU, but CC BY-NC 4.0 and explicitly not for commercial use.
+- **KittenTTS**: a tiny English model; sherpa-onnx 2.0 needs an outside phonemizer for it, and Kokoro sounds better.
+
 ### Sorani voices
 
 End-to-end tested on 2026-10-25 with a 90 s Sorani explainer, including a render, on Windows with an Intel laptop CPU (no GPU) and 16 GB of RAM. Offer these alongside the person's own recording. For Kurmanji, no free voice has been tested; check HeyGen's and ElevenLabs' current language lists before offering either.
+
+**Try Gemini first** when the person has a key: it lists Central Kurdish, speaks a scene in seconds, and its audio isn't limited to non-commercial use. It hasn't been tested on Sorani here, so make the samples and let the person judge the pronunciation; the F5 steps below remain the offline choice.
 
 1. **Samples to pick by ear, without the big download.** The model repo has a demo per voice: `curl -sSLo out/voice-samples/f5-<voice>.wav https://huggingface.co/aranemini/central-kurdish-tts/resolve/main/output-<voice>.wav` for `studio-male`, `audiobook-male` and `audiobook-female`. Its demo Spaces on Hugging Face were paused when tested, so don't count on them.
 2. **Install once**, in the project's `tts/` folder (on macOS and Linux the venv's Python is `tts/.venv/bin/python`):
@@ -161,22 +188,31 @@ The HeyGen CLI is Linux and macOS only. On Windows, install it inside WSL and ru
 
 | Path | What it is |
 | --- | --- |
-| `scripts/voice-samples.mjs` | Narrator samples to `out/voice-samples/` (Kokoro by default, Edge with `--voices`) |
-| `scripts/make-voice.mjs` | Narration for every scene, normalized, with word timings (Kokoro; Edge for an Edge voice name; for an `f5:` voice it reads the Sorani files `speak_story.py` wrote) |
-| `scripts/edge-voice.py` | Speaks one line with Edge TTS and returns each word's time; called by the two scripts above |
+| `scripts/setup-project.mjs` | The whole project in one command (Remotion, packages, template, scripts, size and platform, script font, brand kit, sound effects, draft timings); `--update` for an older project. Run with the skill's own copy. |
+| `scripts/doctor.mjs` | Machine and project check before a build: ffmpeg filters, voice engine, HeyGen, mixed Remotion versions, stale `voice.json`, missing files, HEVC/HDR phone clips |
+| `scripts/review-check.mjs` | The measurable review checks in one pass, on the script and code, and on a rendered file, including empty frames and small things floating in empty space (review.md) |
+| `scripts/sync-story.mjs` | `STORYBOARD.md` → `story.json`, keeping each scene's settings; `--seconds` fills the storyboard's Seconds column |
+| `scripts/pronounce.mjs` | Phonemes of every name and odd word as the Kokoro voice will say them, to catch a misread name without hearing it |
+| `scripts/render.mjs` | Versioned renders (`out/<name>-vN.mp4`), `--draft` at half size, then review-check |
+| `scripts/master-audio.mjs` | Two-pass loudness to -14 LUFS, true peak under -1 dBTP, picture copied |
+| `scripts/voice-samples.mjs` | One numbered file of narrator samples (`out/voice-samples/all.mp3`) plus `list.txt` with what each voice may be used for. `--voices` takes names and the groups `kokoro` (the default), `supertonic`, `pocket`, `pocket-demo`, `gemini`, `edge-ar`; a voice that can't run is skipped |
+| `scripts/make-voice.mjs` | Narration for every scene, normalized, with word timings (Kokoro; `supertonic:`, `pocket:` and `gemini:` voices; Edge for an Edge voice name; for an `f5:` voice it reads the Sorani files `speak_story.py` wrote). `--draft`: silent estimated timings, no voice needed. Unchanged scenes are reused; `--fresh` re-speaks all. |
+| `scripts/voice-engines.mjs` | The Supertonic, Pocket TTS and Gemini engines (through `sherpa-onnx-node` and Google's API), their model downloads, the licence line for every voice, and the audio helpers the voice scripts share |
+| `scripts/edge-voice.py` | Speaks one line with Edge TTS and returns each word's time; called by the voice scripts |
+| `scripts/kokoro-voice.py` | Kokoro through Python (kokoro-onnx, model from GitHub), used by the voice scripts when kokoro-js can't download its model |
+| `scripts/find-browser.mjs` | Lets stills.mjs and render.mjs use an installed Chrome or Edge when Remotion can't download its own browser |
 | `scripts/sorani/speak_story.py` | Speaks every scene in Sorani with F5-TTS Central Kurdish (or the MMS stand-in) to `out/voice-raw/`; copy it into the project's `tts/` |
 | `scripts/sorani/fetch_ema.py` | Downloads only the EMA weights from a remote PyTorch checkpoint (1.35 GB of 5.4 GB for an F5 voice) |
 | `scripts/heygen-music.mjs` | Search the HeyGen music catalog and download picks (calls the CLI through `wsl` on Windows) |
-| `scripts/stills.mjs` | Single-frame checks, and `review` for the contact sheets of every scene, seam and the phone view (review.md) |
+| `scripts/stills.mjs` | Single-frame checks, and `review` for the contact sheets of every scene, seam and the phone view (review.md), in one browser |
 | `scripts/make-timing.mjs` | Scene lengths from the music's beat grid for a video with no narration, in `voice.json`'s shape, with a read-time check (production.md, "No narration") |
 | `scripts/check-audio.mjs` | Loudness and balance measurement |
-| `assets/template/src/` | `theme.ts`, `ChapterLabel.tsx`, and `story/` with `StoryVideo.tsx` (timeline, music ducking, transitions), `Narration.tsx` (captions), `PhotoCard.tsx`, `Devices.tsx` (laptop, phone, screenshot), `Terminal.tsx`, `Counter.tsx`, `motion.ts`, `voice.ts`, `scenes/BeatScene.tsx`, `scenes/FreezeScene.tsx`, a sample `story.json` |
-| `assets/examples/` | The finished "My Life with Claude" scenes and timeline, to copy staging from |
-| `evals/evals.json` | Test prompts and assertions for this skill |
+| `assets/template/src/` | `Root.tsx`, `theme.ts`, `layout.ts` (positions and safe zones per format and platform), `ChapterLabel.tsx`, and `story/` with `StoryVideo.tsx` (the timeline built from `story.json`: transitions, music ducking, silences, whooshes), `scenes.tsx` (the per-video scenes), `Placeholder.tsx`, `Narration.tsx` (captions), `Title.tsx`, `EndCard.tsx`, `PhotoFill.tsx`, `PhotoCard.tsx`, `Devices.tsx` (laptop, phone, screenshot, screen recording), `Cursor.tsx`, `Stamp.tsx`, `Terminal.tsx`, `Counter.tsx`, `Sfx.tsx`, `media.ts`, `text.ts` (right-to-left helpers), `motion.ts`, `voice.ts`, `scenes/BeatScene.tsx`, `scenes/FreezeScene.tsx`, a sample `story.json` |
+| `evals/` | Test cases for this skill, one folder each (`prompt.md`, `case.yaml`, `graders/`), in the layout `claude plugin eval` reads |
 
-The scripts must be copied into the Remotion project's own `scripts/` folder: Node resolves `kokoro-js` from the script's folder, so running them from the skill folder fails with `ERR_MODULE_NOT_FOUND`. Copy `edge-voice.py` with them; the voice scripts look for it next to themselves.
+The scripts must be copied into the Remotion project's own `scripts/` folder: Node resolves `kokoro-js` from the script's folder, so running them from the skill folder fails with `ERR_MODULE_NOT_FOUND`. Copy `edge-voice.py` and `voice-engines.mjs` with them; the voice scripts look for both next to themselves.
 
-The template and example scenes were built for the funny story style (freeze-frame opener, reaction zoom, terminal gags). For other styles reuse the timeline, narration, captions, photo card, device mockups and counter, and write scenes for the style's shape (styles.md) instead of copying the gags.
+The template started as the funny story style (freeze-frame opener, terminal gags); `Title`, `EndCard`, `PhotoFill`, `Cursor`, `ShotVideo` and `layout.ts` (2026-11-18) cover the other styles' common pieces. Reuse the timeline, narration, captions and components, and write scenes for the style's shape (styles.md) instead of copying the gags.
 
 ## Related skills reviewed (2026-10-15)
 
@@ -190,6 +226,8 @@ Second pass (2026-10-21, `npx skills find` with 29 queries on the PC; it returns
 - **`browser-use/video-use`** (about 29k stars): strong for cutting long talking-head or vlog footage by its transcript, but it is a separate ffmpeg pipeline that needs an ElevenLabs key for transcription. Offer it only when the person brings long raw footage to cut.
 - **Thinner than what is here:** `digitalsamba/claude-code-video-toolkit@ffmpeg` and `@playwright-recording`; `mengto/skills@browser-video-recording` is built for the Codex in-app browser and macOS; `aahl/skills@edge-tts` is a short wrapper that needs `uv`, so Edge TTS is documented directly.
 - **Still avoid** `*/superpowers@ai-video-generation` and `@ai-avatar-video`: six copies with 300k to 800k installs each, from repos with 3 to 8 stars.
+
+Third pass (2026-11-18, the skills.sh leaderboard and web search; `npx skills find` still returns nothing from the cloud sandbox): nothing new to install. The HyperFrames repo added `hyperframes-animation`, `hyperframes-keyframes` and `hyperframes-audio`, which belong with that engine (hyperframes.md). Remotion video skills from other authors (`akillness/*@remotion-video-production`, `oakoss/agent-skills@remotion`, `ericmjl/skills@remotion-video`) have under 400 installs and cover less than this skill. `emilkowalski/skills@review-animations` and its siblings review web UI motion, not video (designa-xoshaka already draws on them). `remotion-dev/remotion@video-report` is for reporting Remotion bugs.
 
 ## Claude Code helpers
 

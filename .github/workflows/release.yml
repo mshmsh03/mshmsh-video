@@ -1,0 +1,48 @@
+# On every change to main, builds video-xoshaka.zip (the skill folder, ready to
+# upload in the Claude app) and puts it on the release called "latest":
+# https://github.com/mshmsh03/video-xoshaka/releases/download/latest/video-xoshaka.zip
+name: Release zip
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build video-xoshaka.zip
+        run: |
+          mkdir -p dist/video-xoshaka
+          git archive HEAD | tar -x -C dist/video-xoshaka
+          rm -rf dist/video-xoshaka/.github dist/video-xoshaka/.gitignore dist/video-xoshaka/.gitattributes
+          cd dist && zip -qr video-xoshaka.zip video-xoshaka
+      - name: Put it on the "latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f latest
+          git push -f origin refs/tags/latest
+          cat > notes.md <<NOTES
+          The whole skill in one zip, rebuilt on every change to main (this one: ${GITHUB_SHA::7}, $(date -u +%Y-%m-%d)).
+
+          - **Claude app:** download video-xoshaka.zip and upload it in your skill settings. To update, upload the new zip in place of the old one.
+          - **Claude Code:** \`npx skills add mshmsh03/video-xoshaka\`, and \`npx skills update\` later.
+
+          What changed: [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md).
+          NOTES
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest dist/video-xoshaka.zip --clobber
+            gh release edit latest --notes-file notes.md
+          else
+            gh release create latest dist/video-xoshaka.zip --title "video-xoshaka" --notes-file notes.md
+          fi
