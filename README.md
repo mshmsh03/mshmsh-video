@@ -37,13 +37,16 @@ The app builds the video in its cloud workspace. That workspace blocks some down
 | Kokoro voices | yes | yes, through Python with the model from GitHub, automatically |
 | Supertonic and Pocket TTS voices | yes | yes |
 | Gemini and Edge voices | yes (Gemini needs your free key) | blocked in the tests (2026-11-18) |
-| Free music library (16 public-domain tracks) | yes | yes |
+| Free music library (44 public-domain tracks) | yes | yes |
 | HeyGen music search | with the HeyGen CLI | not tested; use the free library |
-| Sound effects | recorded ones from remotion.media | made in code where remotion.media is blocked, automatically |
+| Sound effects | recorded ones from remotion.media, plus 25 free Kenney recordings | the Kenney recordings and ones made in code where remotion.media is blocked, automatically |
+| Animated emoji (Google's, 411) | yes | yes |
+| Cleaning your own recordings, captions from your own clips, cutting pauses | yes | yes (tested in a cloud sandbox like it) |
+| Photo cut-outs | yes, with Python and `rembg` | yes, with Python and `rembg` |
 
 ### Free resources, included
 
-Everything free the skill uses, apart from the code itself, is on this repo's [free-assets release](https://github.com/mshmsh03/video-xoshaka/releases/tag/free-assets): the voice models (Kokoro, Supertonic, Pocket TTS and its free preset voices) and 16 public-domain music tracks, each with its licence and credit in the release notes. The skill downloads what a video needs from there by itself, because GitHub stays reachable where other sites are blocked; nothing has to be downloaded by hand. To hear them first, the release has `samples-english.mp3` and `music-preview.mp3`. Only resources that are free to use, client work included, are in it; each file's conditions (a credit, or Supertonic's rules on use) are listed with it.
+Everything free the skill uses, apart from the code itself, is on this repo's [free-assets release](https://github.com/mshmsh03/video-xoshaka/releases/tag/free-assets) or already on GitHub: the voice models (Kokoro, Supertonic, Pocket TTS and its free preset voices), 44 public-domain music tracks, 25 recorded sound effects by Kenney (CC0) and the noise-removal model for your own recordings, each with its licence and credit in the release notes. The two speech-to-text models (Parakeet for English, Whisper for other languages) come from sherpa-onnx's GitHub releases, and Google's animated emoji from Remotion's GitHub repository. The skill downloads what a video needs from there by itself, because GitHub stays reachable where other sites are blocked; nothing has to be downloaded by hand. To hear them first, the release has `samples-english.mp3`, `music-preview.mp3` and `sfx-preview.mp3`. Only resources that are free to use, client work included, are in it; each file's conditions (a credit, or Supertonic's rules on use) are listed with it.
 
 The one thing that can't be included is a personal key (Gemini, HeyGen): each person makes their own, free, and keeps it out of any file in the repo.
 
@@ -51,14 +54,21 @@ The one thing that can't be included is a personal key (Gemini, HeyGen): each pe
 
 - Node.js 18 or newer. The skill sets up Remotion itself.
 - Remotion is free for individuals and small teams (up to 3 people). Bigger companies need a paid licence: see [remotion.dev/license](https://www.remotion.dev/license).
-- Music: the free library is included (16 public-domain tracks, client work allowed). Optional: the HeyGen CLI for thousands more royalty-free tracks (Linux and macOS; on Windows it runs inside WSL).
+- Music: the free library is included (44 public-domain tracks, client work allowed). Optional: the HeyGen CLI for thousands more royalty-free tracks (Linux and macOS; on Windows it runs inside WSL). For an original track on a PC with an NVIDIA graphics card, ACE-Step 1.5 (MIT); setup steps are in `references/music.md`.
 - The free narrator voices download their model once: Kokoro about 330 MB (English); Supertonic (31 languages including Arabic) and Pocket TTS (English, and it can copy your own voice from a short recording) about 100 MB each, after `npm i -D sherpa-onnx-node@2.0.1` in the project.
 - Optional: a free Gemini API key (aistudio.google.com/apikey) for Google's Gemini voices, over 100 languages including Arabic and Central Kurdish. Set it as `GEMINI_API_KEY` in the terminal. On the free tier Google may use what you send to improve its products, so don't send a client's confidential script.
 - Optional, for Arabic and other languages: Python 3 with `python -m pip install edge-tts` for free Microsoft Edge voices (Iraqi, Saudi, Egyptian Arabic and many more), with right-to-left captions.
-- For Sorani Kurdish: no fully free voice exists yet, so none is included. Options: Gemini with your own free key, your own recording, or the F5-TTS Central Kurdish voices (Python, PyTorch on the CPU, a 1.35 GB download per voice, about an hour of CPU time for a 90-second video; non-commercial only, downloaded from their authors when used). Kurmanji has no tested free voice yet.
+- For Sorani Kurdish: no fully free voice exists yet (checked again 2026-11-19), so none is included. Options: your own recording (the skill takes the background noise out by itself), Gemini with your own free key, or the F5-TTS Central Kurdish voices (Python, PyTorch on the CPU, a 1.35 GB download per voice, about an hour of CPU time for a 90-second video; non-commercial only, downloaded from their authors when used). Kurmanji has no tested free voice yet.
+- Optional, for cutting the subject out of a photo: Python 3 with `python -m pip install "rembg[cpu,cli]"`.
 - Recommended: the full ffmpeg for converting phone clips, the review contact sheets, the automatic checks on a render and loudness mastering. Remotion's bundled copy covers the basics. `node scripts/doctor.mjs` says what is missing.
 - Rendering needs the internet for Google Fonts, or the font files saved in the project (setup does that by itself when Google Fonts can't be reached).
 - Optional: the HyperFrames skills (`npx skills add https://github.com/heygen-com/hyperframes --skill hyperframes`, plus `--skill hyperframes-cli`) and Node.js 22+, for the HyperFrames engine and its file tools: beat and section detection for music, loudness checks, website capture (screenshots, colours, fonts, logos), transcription and background removal. HyperFrames sends usage data to HeyGen unless you turn it off (`HYPERFRAMES_NO_TELEMETRY=1`).
+
+## Skills that work well with it
+
+- [Remotion's own skills](https://github.com/remotion-dev/skills), which this skill leans on for Remotion itself: `npx skills add remotion-dev/skills`
+- [auto-editor's skills](https://github.com/WyattBlue/auto-editor), for cutting raw footage into a timeline for DaVinci Resolve, Premiere, Final Cut Pro, Shotcut or Kdenlive: `npx skills add WyattBlue/auto-editor` (public domain)
+- The HyperFrames skills, for the second engine (under "What you need")
 
 ## How a video is made
 
@@ -78,8 +88,8 @@ The one thing that can't be included is a personal key (Gemini, HeyGen): each pe
 | --- | --- |
 | `SKILL.md` | The skill: the workflow and principles |
 | `references/` | The interview, styles and safe zones, storylines and scripting and comedy, the design file and gates, motion, production notes, music and sound design, the review pass, coming back to a video and brand kits, HyperFrames, toolbox |
-| `scripts/` | Project setup (look from the design file, fonts saved locally), a doctor check, storyboard-to-script sync, a pronunciation check, one numbered voice-samples file with what each voice may be used for, narration with word timings (Kokoro, Supertonic, Pocket TTS including a copy of your own voice, Gemini, Edge TTS, Sorani F5, your own recording, or draft timings with no voice), beat-grid timing for videos without a narrator, HeyGen music search, stills and review contact sheets, the automatic review check, versioned renders, audio check and loudness mastering |
-| `assets/template/` | Starter project: a timeline built from the script, layouts per format and platform, captions, placeholders, titles, end card, photo fill, photo card, device mockups with screenshots and screen recordings, cursor, stamp, terminal, counter, sound effects |
+| `scripts/` | Project setup (look from the design file, fonts saved locally), a doctor check, storyboard-to-script sync, a pronunciation check, one numbered voice-samples file with what each voice may be used for, narration with word timings (Kokoro, Supertonic, Pocket TTS including a copy of your own voice, Gemini, Edge TTS, Sorani F5, your own recording cleaned and timed from a transcript, or draft timings with no voice), noise removal, speech-to-text captions, pause cutting and photo cut-outs, the free music, sound-effect and animated-emoji libraries, beat-grid timing for videos without a narrator, HeyGen music search, stills and review contact sheets, the automatic review check, versioned renders, audio check and loudness mastering |
+| `assets/template/` | Starter project: a timeline built from the script, layouts per format and platform, captions, placeholders, titles, end card, photo fill, photo card, device mockups with screenshots and screen recordings, cursor, stamp, terminal, counter, animated emoji, talking clips with the pauses cut, sound effects |
 | `evals/` | Test cases for the skill (`claude plugin eval .` runs them) |
 | `CHANGELOG.md` | What changed, by date |
 | `.github/` | The check that runs on every push, and the job that builds the release zip |

@@ -99,6 +99,8 @@ Build these inside the scenes (the outgoing scene ends on the move, the incoming
 | Hold or freeze | the template's `FreezeScene`, or a still exported with ffmpeg and placed as its own clip |
 | Randomness (shake, confetti, jitter) | `random(seed)` from `remotion`, never `Math.random()`: every render must give the same frame |
 | Hand-drawn wobble | redraw the outline about 12 times a second with a jitter seeded by `Math.floor(t × 12)`, so the line boils while the shape holds still |
+| An animated emoji or icon | `<Emoji>` (Google's animated emoji, `free-emoji.mjs get <name>`), or a Lottie file through `@remotion/lottie`; both follow the frame, unlike a GIF from the web (toolbox.md, "Animation resources") |
+| Remove pauses from a talking clip | `cut-silence.mjs`, then `<CutClip>` plays the kept parts (toolbox.md, "Editing tools") |
 
 CSS `transition`, CSS `animation` and Tailwind animation classes do not render in Remotion (remotion-markup); drive everything from `useCurrentFrame()`.
 

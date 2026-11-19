@@ -8,6 +8,8 @@
 // A file that fails to download is listed in <dir>/failed.txt; the rest are
 // still published, and the workflow fails afterwards so the failure shows. An
 // entry with "repack" is unpacked, cleaned and packed again before publishing.
+// Entries with "mirror": false are already on GitHub (sherpa-onnx's releases)
+// and are left there.
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -15,13 +17,14 @@ import { join, resolve } from "node:path";
 
 const [command, dir = "dist"] = process.argv.slice(2);
 const free = JSON.parse(readFileSync("scripts/free-assets.json", "utf8"));
+const mirrored = free.files.filter((f) => f.mirror !== false);
 const TAG = free.release.split("/").pop();
 const mb = (bytes) => `${(bytes / 1048576).toFixed(1)} MB`;
 
 if (command === "download") {
   mkdirSync(dir, { recursive: true });
   const failed = [];
-  for (const file of free.files) {
+  for (const file of mirrored) {
     const to = join(dir, file.name);
     try {
       execFileSync("curl", ["-fsSL", "--retry", "3", "-o", to, file.from], { stdio: ["ignore", "inherit", "inherit"] });
@@ -49,12 +52,12 @@ if (command === "download") {
   }
   writeFileSync(join(dir, "failed.txt"), failed.join("\n"));
 } else if (command === "publish") {
-  const files = free.files.map((f) => join(dir, f.name)).filter((path) => existsSync(path));
-  const rows = free.files
+  const files = mirrored.map((f) => join(dir, f.name)).filter((path) => existsSync(path));
+  const rows = mirrored
     .filter((f) => existsSync(join(dir, f.name)))
     .map((f) => `| ${f.name} | ${f.kind === "music" ? `${f.title}: ${f.mood.join(", ")}` : f.use} | ${f.licence} | ${f.credit} |`);
   const notes = [
-    "Free models, voices and music for the video-xoshaka skill. The skill downloads what it needs from here by itself (GitHub stays reachable where other sites are blocked); nothing here is needed by hand.",
+    "Free models, voices, music and sound effects for the video-xoshaka skill. The skill downloads what it needs from here by itself (GitHub stays reachable where other sites are blocked); nothing here is needed by hand.",
     "",
     "Each file keeps its own licence below. The non-commercial ones (marked) are for personal videos only. Samples of every voice and the whole music library, made from these files by the same workflow, are attached as samples-*.mp3 and music-preview.mp3 when that test has run.",
     "",

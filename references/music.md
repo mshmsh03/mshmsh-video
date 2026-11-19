@@ -8,6 +8,7 @@
 - Sound design
 - Cutting to music
 - If HeyGen isn't an option
+- Making an original track (ACE-Step)
 
 "Sound design", "Cutting to music" and the loudness targets come from HeyGen's HyperFrames `sound.md` and `film.md` (Apache-2.0, adopted 2026-11-17).
 
@@ -16,9 +17,11 @@
 Synthesized music (writing a score in code) sounds cheap next to a real track.
 People notice and say "the music is not nice". Use real music:
 
-1. **The free library** (`scripts/free-music.mjs`): 16 public-domain tracks
-   (FreePD.com) tagged by mood (upbeat, happy, funny, calm, sincere, cinematic,
-   tense, celebration...), downloaded from this skill's GitHub release, so it
+1. **The free library** (`scripts/free-music.mjs`): 44 public-domain tracks
+   (FreePD.com) tagged by mood (upbeat, promo, happy, funny, chill, lo-fi,
+   calm, sincere, hopeful, cinematic, epic, tense, mystery, electronic, tech,
+   news, sport, graduation, celebration, desert and world...), downloaded from
+   this skill's GitHub release, so it
    works with no account and in the Claude app. Public domain: client work is
    fine and no credit is needed. `preview calm,sincere` makes one numbered file
    of 15 s from each match for the person to pick by ear; `get <id>` saves it as
@@ -33,6 +36,9 @@ People notice and say "the music is not nice". Use real music:
    a paid API key.
 4. A track the person supplies. This is fine for WhatsApp, but copyrighted songs
    get muted or blocked on Instagram, TikTok and YouTube. Say so.
+5. An original track made on the person's own PC with ACE-Step ("Making an
+   original track" below): free and theirs, but it needs a graphics card for
+   reasonable speed and a listen before it goes in.
 
 For a business, a client or a paid post, check the chosen track's licence
 covers commercial use on that platform before delivering (and the voice's:
@@ -168,11 +174,19 @@ it, so plan sound on purpose.
 - Over strong music, a typing-heavy video can drop the clicks and keys. No
   synthesised tones, chimes or dings.
 - **Where the effects come from.** Setup downloads recorded effects from
-  remotion.media. Where that's blocked (the Claude app's cloud workspace), it
-  makes plainer ones in code instead (`scripts/make-sfx.mjs`, no download, same
-  file names): use their noise-based sounds (whoosh, paper, riser, click, boom)
-  and skip their tonal ding and chime, per the line above. Swap in recorded
-  effects when the project moves to a machine that can reach remotion.media.
+  remotion.media. Where that's blocked (the Claude app's cloud workspace), the
+  click, ding and XP error come from 25 recorded interface sounds by Kenney
+  (CC0, on this skill's GitHub release) and the whoosh, record scratch and boom
+  are made in code (`scripts/make-sfx.mjs`, same file names): use the made
+  ones' noise-based sounds and skip their tonal ding and chime, per the line
+  above. Swap in remotion.media's when the project moves to a machine that can
+  reach it.
+- **More recorded sounds:** `scripts/free-sfx.mjs` lists the Kenney set by tag
+  (click, tick, pop, drop, open, close, rise, fall, confirm, success, error,
+  buzz, question, clink, glitch, scratch, scroll, pluck, bong, back, hover),
+  `preview` plays each twice in one file, and `get confirm,pop` saves them to
+  `public/sfx/` at a level that sits under the voice with `<Sfx>`'s default
+  volume. The names are Kenney's: judge them by ear.
 
 ## Cutting to music
 
@@ -197,3 +211,26 @@ synthesized music without telling them it will sound synthetic. If they have
 none, deliver the video silent and say so in one line, with how to add music
 later, rather than spending the session writing music in code that nobody can
 hear.
+
+## Making an original track (ACE-Step)
+
+ACE-Step 1.5 (MIT, released 2026-01-31) writes full songs or instrumentals from
+a text description (genre, instruments, tempo, mood) on the person's own
+computer, and the result is theirs to use, client work included. Its makers say
+it was trained only on licensed, royalty-free and synthetic music. It wants a
+graphics card: an NVIDIA card with about 8 GB or more runs it in seconds to
+minutes; it also runs on a CPU or a Mac, much more slowly. Not wired into the
+scripts and not tested here (the cloud sandbox has no graphics card).
+
+1. Install `uv`, then `git clone https://github.com/ACE-Step/ACE-Step-1.5.git`,
+   `cd ACE-Step-1.5` and `uv sync` (Python 3.11 or 3.12; the models download on
+   first launch).
+2. `uv run acestep` opens its web page at http://localhost:7860. Describe an
+   instrumental bed ("warm acoustic guitar and soft piano, 90 BPM, hopeful, no
+   vocals") a little longer than the video, make three, and let the person pick
+   by ear.
+3. Save the pick as `public/bgm/track.mp3` (or .wav) and set `"music"` in
+   `story.json` like any other track; measure it with `check-audio.mjs`.
+
+Treat it like any found track: listen for artefacts and a stray vocal before it
+goes in, and say in the delivery message that the music was AI-generated.

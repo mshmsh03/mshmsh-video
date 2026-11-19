@@ -1,7 +1,8 @@
-# Copies every free model, voice and music track in scripts/free-assets.json to
-# the "free-assets" release, where the skill downloads them from (GitHub stays
-# reachable where other sites are blocked), then tests every free voice from
-# those copies and attaches the samples to the same release.
+# Copies every free model, voice, music track and sound effect in
+# scripts/free-assets.json to the "free-assets" release, where the skill
+# downloads them from (GitHub stays reachable where other sites are blocked),
+# then tests every free voice and tool from those copies and attaches the
+# samples to the same release.
 # Runs when the list changes, or by hand: Actions tab > Free assets > Run workflow.
 name: Free assets
 
@@ -67,11 +68,22 @@ jobs:
           node scripts/free-music.mjs preview
           cp out/music-samples/all.mp3 music-preview.mp3
           cp out/music-samples/list.txt music-preview.txt
+      - name: The free tools (sound effects, emoji, noise removal, transcription)
+        run: |
+          node scripts/free-sfx.mjs preview
+          cp out/sfx-samples/all.mp3 sfx-preview.mp3
+          cp out/sfx-samples/list.txt sfx-preview.txt
+          node scripts/free-emoji.mjs get fire,party-popper
+          test -s public/emoji/fire-1x.webm
+          ffmpeg -v error -y -i samples-english.mp3 -f lavfi -i "anoisesrc=color=pink:amplitude=0.05:sample_rate=48000" -filter_complex "[0]aresample=48000[v];[v][1]amix=inputs=2:duration=first:normalize=0" noisy.wav
+          node scripts/clean-voice.mjs noisy.wav cleaned.wav
+          node scripts/transcribe.mjs cleaned.wav --out captions.json
+          grep -qi "sentence" captions.json || { echo "::error::The transcript of the cleaned samples lost the words"; exit 1; }
       - name: Attach the samples to the release
         if: always()
         run: |
           shopt -s nullglob
-          files=(samples-*.mp3 samples-*.txt music-preview.mp3 music-preview.txt)
+          files=(samples-*.mp3 samples-*.txt music-preview.mp3 music-preview.txt sfx-preview.mp3 sfx-preview.txt)
           if [ ${#files[@]} -gt 0 ]; then gh release upload free-assets "${files[@]}" --clobber; fi
       - name: Every file in the list is on the release
         if: always()
@@ -80,7 +92,7 @@ jobs:
           node -e '
             const fs = require("fs");
             const there = new Set(fs.readFileSync("on-release.txt", "utf8").split("\n"));
-            const missing = JSON.parse(fs.readFileSync("scripts/free-assets.json", "utf8")).files.map((f) => f.name).filter((n) => !there.has(n));
+            const missing = JSON.parse(fs.readFileSync("scripts/free-assets.json", "utf8")).files.filter((f) => f.mirror !== false).map((f) => f.name).filter((n) => !there.has(n));
             if (missing.length) { console.log("::error::Not on the release: " + missing.join(", ")); process.exit(1); }
             console.log("All " + there.size + " files are on the release.");
           '

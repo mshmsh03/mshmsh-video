@@ -14,7 +14,11 @@
 // - Recorded ("recorded"): audio made elsewhere, one file per scene in
 //   out/voice-raw/<id>.wav (or .flac, .mp3, .m4a, .ogg): the person's own
 //   recording (one take per scene, a breath of silence at each end), or an
-//   ElevenLabs or HeyGen download. Words are timed from the pauses.
+//   ElevenLabs or HeyGen download. The noise is taken out first
+//   (clean-voice.mjs, saved to out/voice-clean/; "clean": false in story.json
+//   skips it). English lines are timed word by word from a transcript
+//   (transcribe.mjs; "transcribe": false skips it); other languages, and a
+//   take that strays from the script, are timed from the pauses.
 // - Pocket TTS ("pocket:alba", or "pocket:voice/me.wav" to copy a voice),
 //   Supertonic 3 ("supertonic:F2") and Gemini ("gemini:Charon"): see
 //   voice-engines.mjs. Words are timed from the pauses, as for Kokoro.
@@ -38,6 +42,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { decode, engineOf, kokoroSpeaker, makeSpeaker, normalize, speechRange, trim, writeWav } from "./voice-engines.mjs";
+
+// The cleaner and the transcriber load only for a recorded voice.
+const tools = async () => ({ ...(await import("./clean-voice.mjs")), ...(await import("./transcribe.mjs")) });
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -70,6 +77,10 @@ const EDGE = ENGINE === "edge";
 // ElevenLabs or HeyGen download. Either way this script trims, normalizes and
 // times them like Kokoro's.
 const RAW = ENGINE === "raw";
+// A person's own recording (or a downloaded one): cleaned and transcribed.
+const HUMAN = story.voice === "recorded";
+// Parakeet knows English only; a line in Arabic script never goes to it.
+const ENGLISH = (text) => (story.lang ?? "en") === "en" && /[a-z]/i.test(text) && !/[\u0600-\u06FF]/.test(text);
 // pocket:, supertonic: and gemini: voices (voice-engines.mjs).
 const EXTRA = ["pocket", "supertonic", "gemini"].includes(ENGINE);
 const engineOptions = { lang: story.lang, style: story.voiceStyle, model: story.voiceModel };
@@ -355,6 +366,7 @@ const keyOf = (scene, spoken) => {
     if (ENGINE === "gemini") extra.push(story.voiceStyle ?? "", story.voiceModel ?? "");
     if (ENGINE === "supertonic") extra.push(story.lang ?? "");
   }
+  if (HUMAN && !DRAFT) extra.push(`clean:${story.clean !== false}`, `transcribe:${story.transcribe !== false}`);
   return createHash("sha1")
     .update(JSON.stringify([DRAFT ? "draft" : story.voice, story.speed ?? 1, spoken, scene.text, source, ...extra]))
     .digest("hex")
@@ -398,6 +410,8 @@ for (const [index, scene] of story.scenes.entries()) {
   let sr;
   let samples;
   let edgeTimed = null;
+  // Words heard in a recorded English take, for word-by-word timing.
+  let heard = null;
   if (DRAFT) {
     sr = 24000;
     samples = new Float32Array(Math.round(draftSeconds(spoken, story.speed) * sr));
@@ -411,7 +425,27 @@ for (const [index, scene] of story.scenes.entries()) {
     edgeTimed = edgeCaptions(scene.text, spoken, words, start / sr, findPauses(samples, sr));
   } else if (RAW) {
     sr = 24000;
-    samples = normalize(trim(decode(rawFile(scene.id), sr), sr));
+    let file = rawFile(scene.id);
+    if (HUMAN && story.clean !== false) {
+      try {
+        const { cleanFile } = await tools();
+        file = await cleanFile(file, `out/voice-clean/${scene.id}.wav`);
+      } catch (error) {
+        console.log(`${scene.id}: not cleaned (${error.message.split("\n")[0]}); using the recording as it is`);
+      }
+    }
+    const full = decode(file, sr);
+    const [from, to] = speechRange(full, sr);
+    samples = normalize(full.slice(from, to));
+    if (HUMAN && story.transcribe !== false && ENGLISH(scene.text)) {
+      try {
+        const { transcribeWords } = await tools();
+        const at16 = decode(file, 16000).slice(Math.round((from * 16000) / sr), Math.round((to * 16000) / sr));
+        heard = await transcribeWords(at16, "en");
+      } catch (error) {
+        console.log(`${scene.id}: timed from the pauses (${error.message.split("\n")[0]})`);
+      }
+    }
   } else if (EXTRA) {
     const audio = await (await extraSpeaker()).speak(spoken, story.speed ?? 1);
     sr = audio.sampleRate;
@@ -427,7 +461,8 @@ for (const [index, scene] of story.scenes.entries()) {
   // Kokoro, Pocket, Supertonic, Gemini and the Sorani voices give no word
   // times, so they're estimated from the pauses; so are Edge's when `say` and `text` differ in word count. A
   // draft has no pauses, so its words are spread by length.
-  const timed = edgeTimed ?? timeWords(scene.text, DRAFT ? [] : findPauses(samples, sr), voiceSeconds, spoken);
+  const fromTranscript = heard?.length ? (await tools()).alignToScript(scene.text, heard, voiceSeconds) : null;
+  const timed = edgeTimed ?? fromTranscript ?? timeWords(scene.text, DRAFT ? [] : findPauses(samples, sr), voiceSeconds, spoken);
   const { captions } = timed;
   const matched = DRAFT ? "draft (estimated, silent)" : timed.matched;
   // A scene can hold the voice back with its own "lead" (seconds).

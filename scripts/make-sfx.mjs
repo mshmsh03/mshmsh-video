@@ -120,7 +120,7 @@ const SOUNDS = {
   },
 };
 // The names setup-project asks remotion.media for.
-const ALIASES = { "vine-boom": "boom", "record-scratch": "scratch" };
+const ALIASES = { "vine-boom": "boom", "record-scratch": "scratch", "windows-xp-error": "error" };
 
 export const SFX_NAMES = [...Object.keys(SOUNDS), ...Object.keys(ALIASES)];
 

@@ -184,7 +184,10 @@ export const fetchAsset = (name, dir, saveAs = name) => {
     }
   };
   let failure;
-  for (const url of [`${RELEASE}/${name}`, entry.from]) {
+  // "mirror": false marks a file already on GitHub (sherpa-onnx's own
+  // releases): it isn't copied to this repo's release, so go straight there.
+  const urls = entry.mirror === false ? [entry.from] : [`${RELEASE}/${name}`, entry.from];
+  for (const url of urls) {
     if (url !== entry.from && !there(url)) continue;
     try {
       return download(url, dir, saveAs);
@@ -195,10 +198,10 @@ export const fetchAsset = (name, dir, saveAs = name) => {
   throw new Error(`Couldn't download ${name} from GitHub or from ${entry.from}: ${failure.message.split("\n")[0]}`);
 };
 
-export const ensureModel = (name, check) => {
+export const ensureModel = (name, check, size = "about 100 MB") => {
   const dir = join(MODELS, name);
   if (existsSync(join(dir, check))) return dir;
-  console.log(`Downloading ${name} (once, about 100 MB) into ${MODELS}`);
+  console.log(`Downloading ${name} (once, ${size}) into ${MODELS}`);
   fetchAsset(`${name}.tar.bz2`, MODELS);
   execFileSync("tar", ["-xjf", `${name}.tar.bz2`], { cwd: MODELS, stdio: "inherit" });
   rmSync(join(MODELS, `${name}.tar.bz2`), { force: true });
@@ -206,14 +209,16 @@ export const ensureModel = (name, check) => {
   return dir;
 };
 
-const loadSherpa = async (voice) => {
+// sherpa-onnx-node, from the project's node_modules. `what` names what needs
+// it, for the error message.
+export const loadSherpa = async (what) => {
   try {
     return (await import("sherpa-onnx-node")).default;
   } catch (error) {
-    throw new Error(`${voice} runs on sherpa-onnx. Install it in the project: npm i -D sherpa-onnx-node@2.0.1\n(${error.message})`);
+    throw new Error(`${what} runs on sherpa-onnx. Install it in the project: npm i -D sherpa-onnx-node@2.0.1\n(${error.message})`);
   }
 };
-const THREADS = Math.max(1, Math.min(8, availableParallelism() - 1));
+export const THREADS = Math.max(1, Math.min(8, availableParallelism() - 1));
 
 // --- Pocket TTS --------------------------------------------------------------------
 

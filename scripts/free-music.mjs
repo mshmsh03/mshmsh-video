@@ -1,7 +1,9 @@
-// The free music library: 16 public-domain tracks (FreePD.com) listed in
+// The free music library: 44 public-domain tracks (FreePD.com) listed in
 // free-assets.json and downloaded from this repo's GitHub release, so it works
-// without a HeyGen account and where other sites are blocked. Public domain:
-// free for any use, client work included, no credit needed.
+// without a HeyGen account and where other sites are blocked. Upbeat and promo,
+// happy and funny, chill and lo-fi, sincere, cinematic and epic, mystery,
+// tech, news, sport, graduation, desert and world. Public domain: free for any
+// use, client work included, no credit needed.
 //
 //   node scripts/free-music.mjs                         every track, its length and moods
 //   node scripts/free-music.mjs calm                    only tracks whose moods match
