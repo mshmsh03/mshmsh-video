@@ -16,7 +16,7 @@
 //
 // Pocket and Supertonic run through sherpa-onnx (npm i -D sherpa-onnx-node@2.0.1).
 // Their models, about 100 MB each, download once from sherpa-onnx's GitHub
-// releases into ~/.cache/video-xoshaka/models (VIDEO_XOSHAKA_MODELS moves it),
+// releases into ~/.cache/mshmsh-video/models (MSHMSH_VIDEO_MODELS moves it),
 // so every project shares one copy.
 
 import { execFileSync, execSync } from "node:child_process";
@@ -142,14 +142,19 @@ export const decode = (file, sr) => {
 
 // --- Model downloads -------------------------------------------------------------
 
-export const MODELS = process.env.VIDEO_XOSHAKA_MODELS ?? join(homedir(), ".cache", "video-xoshaka", "models");
+// The skill was called video-xoshaka until 2026-11-19: a cache and settings
+// under that name are still used, so nothing downloads twice.
+const OLD_CACHE = join(homedir(), ".cache", "video-xoshaka", "models");
+const CACHE = join(homedir(), ".cache", "mshmsh-video", "models");
+export const MODELS =
+  process.env.MSHMSH_VIDEO_MODELS ?? process.env.VIDEO_XOSHAKA_MODELS ?? (existsSync(OLD_CACHE) && !existsSync(CACHE) ? OLD_CACHE : CACHE);
 
 // Every downloadable resource is listed in free-assets.json, with its licence.
 // Each is copied to this repo's free-assets release on GitHub, tried first
 // because GitHub stays reachable where other sites are blocked (the Claude
 // app's cloud workspace); the original source is the fallback.
 export const FREE = JSON.parse(readFileSync(new URL("free-assets.json", import.meta.url), "utf8"));
-const RELEASE = process.env.VIDEO_XOSHAKA_ASSETS ?? FREE.release;
+const RELEASE = process.env.MSHMSH_VIDEO_ASSETS ?? process.env.VIDEO_XOSHAKA_ASSETS ?? FREE.release;
 
 // curl and tar ship with Windows 10 and later, macOS and Linux. Both run from
 // inside the folder with relative names: Git Bash's GNU tar reads "C:\..." as a

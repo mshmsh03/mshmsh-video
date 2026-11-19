@@ -13,7 +13,7 @@ if (!front) problems.push("SKILL.md: no front matter");
 else {
   const name = front[1].match(/^name:\s*(.+)$/m)?.[1]?.trim();
   const description = front[1].match(/^description:\s*(.+)$/m)?.[1]?.trim();
-  if (name !== "video-xoshaka") problems.push(`SKILL.md: name is "${name}", expected "video-xoshaka"`);
+  if (name !== "mshmsh-video") problems.push(`SKILL.md: name is "${name}", expected "mshmsh-video"`);
   if (!description) problems.push("SKILL.md: no description");
   else if (description.length > 1024) problems.push(`SKILL.md: the description is ${description.length} characters (the limit is 1024)`);
 }

@@ -199,7 +199,7 @@ export const Narration: React.FC<NarrationProps> = ({
           >
             {page.words.map((word, i) => (
               // The space stays outside the word, so lines break between
-              // words but never inside one ("video-xoshaka", "30-second").
+              // words but never inside one ("mshmsh-video", "30-second").
               <Fragment key={i}>
                 {i === 0 ? "" : (word.text.match(/^\s*/)?.[0] ?? "")}
                 <span

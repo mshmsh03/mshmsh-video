@@ -13,7 +13,7 @@ Most videos come back: a price was wrong, the client wants a 15-second cut for S
 
 Before changing anything, read `brief.md`, `design.md`, `STORYBOARD.md`, `REVIEW.md` and `story.json`, and look at what changed since the last session (`git status` or `git diff` if it's a repo, file times otherwise). The person may have edited code or text in the Studio: assume their edits were on purpose and build on them, or ask. `REVIEW.md` says what was weak last time and which warnings were kept on purpose, so don't "fix" those.
 
-Run `node scripts/doctor.mjs` once: an older project may predate the current scripts. `node <skill>/scripts/setup-project.mjs . --update` brings its shared components and scripts up to date, backs up anything it replaces in `.video-xoshaka-backup/`, and never touches `story.json`, `scenes.tsx`, `theme.ts`, `Root.tsx` or `voice.json`. If the person changed a shared component themselves, tell them before updating and point at the backup.
+Run `node scripts/doctor.mjs` once: an older project may predate the current scripts. `node <skill>/scripts/setup-project.mjs . --update` brings its shared components and scripts up to date, backs up anything it replaces in `.mshmsh-video-backup/`, and never touches `story.json`, `scenes.tsx`, `theme.ts`, `Root.tsx` or `voice.json`. If the person changed a shared component themselves, tell them before updating and point at the backup.
 
 The interview shrinks to what is new. Don't re-ask anything `brief.md` already answers; confirm it in one line ("Same voice, music and captions as the March video?").
 

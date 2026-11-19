@@ -13,7 +13,7 @@
 //   --crop    trim the empty edges, for a sticker
 //
 // Needs Python with rembg: python -m pip install "rembg[cpu,cli]"
-// Models download from rembg's GitHub releases into ~/.cache/video-xoshaka/models/rembg.
+// Models download from rembg's GitHub releases into ~/.cache/mshmsh-video/models/rembg.
 // For a cut-out of a moving person in a clip, use `hf remove-background` (hyperframes.md).
 
 import { execFileSync } from "node:child_process";

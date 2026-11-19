@@ -1,6 +1,6 @@
-# On every change to main, builds video-xoshaka.zip (the skill folder, ready to
+# On every change to main, builds mshmsh-video.zip (the skill folder, ready to
 # upload in the Claude app) and puts it on the release called "latest":
-# https://github.com/mshmsh03/video-xoshaka/releases/download/latest/video-xoshaka.zip
+# https://github.com/mshmsh03/mshmsh-video/releases/download/latest/mshmsh-video.zip
 name: Release zip
 
 on:
@@ -20,12 +20,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build video-xoshaka.zip
+      - name: Build mshmsh-video.zip
         run: |
-          mkdir -p dist/video-xoshaka
-          git archive HEAD | tar -x -C dist/video-xoshaka
-          rm -rf dist/video-xoshaka/.github dist/video-xoshaka/.gitignore dist/video-xoshaka/.gitattributes
-          cd dist && zip -qr video-xoshaka.zip video-xoshaka
+          mkdir -p dist/mshmsh-video
+          git archive HEAD | tar -x -C dist/mshmsh-video
+          rm -rf dist/mshmsh-video/.github dist/mshmsh-video/.gitignore dist/mshmsh-video/.gitattributes
+          cd dist && zip -qr mshmsh-video.zip mshmsh-video
+          # The same zip under the old name, so links shared before the rename
+          # still give the current skill.
+          cp mshmsh-video.zip video-xoshaka.zip
       - name: Put it on the "latest" release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,14 +38,16 @@ jobs:
           cat > notes.md <<NOTES
           The whole skill in one zip, rebuilt on every change to main (this one: ${GITHUB_SHA::7}, $(date -u +%Y-%m-%d)).
 
-          - **Claude app:** download video-xoshaka.zip and upload it in your skill settings. To update, upload the new zip in place of the old one.
-          - **Claude Code:** \`npx skills add mshmsh03/video-xoshaka\`. To update, run the same command again.
+          - **Claude app:** download mshmsh-video.zip and upload it in your skill settings. To update, upload the new zip in place of the old one.
+          - **Claude Code:** \`npx skills add mshmsh03/mshmsh-video\`. To update, run the same command again.
+
+          The skill was called video-xoshaka until 2026-11-19. If you have that copy, remove it after installing this one (in the Claude app, delete video-xoshaka; in Claude Code, \`npx skills remove video-xoshaka -g\`). video-xoshaka.zip here is the same zip, kept for links shared before the rename.
 
           What changed: [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md).
           NOTES
           if gh release view latest >/dev/null 2>&1; then
-            gh release upload latest dist/video-xoshaka.zip --clobber
-            gh release edit latest --notes-file notes.md
+            gh release upload latest dist/mshmsh-video.zip dist/video-xoshaka.zip --clobber
+            gh release edit latest --title "mshmsh-video" --notes-file notes.md
           else
-            gh release create latest dist/video-xoshaka.zip --title "video-xoshaka" --notes-file notes.md
+            gh release create latest dist/mshmsh-video.zip dist/video-xoshaka.zip --title "mshmsh-video" --notes-file notes.md
           fi

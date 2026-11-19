@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-19, renamed to mshmsh-video
+
+The skill is now called **mshmsh-video** (it was video-xoshaka), and the repo is mshmsh03/mshmsh-video. GitHub sends the old repo links to the new one.
+
+- Install with `npx skills add mshmsh03/mshmsh-video`, or upload `mshmsh-video.zip` in the Claude app. Then remove the old copy: `npx skills remove video-xoshaka -g` in Claude Code, or delete the video-xoshaka skill in the Claude app.
+- The shared model cache is now `~/.cache/mshmsh-video/models` and the settings are `MSHMSH_VIDEO_MODELS` and `MSHMSH_VIDEO_ASSETS`. A cache and settings under the old name are still used, so nothing downloads twice.
+- `setup-project.mjs --update` backs up into `.mshmsh-video-backup/`.
+- The funny style is still called the xoshaka story.
+
 ## 2026-11-19, free tools for editing, animation and sound
 
 The best free resources found for animation, voiceovers, editing and music (skills.sh and the web, checked 2026-11-19), all free for client work, added to the skill:

@@ -108,7 +108,7 @@ Each scene's line reads "x/y words timed by Edge". Edge leaves punctuation out o
 
 Pocket and Supertonic (tested 2026-11-18 on Linux: samples, make-voice on an eight-scene story, the model download, and a Whisper transcript of every sample to check it's intelligible):
 1. `setup-project.mjs` installs `sherpa-onnx-node` in every project (it also runs the recording cleaner and the transcriber; `--no-sherpa` skips it). In an older project: `npm i -D sherpa-onnx-node@2.0.1`.
-2. Samples: `node scripts/voice-samples.mjs "<line>" --voices supertonic,pocket`. The first run downloads each model from sherpa-onnx's GitHub releases (with curl and tar, both built into Windows 10 and later) into `~/.cache/video-xoshaka/models`, shared by every project; `VIDEO_XOSHAKA_MODELS` moves it.
+2. Samples: `node scripts/voice-samples.mjs "<line>" --voices supertonic,pocket`. The first run downloads each model from sherpa-onnx's GitHub releases (with curl and tar, both built into Windows 10 and later) into `~/.cache/mshmsh-video/models`, shared by every project (a cache from the skill's old name, `~/.cache/video-xoshaka/models`, is still used); `MSHMSH_VIDEO_MODELS` moves it.
 3. Put the chosen name in `story.json`'s `voice` and run make-voice as usual. `doctor.mjs` checks the package, the model, a copied voice's file, and Kurdish text sent to Supertonic.
 
 Gemini:

@@ -1,6 +1,6 @@
 {
   "about": "Free resources the skill downloads when it needs them, never bundled in the skill itself. The free-assets workflow copies each one to this repo's free-assets release, which the scripts try first (it's on GitHub, so it works where other sites are blocked); 'from' is the original source and the fallback. Entries with \"mirror\": false are already on GitHub (sherpa-onnx's releases) and aren't copied. Music moods come from the titles and a tempo and loudness measurement, not from listening.",
-  "release": "https://github.com/mshmsh03/video-xoshaka/releases/download/free-assets",
+  "release": "https://github.com/mshmsh03/mshmsh-video/releases/download/free-assets",
   "files": [
     {
       "name": "sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
@@ -22,7 +22,7 @@
           "sherpa-onnx-pocket-tts-int8-2026-01-26/test_wavs",
           "sherpa-onnx-pocket-tts-int8-2026-01-26/README.md"
         ],
-        "notice": "Pocket TTS (Kyutai), exported to ONNX by KevinAHM/pocket-tts-onnx (licence: CC BY 4.0, see LICENSE) and packaged by k2-fsa/sherpa-onnx. In this copy, video-xoshaka removed the demo voice clips (test_wavs), whose licence isn't stated, and the package README."
+        "notice": "Pocket TTS (Kyutai), exported to ONNX by KevinAHM/pocket-tts-onnx (licence: CC BY 4.0, see LICENSE) and packaged by k2-fsa/sherpa-onnx. In this copy, mshmsh-video removed the demo voice clips (test_wavs), whose licence isn't stated, and the package README."
       }
     },
     {
