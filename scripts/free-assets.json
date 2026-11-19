@@ -1,0 +1,318 @@
+{
+  "about": "Free resources the skill downloads when it needs them, never bundled in the skill itself. The free-assets workflow copies each one to this repo's free-assets release, which the scripts try first (it's on GitHub, so it works where other sites are blocked); 'from' is the original source and the fallback. Music moods come from the titles and a tempo and loudness measurement, not from listening.",
+  "release": "https://github.com/mshmsh03/video-xoshaka/releases/download/free-assets",
+  "files": [
+    {
+      "name": "sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
+      "kind": "model",
+      "use": "Supertonic 3 voices (supertonic:F1 ... M5)",
+      "licence": "OpenRAIL-M: client work allowed, but no imitating real people, and say it's an AI voice",
+      "credit": "Supertone Inc. (Supertonic 3), packaged by k2-fsa/sherpa-onnx"
+    },
+    {
+      "name": "sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-pocket-tts-int8-2026-01-26.tar.bz2",
+      "kind": "model",
+      "use": "Pocket TTS voices (pocket:...)",
+      "licence": "CC BY 4.0: credit Kyutai",
+      "credit": "Kyutai (Pocket TTS), packaged by k2-fsa/sherpa-onnx"
+    },
+    {
+      "name": "kokoro-v1.0.onnx",
+      "from": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx",
+      "kind": "model",
+      "use": "Kokoro voices through Python, where kokoro-js can't download",
+      "licence": "Apache-2.0",
+      "credit": "hexgrad (Kokoro-82M), ONNX by thewh1teagle/kokoro-onnx"
+    },
+    {
+      "name": "voices-v1.0.bin",
+      "from": "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin",
+      "kind": "model",
+      "use": "Kokoro's voices for the Python route",
+      "licence": "Apache-2.0",
+      "credit": "hexgrad (Kokoro-82M), ONNX by thewh1teagle/kokoro-onnx"
+    },
+    {
+      "name": "vekol-ckb.onnx",
+      "from": "https://huggingface.co/RevgeAI/vekol-tts-ckb-edge/resolve/main/model.onnx",
+      "kind": "model",
+      "use": "Vekol, an offline Central Kurdish (Sorani) voice (vekol)",
+      "licence": "CC BY-NC 4.0: personal videos only, never client or paid work; credit Revge",
+      "credit": "Revge (Vekol TTS, vekol-tts-ckb-edge)"
+    },
+    {
+      "name": "vekol-ckb.onnx.json",
+      "from": "https://huggingface.co/RevgeAI/vekol-tts-ckb-edge/resolve/main/model.onnx.json",
+      "kind": "model",
+      "use": "Vekol's settings and letters",
+      "licence": "CC BY-NC 4.0: personal videos only; credit Revge",
+      "credit": "Revge (Vekol TTS)"
+    },
+    {
+      "name": "pocket-alba.wav",
+      "from": "https://huggingface.co/kyutai/tts-voices/resolve/main/alba-mackenna/casual.wav",
+      "kind": "voice",
+      "use": "Pocket TTS preset voice pocket:alba",
+      "licence": "CC BY 4.0: credit Alba Mackenna",
+      "credit": "Alba Mackenna, via Kyutai's tts-voices"
+    },
+    {
+      "name": "pocket-bill_boerst.wav",
+      "from": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-zero/bill_boerst.wav",
+      "kind": "voice",
+      "use": "Pocket TTS preset voice pocket:bill_boerst",
+      "licence": "CC0",
+      "credit": "Kyutai's tts-voices (voice-zero)"
+    },
+    {
+      "name": "pocket-caro_davy.wav",
+      "from": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-zero/caro_davy.wav",
+      "kind": "voice",
+      "use": "Pocket TTS preset voice pocket:caro_davy",
+      "licence": "CC0",
+      "credit": "Kyutai's tts-voices (voice-zero)"
+    },
+    {
+      "name": "pocket-peter_yearsley.wav",
+      "from": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-zero/peter_yearsley.wav",
+      "kind": "voice",
+      "use": "Pocket TTS preset voice pocket:peter_yearsley",
+      "licence": "CC0",
+      "credit": "Kyutai's tts-voices (voice-zero)"
+    },
+    {
+      "name": "pocket-stuart_bell.wav",
+      "from": "https://huggingface.co/kyutai/tts-voices/resolve/main/voice-zero/stuart_bell.wav",
+      "kind": "voice",
+      "use": "Pocket TTS preset voice pocket:stuart_bell",
+      "licence": "CC0",
+      "credit": "Kyutai's tts-voices (voice-zero)"
+    },
+    {
+      "name": "music-advertime.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Advertime.mp3",
+      "kind": "music",
+      "title": "Advertime",
+      "seconds": 134,
+      "mood": [
+        "upbeat",
+        "promo",
+        "builds up"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-inspiration.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Inspiration.mp3",
+      "kind": "music",
+      "title": "Inspiration",
+      "seconds": 138,
+      "mood": [
+        "upbeat",
+        "inspiring",
+        "steady"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-funkeriffic.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Funkeriffic.mp3",
+      "kind": "music",
+      "title": "Funkeriffic",
+      "seconds": 210,
+      "mood": [
+        "funky",
+        "upbeat",
+        "energetic"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-funshine.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Funshine.mp3",
+      "kind": "music",
+      "title": "Funshine",
+      "seconds": 165,
+      "mood": [
+        "happy",
+        "bright",
+        "steady"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-happy-whistling-ukulele.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Happy%20Whistling%20Ukulele.mp3",
+      "kind": "music",
+      "title": "Happy Whistling Ukulele",
+      "seconds": 123,
+      "mood": [
+        "happy",
+        "playful",
+        "kids",
+        "birthday"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-ukulele-song.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Ukulele%20Song.mp3",
+      "kind": "music",
+      "title": "Ukulele Song",
+      "seconds": 139,
+      "mood": [
+        "happy",
+        "light",
+        "birthday"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-silly-boy.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Silly%20Boy.mp3",
+      "kind": "music",
+      "title": "Silly Boy",
+      "seconds": 96,
+      "mood": [
+        "funny",
+        "quirky"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-be-chillin.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Be%20Chillin.mp3",
+      "kind": "music",
+      "title": "Be Chillin",
+      "seconds": 203,
+      "mood": [
+        "chill",
+        "calm",
+        "lo-fi"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-study-and-relax.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Study%20and%20Relax.mp3",
+      "kind": "music",
+      "title": "Study and Relax",
+      "seconds": 223,
+      "mood": [
+        "calm",
+        "tutorial",
+        "focus"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-compy-jazz.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Compy%20Jazz.mp3",
+      "kind": "music",
+      "title": "Compy Jazz",
+      "seconds": 247,
+      "mood": [
+        "calm",
+        "jazz",
+        "background"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-nostalgic-piano.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Nostalgic%20Piano.mp3",
+      "kind": "music",
+      "title": "Nostalgic Piano",
+      "seconds": 196,
+      "mood": [
+        "sincere",
+        "piano",
+        "memories"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-relaxing-ballad.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Relaxing%20Ballad.mp3",
+      "kind": "music",
+      "title": "Relaxing Ballad",
+      "seconds": 209,
+      "mood": [
+        "sincere",
+        "emotional",
+        "gentle"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-journey-of-hope.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Journey%20of%20Hope.mp3",
+      "kind": "music",
+      "title": "Journey of Hope",
+      "seconds": 349,
+      "mood": [
+        "cinematic",
+        "inspiring",
+        "recap"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-epic-blockbuster-2.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Epic%20Blockbuster%202.mp3",
+      "kind": "music",
+      "title": "Epic Blockbuster 2",
+      "seconds": 159,
+      "mood": [
+        "epic",
+        "cinematic",
+        "trailer"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-horror-suspense.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Horror%20Suspense.mp3",
+      "kind": "music",
+      "title": "Horror Suspense",
+      "seconds": 140,
+      "mood": [
+        "tense",
+        "suspense",
+        "dark"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-celebration.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Celebration.mp3",
+      "kind": "music",
+      "title": "Celebration",
+      "seconds": 143,
+      "mood": [
+        "celebration",
+        "party",
+        "upbeat"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    }
+  ]
+}

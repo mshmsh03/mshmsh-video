@@ -84,6 +84,14 @@ if (engine === "pocket" || engine === "supertonic") {
   const kurdish = (story?.scenes ?? []).filter((s) => KURDISH_LETTERS.test(s.say ?? s.text ?? ""));
   if (engine === "supertonic" && kurdish.length) fail("Supertonic", `can't speak Kurdish (${kurdish.map((s) => s.id).join(", ")}): use a gemini: or f5: voice`);
 }
+if (engine === "vekol") {
+  if (existsSync(join("node_modules", "onnxruntime-node"))) ok("onnxruntime", "runs the Vekol Sorani voice");
+  else fail("onnxruntime", "vekol needs it: npm i -D onnxruntime-node@1.21.0 --onnxruntime-node-install-cuda=skip");
+  if (existsSync(join(MODELS, "vekol-ckb", "vekol-ckb.onnx"))) ok("Vekol model", join(MODELS, "vekol-ckb"));
+  else ok("Vekol model", "downloads on first use (77 MB, once for every project)");
+  const latin = (story?.scenes ?? []).filter((s) => !/[\u0600-\u06FF]/.test(s.say ?? s.text ?? ""));
+  if (latin.length) warn("Vekol", `reads Sorani in Arabic script; these scenes have none: ${latin.map((s) => s.id).join(", ")}`);
+}
 if (engine === "gemini") {
   if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) ok("Gemini key", "set in this terminal");
   else fail("Gemini key", `${voiceName} needs GEMINI_API_KEY: a free key from https://aistudio.google.com/apikey, set in the terminal, never in a project file`);

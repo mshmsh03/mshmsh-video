@@ -16,8 +16,9 @@
 //   recording (one take per scene, a breath of silence at each end), or an
 //   ElevenLabs or HeyGen download. Words are timed from the pauses.
 // - Pocket TTS ("pocket:alba", or "pocket:voice/me.wav" to copy a voice),
-//   Supertonic 3 ("supertonic:F2") and Gemini ("gemini:Charon"): see
-//   voice-engines.mjs. Words are timed from the pauses, as for Kokoro.
+//   Supertonic 3 ("supertonic:F2"), Gemini ("gemini:Charon") and Vekol
+//   ("vekol", Sorani, offline): see voice-engines.mjs. Words are timed from
+//   the pauses, as for Kokoro.
 //
 // - Draft (--draft): no voice at all. Each line's length is estimated from its
 //   words and the WAVs are silent, so the Studio preview and the scenes can be
@@ -71,7 +72,7 @@ const EDGE = ENGINE === "edge";
 // times them like Kokoro's.
 const RAW = ENGINE === "raw";
 // pocket:, supertonic: and gemini: voices (voice-engines.mjs).
-const EXTRA = ["pocket", "supertonic", "gemini"].includes(ENGINE);
+const EXTRA = ["pocket", "supertonic", "gemini", "vekol"].includes(ENGINE);
 const engineOptions = { lang: story.lang, style: story.voiceStyle, model: story.voiceModel };
 const rawFile = (id) => {
   for (const ext of ["flac", "wav", "mp3", "m4a", "ogg", "opus", "webm"]) {
@@ -108,19 +109,21 @@ const findPauses = (samples, sr) => {
 
 const ONES = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 // Roughly how long a word takes to say: its letters, or for "300" the letters
-// of "three hundred".
+// of "three hundred"; a year like 2026 counts about five letters a digit.
 const spokenLength = (word) => {
+  const letters = word.replace(/[^\p{L}]/gu, "").length;
   const digits = word.replace(/[^0-9]/g, "");
-  if (!digits) return word.replace(/[^\p{L}]/gu, "").length;
+  if (!digits) return letters;
   const n = Number(digits);
+  if (n >= 1000) return digits.length * 5 + letters;
   const hundreds = Math.floor(n / 100);
-  return (hundreds ? ONES[hundreds].length + 7 : 0) + (n % 100 ? 7 : 0) || 4;
+  return ((hundreds ? ONES[hundreds].length + 7 : 0) + (n % 100 ? 7 : 0) || 4) + letters;
 };
 // The same for each written word when `say` spells it differently ("٢٠ی" read
 // as "بیستی", "PHP" as "پی ئێچ پی"): the words both share line up, and each
 // run that differs takes the letters of what was actually said.
 const spokenLengths = (words, said) => {
-  const letters = (w) => spokenLength(w.replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x660));
+  const letters = (w) => spokenLength(w.replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 0x6f0));
   const n = words.length;
   const m = said.length;
   const common = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));

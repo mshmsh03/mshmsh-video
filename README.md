@@ -36,18 +36,27 @@ The app builds the video in its cloud workspace. That workspace blocks some down
 | Fonts | from Google Fonts | saved into the project from Google's font repository on GitHub, automatically |
 | Kokoro voices | yes | yes, through Python with the model from GitHub, automatically |
 | Supertonic and Pocket TTS voices | yes | yes |
+| Sorani Kurdish voice (Vekol, offline, personal videos) | yes | yes |
 | Gemini and Edge voices | yes (Gemini needs your free key) | blocked in the tests (2026-11-18) |
-| HeyGen music search | with the HeyGen CLI | not tested; bring your own track |
+| Free music library (16 public-domain tracks) | yes | yes |
+| HeyGen music search | with the HeyGen CLI | not tested; use the free library |
+| Sound effects | recorded ones from remotion.media | made in code where remotion.media is blocked, automatically |
+
+### Free resources, included
+
+Everything free the skill uses, apart from the code itself, is on this repo's [free-assets release](https://github.com/mshmsh03/video-xoshaka/releases/tag/free-assets): the voice models (Kokoro, Supertonic, Pocket TTS and its free preset voices, the Vekol Sorani voice) and 16 public-domain music tracks, each with its licence and credit in the release notes. The skill downloads what a video needs from there by itself, because GitHub stays reachable where other sites are blocked; nothing has to be downloaded by hand. To hear them first, the release has `samples-english.mp3`, `samples-sorani.mp3` and `music-preview.mp3`.
+
+The one thing that can't be included is a personal key (Gemini, HeyGen): each person makes their own, free, and keeps it out of any file in the repo.
 
 ## What you need
 
 - Node.js 18 or newer. The skill sets up Remotion itself.
 - Remotion is free for individuals and small teams (up to 3 people). Bigger companies need a paid licence: see [remotion.dev/license](https://www.remotion.dev/license).
-- Optional: the HeyGen CLI for real royalty-free music (Linux and macOS; on Windows it runs inside WSL). Without it, the skill asks you for a track or another source.
+- Music: the free library is included (16 public-domain tracks, client work allowed). Optional: the HeyGen CLI for thousands more royalty-free tracks (Linux and macOS; on Windows it runs inside WSL).
 - The free narrator voices download their model once: Kokoro about 330 MB (English); Supertonic (31 languages including Arabic) and Pocket TTS (English, and it can copy your own voice from a short recording) about 100 MB each, after `npm i -D sherpa-onnx-node@2.0.1` in the project.
 - Optional: a free Gemini API key (aistudio.google.com/apikey) for Google's Gemini voices, over 100 languages including Arabic and Central Kurdish. Set it as `GEMINI_API_KEY` in the terminal. On the free tier Google may use what you send to improve its products, so don't send a client's confidential script.
 - Optional, for Arabic and other languages: Python 3 with `python -m pip install edge-tts` for free Microsoft Edge voices (Iraqi, Saudi, Egyptian Arabic and many more), with right-to-left captions.
-- Optional, for Sorani Kurdish: free F5-TTS Central Kurdish voices (Python, PyTorch on the CPU, a 1.35 GB download per voice, about an hour of CPU time for a 90-second video). Their licence is non-commercial only, so for client or paid work record your own voice. Kurmanji has no tested free voice yet.
+- For Sorani Kurdish: the Vekol voice is included (offline, seconds per scene, works in the Claude app; setup installs what it runs on). Slower and more natural: the free F5-TTS Central Kurdish voices (Python, PyTorch on the CPU, a 1.35 GB download per voice, about an hour of CPU time for a 90-second video). Both are non-commercial only, so for client or paid work record your own voice or use Gemini. Kurmanji has no tested free voice yet.
 - Recommended: the full ffmpeg for converting phone clips, the review contact sheets, the automatic checks on a render and loudness mastering. Remotion's bundled copy covers the basics. `node scripts/doctor.mjs` says what is missing.
 - Rendering needs the internet for Google Fonts, or the font files saved in the project (setup does that by itself when Google Fonts can't be reached).
 - Optional: the HyperFrames skills (`npx skills add https://github.com/heygen-com/hyperframes --skill hyperframes`, plus `--skill hyperframes-cli`) and Node.js 22+, for the HyperFrames engine and its file tools: beat and section detection for music, loudness checks, website capture (screenshots, colours, fonts, logos), transcription and background removal. HyperFrames sends usage data to HeyGen unless you turn it off (`HYPERFRAMES_NO_TELEMETRY=1`).

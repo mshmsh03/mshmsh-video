@@ -17,7 +17,9 @@ from pathlib import Path
 
 MODELS = Path(os.environ.get("VIDEO_XOSHAKA_MODELS") or Path.home() / ".cache" / "video-xoshaka" / "models")
 DIR = MODELS / "kokoro-onnx-v1.0"
-BASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
+# Where each file comes from: this repo's free-assets release first, then the original.
+FREE = json.loads(Path(__file__).with_name("free-assets.json").read_text(encoding="utf-8"))
+RELEASE = os.environ.get("VIDEO_XOSHAKA_ASSETS") or FREE["release"]
 
 
 def fetch(name):
@@ -26,11 +28,19 @@ def fetch(name):
         return path
     DIR.mkdir(parents=True, exist_ok=True)
     print(f"Downloading {name} (once) into {DIR}", file=sys.stderr)
+    entry = next(f for f in FREE["files"] if f["name"] == name)
     part = path.with_name(path.name + ".part")
-    with urllib.request.urlopen(BASE + name, timeout=60) as response, open(part, "wb") as out:
-        shutil.copyfileobj(response, out, 1 << 20)
-    part.replace(path)
-    return path
+    failure = None
+    for url in (f"{RELEASE}/{name}", entry["from"]):
+        try:
+            with urllib.request.urlopen(url, timeout=60) as response, open(part, "wb") as out:
+                shutil.copyfileobj(response, out, 1 << 20)
+            part.replace(path)
+            return path
+        except OSError as error:  # urllib's HTTP and network errors are OSErrors
+            failure = error
+    part.unlink(missing_ok=True)
+    sys.exit(f"Couldn't download {name}: {failure}")
 
 
 def main():

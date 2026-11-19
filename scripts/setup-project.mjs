@@ -27,6 +27,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameS
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeSfx } from "./make-sfx.mjs";
 
 const SKILL = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TEMPLATE = join(SKILL, "assets", "template", "src");
@@ -106,6 +107,8 @@ if (INSTALL) {
   // Supertonic (English, Arabic and more) and Pocket TTS (English) run on
   // sherpa-onnx; neither speaks Kurdish, so a Sorani project skips it.
   if (SCRIPT !== "sorani" && !has("no-sherpa") && !deps["sherpa-onnx-node"]) npm(["i", "-D", "sherpa-onnx-node@2.0.1"], DIR);
+  // Vekol, the offline Sorani voice, runs on onnxruntime.
+  if (SCRIPT === "sorani" && !deps["onnxruntime-node"]) npm(["i", "-D", "onnxruntime-node@1.21.0", "--onnxruntime-node-install-cuda=skip"], DIR);
 }
 
 // 2. The template. Per-video files are written once; shared components are
@@ -340,7 +343,9 @@ if (!existsSync(themePath)) {
 // 4. The scripts (and the Sorani voice tools).
 mkdirSync(join(DIR, "scripts"), { recursive: true });
 for (const name of readdirSync(join(SKILL, "scripts"))) {
-  if (!/\.(mjs|py)$/.test(name) || name === "setup-project.mjs") continue;
+  // Scripts, and free-assets.json: the voice and music scripts read it.
+  if (!/\.(mjs|py)$/.test(name) && name !== "free-assets.json") continue;
+  if (name === "setup-project.mjs") continue;
   const to = join(DIR, "scripts", name);
   if (existsSync(to)) {
     if (!UPDATE || readFileSync(to, "utf8") === readFileSync(join(SKILL, "scripts", name), "utf8")) continue;
@@ -383,7 +388,7 @@ if (brand?.logo) {
   } else notes.push(`brand.json's logo ${logo} isn't there.`);
 }
 
-// 7. Sound effects from remotion.media (skipped quietly when offline).
+// 7. Sound effects from remotion.media, or made in code where it's blocked.
 const SFX = (flag("sfx", "whoosh,mouse-click,ding,record-scratch,vine-boom,windows-xp-error")).split(",").filter(Boolean);
 const failed = [];
 for (const name of SFX) {
@@ -397,7 +402,13 @@ for (const name of SFX) {
     failed.push(name);
   }
 }
-if (failed.length) notes.push(`Couldn't download sound effects (${failed.join(", ")}); <Sfx> skips missing files. Get them later: curl -sfo public/sfx/<name>.wav https://remotion.media/<name>.wav`);
+// Where remotion.media is blocked (the Claude app's cloud workspace), make the
+// effects in code instead (make-sfx.mjs); windows-xp-error becomes "error".
+if (failed.length) {
+  const made = writeSfx(failed.map((name) => (name === "windows-xp-error" ? "error" : name)), join(DIR, "public", "sfx"));
+  const missing = failed.filter((name) => !made.includes(name === "windows-xp-error" ? "error" : name));
+  notes.push(`remotion.media couldn't be reached, so these sound effects were made in code (plainer than recorded ones): ${made.join(", ")}.${missing.length ? ` Missing: ${missing.join(", ")}; <Sfx> skips missing files.` : ""}`);
+}
 
 // 7b. The approved storyboard is the story: its rows replace the template's
 // sample scenes, and every scene starts as a placeholder.

@@ -10,6 +10,7 @@
 //   pocket-demo  pocket:bria, pocket:loona (come with the model, no extra download)
 //   gemini       8 of Gemini's 30 voices (needs GEMINI_API_KEY)
 //   edge-ar      Iraqi, Saudi and Egyptian Arabic Edge voices (needs edge-tts)
+//   sorani       vekol (offline, personal videos only) and four Gemini voices (need a key)
 // To hear the person's own voice copied, add pocket:<their recording>.wav.
 //
 // Each voice says "Voice 1.", "Voice 2." ... before the line (or two beeps when
@@ -31,6 +32,7 @@ const GROUPS = {
   "pocket-demo": ["pocket:bria", "pocket:loona"],
   gemini: ["Kore", "Charon", "Puck", "Aoede", "Sulafat", "Achird", "Gacrux", "Iapetus"].map((v) => `gemini:${v}`),
   "edge-ar": ["ar-IQ-RanaNeural", "ar-IQ-BasselNeural", "ar-SA-ZariyahNeural", "ar-SA-HamedNeural", "ar-EG-SalmaNeural", "ar-EG-ShakirNeural"],
+  sorani: ["vekol", "gemini:Kore", "gemini:Charon", "gemini:Puck", "gemini:Sulafat"],
 };
 
 const args = process.argv.slice(2);
