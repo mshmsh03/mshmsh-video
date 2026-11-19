@@ -36,7 +36,7 @@ jobs:
           The whole skill in one zip, rebuilt on every change to main (this one: ${GITHUB_SHA::7}, $(date -u +%Y-%m-%d)).
 
           - **Claude app:** download video-xoshaka.zip and upload it in your skill settings. To update, upload the new zip in place of the old one.
-          - **Claude Code:** \`npx skills add mshmsh03/video-xoshaka\`, and \`npx skills update\` later.
+          - **Claude Code:** \`npx skills add mshmsh03/video-xoshaka\`. To update, run the same command again.
 
           What changed: [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md).
           NOTES
