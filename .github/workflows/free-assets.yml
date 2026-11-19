@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      VIDEO_XOSHAKA_MODELS: /tmp/video-xoshaka-models
+      MSHMSH_VIDEO_MODELS: /tmp/mshmsh-video-models
       KOKORO_ENGINE: python
     steps:
       - uses: actions/checkout@v4

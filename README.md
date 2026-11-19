@@ -1,6 +1,6 @@
-# video-xoshaka
+# mshmsh-video
 
-A Claude skill that makes a whole video with you, from "make me a video" to a finished MP4. It works in [Remotion](https://www.remotion.dev) (videos written as React code), so every video is a real project you can change and re-render.
+A Claude skill that makes a whole video with you, from "make me a video" to a finished MP4. It was called video-xoshaka until 2026-11-19. It works in [Remotion](https://www.remotion.dev) (videos written as React code), so every video is a real project you can change and re-render.
 
 It asks you questions first, writes a short brief, pitches three different storylines when the story is still open, then writes a design file, a script and a storyboard. Nothing is built until you approve the words. Then the whole video plays straight away as an animatic (placeholders with the real captions) while it adds a narrator, music and sound effects and builds the scenes one by one, reviews them frame by frame (contact sheets of every scene, every cut and the phone view, plus an automatic check of the script, the code and the rendered file) and hands you the file, loudness-matched for social apps.
 
@@ -15,14 +15,14 @@ If you want to keep editing the video yourself afterwards without code, it can b
 **Claude Code** (on your own computer: everything works there)
 
 ```bash
-npx skills add mshmsh03/video-xoshaka
+npx skills add mshmsh03/mshmsh-video
 ```
 
-Restart Claude Code, then type `/video-xoshaka`, or just ask it for a video. By hand instead: download this repo and put the folder at `C:\Users\<you>\.claude\skills\video-xoshaka` (Windows) or `~/.claude/skills/video-xoshaka` (macOS, Linux).
+Restart Claude Code, then type `/mshmsh-video`, or just ask it for a video. By hand instead: download this repo and put the folder at `C:\Users\<you>\.claude\skills\mshmsh-video` (Windows) or `~/.claude/skills/mshmsh-video` (macOS, Linux).
 
 **Claude app** (claude.ai or the desktop app)
 
-1. Download [video-xoshaka.zip](https://github.com/mshmsh03/video-xoshaka/releases/download/latest/video-xoshaka.zip). It is rebuilt every time this repo changes.
+1. Download [mshmsh-video.zip](https://github.com/mshmsh03/mshmsh-video/releases/download/latest/mshmsh-video.zip). It is rebuilt every time this repo changes.
 2. Upload it in the app's skill settings.
 3. Ask Claude for a video.
 
@@ -46,7 +46,7 @@ The app builds the video in its cloud workspace. That workspace blocks some down
 
 ### Free resources, included
 
-Everything free the skill uses, apart from the code itself, is on this repo's [free-assets release](https://github.com/mshmsh03/video-xoshaka/releases/tag/free-assets) or already on GitHub: the voice models (Kokoro, Supertonic, Pocket TTS and its free preset voices), 44 public-domain music tracks, 25 recorded sound effects by Kenney (CC0) and the noise-removal model for your own recordings, each with its licence and credit in the release notes. The two speech-to-text models (Parakeet for English, Whisper for other languages) come from sherpa-onnx's GitHub releases, and Google's animated emoji from Remotion's GitHub repository. The skill downloads what a video needs from there by itself, because GitHub stays reachable where other sites are blocked; nothing has to be downloaded by hand. To hear them first, the release has `samples-english.mp3`, `music-preview.mp3` and `sfx-preview.mp3`. Only resources that are free to use, client work included, are in it; each file's conditions (a credit, or Supertonic's rules on use) are listed with it.
+Everything free the skill uses, apart from the code itself, is on this repo's [free-assets release](https://github.com/mshmsh03/mshmsh-video/releases/tag/free-assets) or already on GitHub: the voice models (Kokoro, Supertonic, Pocket TTS and its free preset voices), 44 public-domain music tracks, 25 recorded sound effects by Kenney (CC0) and the noise-removal model for your own recordings, each with its licence and credit in the release notes. The two speech-to-text models (Parakeet for English, Whisper for other languages) come from sherpa-onnx's GitHub releases, and Google's animated emoji from Remotion's GitHub repository. The skill downloads what a video needs from there by itself, because GitHub stays reachable where other sites are blocked; nothing has to be downloaded by hand. To hear them first, the release has `samples-english.mp3`, `music-preview.mp3` and `sfx-preview.mp3`. Only resources that are free to use, client work included, are in it; each file's conditions (a credit, or Supertonic's rules on use) are listed with it.
 
 The one thing that can't be included is a personal key (Gemini, HeyGen): each person makes their own, free, and keeps it out of any file in the repo.
 
@@ -98,15 +98,16 @@ The author's own example video (with real people in it) is not published. Use `a
 
 ## Update
 
-- Claude Code: run the install command again, `npx skills add mshmsh03/video-xoshaka`; it replaces the old version. (`npx skills update` on its own only updates skills installed inside one project; for a skill installed for the whole computer it's `npx skills update -g`.)
-- Claude app: download [video-xoshaka.zip](https://github.com/mshmsh03/video-xoshaka/releases/download/latest/video-xoshaka.zip) again and upload it in place of the old one.
+- Claude Code: run the install command again, `npx skills add mshmsh03/mshmsh-video`; it replaces the old version. (`npx skills update` on its own only updates skills installed inside one project; for a skill installed for the whole computer it's `npx skills update -g`.)
+- Claude app: download [mshmsh-video.zip](https://github.com/mshmsh03/mshmsh-video/releases/download/latest/mshmsh-video.zip) again and upload it in place of the old one.
+- **Had it as video-xoshaka?** That's this skill's old name. Install it under the new name as above, then remove the old copy so the two don't compete: in Claude Code, `npx skills remove video-xoshaka -g` (or delete the `video-xoshaka` folder in `.claude/skills`); in the Claude app, delete the video-xoshaka skill after uploading mshmsh-video.zip. The voice models it already downloaded are reused.
 
 What changed is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Maintaining it
 
 - Every push and pull request runs a check (GitHub's Actions tab): every script parses, every JSON file is valid, and every script and reference file the docs name exists.
-- Every change to `main` rebuilds `video-xoshaka.zip` on the release called "latest", so the download link above always gives the newest version.
+- Every change to `main` rebuilds `mshmsh-video.zip` on the release called "latest", so the download link above always gives the newest version.
 - Add a line to `CHANGELOG.md` with each change, so friends know what they get when they update.
 
 ## Credits

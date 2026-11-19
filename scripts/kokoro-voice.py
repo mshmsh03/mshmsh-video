@@ -15,11 +15,19 @@ import sys
 import urllib.request
 from pathlib import Path
 
-MODELS = Path(os.environ.get("VIDEO_XOSHAKA_MODELS") or Path.home() / ".cache" / "video-xoshaka" / "models")
+# The same shared cache as voice-engines.mjs; the skill's old name (video-xoshaka)
+# still works for the cache folder and the settings.
+_OLD = Path.home() / ".cache" / "video-xoshaka" / "models"
+_NEW = Path.home() / ".cache" / "mshmsh-video" / "models"
+MODELS = Path(
+    os.environ.get("MSHMSH_VIDEO_MODELS")
+    or os.environ.get("VIDEO_XOSHAKA_MODELS")
+    or (_OLD if _OLD.exists() and not _NEW.exists() else _NEW)
+)
 DIR = MODELS / "kokoro-onnx-v1.0"
 # Where each file comes from: this repo's free-assets release first, then the original.
 FREE = json.loads(Path(__file__).with_name("free-assets.json").read_text(encoding="utf-8"))
-RELEASE = os.environ.get("VIDEO_XOSHAKA_ASSETS") or FREE["release"]
+RELEASE = os.environ.get("MSHMSH_VIDEO_ASSETS") or os.environ.get("VIDEO_XOSHAKA_ASSETS") or FREE["release"]
 
 
 def fetch(name):

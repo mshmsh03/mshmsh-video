@@ -372,7 +372,7 @@ You can't hear the video, so measure it and look at frames:
 - **Pocket and Supertonic need `sherpa-onnx-node`** in the project (`npm i -D
   sherpa-onnx-node@2.0.1`); without it make-voice stops with that command.
   Their first run downloads the model with `curl` and `tar` into
-  `~/.cache/video-xoshaka/models`. If the connection drops, run it again: the
+  `~/.cache/mshmsh-video/models`. If the connection drops, run it again: the
   download starts over (a half-done file is left as `.part`).
 - **Gemini's key lives in the terminal**, not in a file: `GEMINI_API_KEY` set in
   the shell that runs make-voice. A new terminal needs it again. The free tier

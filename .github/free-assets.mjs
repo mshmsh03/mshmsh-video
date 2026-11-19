@@ -57,7 +57,7 @@ if (command === "download") {
     .filter((f) => existsSync(join(dir, f.name)))
     .map((f) => `| ${f.name} | ${f.kind === "music" ? `${f.title}: ${f.mood.join(", ")}` : f.use} | ${f.licence} | ${f.credit} |`);
   const notes = [
-    "Free models, voices, music and sound effects for the video-xoshaka skill. The skill downloads what it needs from here by itself (GitHub stays reachable where other sites are blocked); nothing here is needed by hand.",
+    "Free models, voices, music and sound effects for the mshmsh-video skill (called video-xoshaka until 2026-11-19). The skill downloads what it needs from here by itself (GitHub stays reachable where other sites are blocked); nothing here is needed by hand.",
     "",
     "Each file keeps its own licence below. The non-commercial ones (marked) are for personal videos only. Samples of every voice and the whole music library, made from these files by the same workflow, are attached as samples-*.mp3 and music-preview.mp3 when that test has run.",
     "",

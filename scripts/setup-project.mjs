@@ -20,7 +20,7 @@
 // --update brings an existing project's shared components and scripts up to
 // this skill's version. It never touches the per-video files (story.json,
 // scenes.tsx, theme.ts, Root.tsx, voice.json) and backs up every file it
-// replaces in .video-xoshaka-backup/<time>/.
+// replaces in .mshmsh-video-backup/<time>/.
 
 import { execFileSync, execSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -114,7 +114,7 @@ if (INSTALL) {
 const PER_VIDEO = new Set(["Root.tsx", "theme.ts", "story/story.json", "story/scenes.tsx", "story/voice.json"]);
 const backup = (rel) => {
   const from = join(DIR, rel);
-  const to = join(DIR, ".video-xoshaka-backup", STAMP, rel);
+  const to = join(DIR, ".mshmsh-video-backup", STAMP, rel);
   mkdirSync(dirname(to), { recursive: true });
   copyFileSync(from, to);
 };
@@ -374,7 +374,7 @@ if (existsSync(tsPath)) {
 for (const folder of ["photos", "shots", "sfx", "bgm", "brand", "voice"]) mkdirSync(join(DIR, "public", folder), { recursive: true });
 const gitignore = join(DIR, ".gitignore");
 const ignoreText = existsSync(gitignore) ? readFileSync(gitignore, "utf8") : "";
-const ignoreAdd = ["out/", ".video-xoshaka-backup/", "tts/.venv/", "tts/f5-repo/"].filter((l) => !ignoreText.split(/\r?\n/).includes(l));
+const ignoreAdd = ["out/", ".mshmsh-video-backup/", "tts/.venv/", "tts/f5-repo/"].filter((l) => !ignoreText.split(/\r?\n/).includes(l));
 if (ignoreAdd.length) writeFileSync(gitignore, `${ignoreText}${ignoreText && !ignoreText.endsWith("\n") ? "\n" : ""}${ignoreAdd.join("\n")}\n`);
 
 // 6. The brand's logo.
