@@ -8,6 +8,8 @@ Everything this workflow uses, and when to reach for it. Check what is installed
 - media-use (HyperFrames Agent Media OS)
 - Voice: Kokoro, Edge TTS, Sorani Kurdish (F5), HeyGen, ElevenLabs, their own recording
 - Music and sound effects
+- Editing tools: noise removal, transcription, pause cutting, cut-outs, auto-editor
+- Animation resources: animated emoji, Remotion's effect packages, Lottie, icons
 - Screenshots, screen recordings, images and brand assets
 - Verification tools
 - This skill's own scripts and template
@@ -32,7 +34,7 @@ Installed as `remotion-*` skills (the router is `remotion-best-practices`; they 
 | `remotion-docs` | Looking up current Remotion API documentation. |
 | `remotion-upgrade` | Upgrading Remotion, its packages and these skills. |
 
-Remotion packages this skill's template uses: `@remotion/transitions` (fades and slides in a `TransitionSeries`), `@remotion/google-fonts`, `@remotion/media` (the `Audio` component), `@remotion/captions`. Sound effects come from remotion.media as `.wav` files (`whoosh`, `mouse-click`, `record-scratch`, `vine-boom`, `windows-xp-error`, `ding`); the full list is in the `remotion-markup` skill's `sfx.md`.
+Remotion packages this skill's template uses: `@remotion/transitions` (fades and slides in a `TransitionSeries`), `@remotion/google-fonts`, `@remotion/media` (the `Audio` component), `@remotion/captions`, `@remotion/animated-emoji` (`<Emoji>`). Sound effects come from remotion.media as `.wav` files (`whoosh`, `mouse-click`, `record-scratch`, `vine-boom`, `windows-xp-error`, `ding`); the full list is in the `remotion-markup` skill's `sfx.md`.
 
 Preview first: run `npx remotion studio` (add `--no-open` if the agent client has an in-app browser, then open the printed URL and confirm the composition loads). Visit one composition at `/<composition-id>`.
 
@@ -93,7 +95,7 @@ What to put in the samples (checked 2026-11-18). The person always picks by ear 
 | F5-TTS Central Kurdish (`aranemini/central-kurdish-tts`) | Free, offline; **CC BY-NC-ND 4.0, non-commercial only** | Sorani Kurdish: three single-speaker voices (studio male, audiobook male, audiobook female), 24 kHz, the best free Sorani voice found (2026-10-25). Slow on a CPU, about 40 times real time. Steps under "Sorani voices" below. |
 | MMS Sorani (`razhan/mms-tts-ckb`) | Free, offline; Meta's MMS base is non-commercial | Flat and robotic, but it speaks a scene in seconds: a stand-in voice for building and timing while F5 runs. |
 | kurdishtts.com | Paid (about $12/month for public use; the free plan is evaluation only) | Many Sorani and Kurmanji voices with word timings. Needs the person's own account and API key. Not tested here. |
-| The person's own recording | Free | Best for tributes. One take per scene, saved as `out/voice-raw/<scene id>.wav` (or .m4a, .mp3: a phone recording is fine), with `"voice": "recorded"` in `story.json`: make-voice trims, levels and times the words from the pauses like any other voice. For exact word times, transcribe it instead (`remotion-captions`, `hf transcribe` with `--model` and `--language` set (hyperframes.md), or the `media-use` audio engine). The same path takes audio downloaded from ElevenLabs or HeyGen. For English, Pocket TTS can copy their voice from one short recording instead (above). |
+| The person's own recording | Free, any use | Best for tributes, and the free route for client work in Sorani. One take per scene, saved as `out/voice-raw/<scene id>.wav` (or .m4a, .mp3: a phone recording is fine), with `"voice": "recorded"` in `story.json`. make-voice takes the background noise out first (`clean-voice.mjs`, kept in `out/voice-clean/`; `"clean": false` skips it), trims and levels it, and times English lines word by word from a transcript (`transcribe.mjs`, Parakeet; `"transcribe": false` skips it). Other languages, and a take that strays from the script, are timed from the pauses. The same path takes audio downloaded from ElevenLabs or HeyGen. For English, Pocket TTS can copy their voice from one short recording instead (above). |
 | HeyGen TTS | Free allowance with OAuth sign-in | Through `media-use resolve --type voice`. |
 | ElevenLabs | Free plan: 10,000 credits a month (about 10 minutes), non-commercial and credit required; commercial use from the paid Starter plan | Download one file per scene and use `"recorded"`. Offer it, don't assume it. |
 
@@ -105,7 +107,7 @@ Edge voices (end-to-end tested 2026-10-21 with Iraqi Arabic, including a render)
 Each scene's line reads "x/y words timed by Edge". Edge leaves punctuation out of its words, so they are matched back to the script's own words, and a word after a pause starts where the sound comes back: Edge puts it 120 to 160 ms early, inside the silence. If the line reads "breaks" instead, `say` and `text` differ in word count and the times were estimated the Kokoro way; keep `say` to the same word count (`"say": "… كلود …"` for a shown "Claude" works) to keep measured times.
 
 Pocket and Supertonic (tested 2026-11-18 on Linux: samples, make-voice on an eight-scene story, the model download, and a Whisper transcript of every sample to check it's intelligible):
-1. `setup-project.mjs` installs `sherpa-onnx-node` (except for a Sorani project; `--no-sherpa` skips it). In an older project: `npm i -D sherpa-onnx-node@2.0.1`.
+1. `setup-project.mjs` installs `sherpa-onnx-node` in every project (it also runs the recording cleaner and the transcriber; `--no-sherpa` skips it). In an older project: `npm i -D sherpa-onnx-node@2.0.1`.
 2. Samples: `node scripts/voice-samples.mjs "<line>" --voices supertonic,pocket`. The first run downloads each model from sherpa-onnx's GitHub releases (with curl and tar, both built into Windows 10 and later) into `~/.cache/video-xoshaka/models`, shared by every project; `VIDEO_XOSHAKA_MODELS` moves it.
 3. Put the chosen name in `story.json`'s `voice` and run make-voice as usual. `doctor.mjs` checks the package, the model, a copied voice's file, and Kurdish text sent to Supertonic.
 
@@ -157,7 +159,30 @@ The person picks the voice by ear from samples, never from their name or a guess
 
 ## Music and sound effects
 
-Full setup is in music.md. The short version: use real royalty-free music from the HeyGen catalog (`media-use` or `scripts/heygen-music.mjs`), or ElevenLabs Music (`elevenlabs/skills@music`, paid), or a track the person supplies (fine for WhatsApp; copyrighted songs get muted or blocked on Instagram, TikTok and YouTube). Don't write music in code and call it done: it sounds cheap. Sound effects: remotion.media files, or `media-use resolve --type sfx`.
+Full setup is in music.md. The short version: start with the free library (`scripts/free-music.mjs`, 44 public-domain tracks, any use), then the HeyGen catalog (`media-use` or `scripts/heygen-music.mjs`) for more choice, ElevenLabs Music (`elevenlabs/skills@music`, paid), or a track the person supplies (fine for WhatsApp; copyrighted songs get muted or blocked on Instagram, TikTok and YouTube). Don't write music in code and call it done: it sounds cheap. Sound effects: remotion.media files, the 25 recorded Kenney sounds (`scripts/free-sfx.mjs`, CC0), or `media-use resolve --type sfx`. For an original track, ACE-Step 1.5 (MIT) makes one on the person's own PC (music.md, "Making an original track").
+
+## Editing tools
+
+All free for client work, offline after a one-time download, and hosted on GitHub so they also work in the Claude app's cloud workspace. Tested 2026-11-19 on Linux (the numbers below are from those tests); not yet on Windows or a Mac.
+
+| Job | Command | Notes |
+| --- | --- | --- |
+| Take the noise out of a recording or a clip | `node scripts/clean-voice.mjs <file or folder> [--keep 18]` | DPDFNet (Ceva, Apache-2.0), 10 MB, through `sherpa-onnx-node` at 48 kHz. On a test with pink noise and mains hum under a voice, DNSMOS rated it 2.98 noisy, 3.44 cleaned, 3.48 for the clean original (ffmpeg's RNNoise filter: 3.21). About 4 s for 10 s of audio. A video keeps its picture and gets the cleaned sound (`<name>-clean.mp4`). `--keep <dB>` leaves some room tone. It can't fix a distant, clipped or talked-over voice: ask for a new take. make-voice runs it on every `"recorded"` scene. |
+| Captions from the person's own clip or recording | `node scripts/transcribe.mjs <file> [--lang en] [--srt]` | English: NVIDIA Parakeet TDT 0.6B v2 (CC BY 4.0), 480 MB once, with a measured time for every word; 70 s of speech in 12 s. Other languages: Whisper large-v3-turbo (MIT), 560 MB once, phrase times spread over the words; it transcribed an Arabic test line exactly. Neither knows Kurdish. The speech is cut at pauses first (Silero VAD, MIT), which kept Parakeet from dropping a sentence after a long pause. Writes Remotion's `Caption` JSON to `public/captions/<name>.json`, the shape `@remotion/captions` takes (`remotion-captions` shows how to display it). Read it before using it: names come out as heard. |
+| Cut the pauses out of talking footage | `node scripts/cut-silence.mjs <clip> [--pause 0.5] [--margin 0.15] [--captions public/captions/<name>.json] [--render]` | Measures the clip's speech level and cuts silences longer than `--pause`, keeping `--margin` of air. Writes `<clip>.cuts.json`; `<CutClip cuts={cuts} />` plays the parts straight from the original (a one-frame sound fade at each cut), and `cutLength(cuts, fps)` is the scene's length. `--captions` moves a transcript of the original onto the cut, so transcribe once, then cut as often as you like. `--render` writes `<clip>-cut.mp4` too. A 15.5 s test clip became 9.2 s and still transcribed word for word. It can't tell a dramatic pause from a dead one: watch it. |
+| A cut-out of a photo's subject | `node scripts/cutout.mjs <photo or folder> [--crop] [--model u2net]` | rembg (MIT) with IS-Net (Apache-2.0, 180 MB once, about 2 GB of memory); needs `python -m pip install "rembg[cpu,cli]"`. Writes `<name>-cutout.png`. rembg's own default model (BRIA) is non-commercial, so the script always names a free one. The BiRefNet models have finer hair edges but ran out of memory on an 8 GB machine. For a moving person in a clip, `hf remove-background` (hyperframes.md). |
+| Editor timelines, motion-based cuts, speed-ups | auto-editor (public domain, about 5k stars) | Cuts by loudness, motion or black frames, speeds up quiet parts, and exports to DaVinci Resolve, Premiere, Final Cut Pro, Shotcut and Kdenlive: the tool for a person who wants to keep editing in their own editor. One self-contained program from its GitHub releases (`auto-editor-windows-x86_64.exe`, `-macos-arm64`, `-linux-x86_64`). Its author's skills cover it: `npx skills add WyattBlue/auto-editor` (about 1.5k installs). Not wired in or tested here. |
+
+A talking-head video with these: `clean-voice.mjs public/photos/me.mp4` → `transcribe.mjs public/photos/me-clean.mp4` → `cut-silence.mjs public/photos/me-clean.mp4 --captions public/captions/me-clean.json` → a scene with `<CutClip>` and the captions from `me-clean-cut.json`.
+
+## Animation resources
+
+Free for client work unless the line says otherwise. Check what the person's brand and `design.md` allow before adding any of them: one emoji that lands on its word beats ten.
+
+- **Animated emoji:** Google's Noto Emoji Animation, 411 of them (faces, hands, hearts, party, fire, animals, food, weather), CC BY 4.0: credit "Animated emoji by Google" in the description or end card. `node scripts/free-emoji.mjs <words>` finds them (it knows feelings: "laugh", "love", "wow", "nervous", "graduation"), `get <names>` saves transparent videos to `public/emoji/` from `remotion-dev/animated-emoji` on GitHub, and `<Emoji name="fire" at={1.2} size={240} />` pops one in like a sticker, with `sfx/pop.wav` (setup gets it). Rendered and checked 2026-11-19: transparent over a busy background.
+- **Remotion's own effect packages** (same licence as Remotion; add with `npx remotion add <package>`): film light leaks for a warm transition and starburst rays behind a reveal (`@remotion/light-leaks` and `@remotion/starburst`, now also as effects in `@remotion/effects`, which the docs describe), `@remotion/noise` (noise functions for organic drift), `@remotion/motion-blur` (`<CameraMotionBlur>`, `<Trail>`), `@remotion/shapes` and `@remotion/paths` (drawn lines and shapes, `evolvePath` for a line that draws itself), `@remotion/lottie` (After Effects animations as JSON), `@remotion/three` (3D). Their APIs change between versions: look each up with `remotion-docs` before using it.
+- **Lottie animations:** LottieFiles' free public animations are under the Lottie Simple License, which allows commercial use without credit (crediting the creator is encouraged); download the JSON and play it with `@remotion/lottie`. useAnimations (MIT) has 300 animated icons as Lottie JSON. Lordicon's free tier needs a credit link, and Icons8's free files need a link too: skip both unless the person accepts that.
+- **Icons:** Lucide (ISC, `npm i lucide-react`), Tabler Icons and Phosphor (both MIT): SVG, so a stroke can draw on with `@remotion/paths`. Brand logos still come from the brand, never an icon set (toolbox above, `media-use resolve --type logo`).
 
 The HeyGen CLI is Linux and macOS only. On Windows, install it inside WSL and run it through `wsl`; the OAuth sign-in trick (run the login in the background with `BROWSER=echo`, read the printed URL, open it on Windows) is in music.md.
 
@@ -202,6 +227,12 @@ The HeyGen CLI is Linux and macOS only. On Windows, install it inside WSL and ru
 | `scripts/free-assets.json` | Every free model, voice and music track the scripts can download, with its licence and credit. The free-assets workflow copies them to this repo's free-assets release, which the scripts try first |
 | `scripts/free-music.mjs` | The free music library: list by mood, a numbered preview, `get <id>` to `public/bgm/track.mp3` with the settings |
 | `scripts/make-sfx.mjs` | Sound effects made in code, for where remotion.media is blocked |
+| `scripts/free-sfx.mjs` | 25 recorded Kenney interface sounds (CC0): list by tag, a preview file, `get <id> [--as name]` to `public/sfx/` |
+| `scripts/free-emoji.mjs` | Google's 411 animated emoji (CC BY 4.0): search by name or feeling, `get <names>` to `public/emoji/` for `<Emoji>` |
+| `scripts/clean-voice.mjs` | Noise removal for a recording or a clip's sound (DPDFNet through sherpa-onnx); make-voice uses it on `"recorded"` scenes |
+| `scripts/transcribe.mjs` | Speech to `Caption` JSON with word times (Parakeet for English, Whisper otherwise, Silero VAD); make-voice uses it to time a recorded English take |
+| `scripts/cut-silence.mjs` | The pauses cut out of talking footage, as `<clip>.cuts.json` for `<CutClip>`, its captions moved onto the cut, `--render` for an MP4 |
+| `scripts/cutout.mjs` | A photo's subject on a transparent background (rembg with a free model; needs Python and `rembg`) |
 | `scripts/kokoro-voice.py` | Kokoro through Python (kokoro-onnx, model from GitHub), used by the voice scripts when kokoro-js can't download its model |
 | `scripts/find-browser.mjs` | Lets stills.mjs and render.mjs use an installed Chrome or Edge when Remotion can't download its own browser |
 | `scripts/sorani/speak_story.py` | Speaks every scene in Sorani with F5-TTS Central Kurdish (or the MMS stand-in) to `out/voice-raw/`; copy it into the project's `tts/` |
@@ -210,7 +241,7 @@ The HeyGen CLI is Linux and macOS only. On Windows, install it inside WSL and ru
 | `scripts/stills.mjs` | Single-frame checks, and `review` for the contact sheets of every scene, seam and the phone view (review.md), in one browser |
 | `scripts/make-timing.mjs` | Scene lengths from the music's beat grid for a video with no narration, in `voice.json`'s shape, with a read-time check (production.md, "No narration") |
 | `scripts/check-audio.mjs` | Loudness and balance measurement |
-| `assets/template/src/` | `Root.tsx`, `theme.ts`, `layout.ts` (positions and safe zones per format and platform), `ChapterLabel.tsx`, and `story/` with `StoryVideo.tsx` (the timeline built from `story.json`: transitions, music ducking, silences, whooshes), `scenes.tsx` (the per-video scenes), `Placeholder.tsx`, `Narration.tsx` (captions), `Title.tsx`, `EndCard.tsx`, `PhotoFill.tsx`, `PhotoCard.tsx`, `Devices.tsx` (laptop, phone, screenshot, screen recording), `Cursor.tsx`, `Stamp.tsx`, `Terminal.tsx`, `Counter.tsx`, `Sfx.tsx`, `media.ts`, `text.ts` (right-to-left helpers), `motion.ts`, `voice.ts`, `scenes/BeatScene.tsx`, `scenes/FreezeScene.tsx`, a sample `story.json` |
+| `assets/template/src/` | `Root.tsx`, `theme.ts`, `layout.ts` (positions and safe zones per format and platform), `ChapterLabel.tsx`, and `story/` with `StoryVideo.tsx` (the timeline built from `story.json`: transitions, music ducking, silences, whooshes), `scenes.tsx` (the per-video scenes), `Placeholder.tsx`, `Narration.tsx` (captions), `Title.tsx`, `EndCard.tsx`, `PhotoFill.tsx`, `PhotoCard.tsx`, `Devices.tsx` (laptop, phone, screenshot, screen recording), `Cursor.tsx`, `Stamp.tsx`, `Terminal.tsx`, `Counter.tsx`, `Emoji.tsx` (an animated emoji popping in), `CutClip.tsx` (a talking clip with its pauses cut), `Sfx.tsx`, `media.ts`, `text.ts` (right-to-left helpers), `motion.ts`, `voice.ts`, `scenes/BeatScene.tsx`, `scenes/FreezeScene.tsx`, a sample `story.json` |
 | `evals/` | Test cases for this skill, one folder each (`prompt.md`, `case.yaml`, `graders/`), in the layout `claude plugin eval` reads |
 
 The scripts must be copied into the Remotion project's own `scripts/` folder: Node resolves `kokoro-js` from the script's folder, so running them from the skill folder fails with `ERR_MODULE_NOT_FOUND`. Copy `edge-voice.py`, `kokoro-voice.py`, `voice-engines.mjs` and `free-assets.json` with them; the voice scripts look for them next to themselves.
@@ -231,6 +262,13 @@ Second pass (2026-10-21, `npx skills find` with 29 queries on the PC; it returns
 - **Still avoid** `*/superpowers@ai-video-generation` and `@ai-avatar-video`: six copies with 300k to 800k installs each, from repos with 3 to 8 stars.
 
 Third pass (2026-11-18, the skills.sh leaderboard and web search; `npx skills find` still returns nothing from the cloud sandbox): nothing new to install. The HyperFrames repo added `hyperframes-animation`, `hyperframes-keyframes` and `hyperframes-audio`, which belong with that engine (hyperframes.md). Remotion video skills from other authors (`akillness/*@remotion-video-production`, `oakoss/agent-skills@remotion`, `ericmjl/skills@remotion-video`) have under 400 installs and cover less than this skill. `emilkowalski/skills@review-animations` and its siblings review web UI motion, not video (designa-xoshaka already draws on them). `remotion-dev/remotion@video-report` is for reporting Remotion bugs.
+
+Fourth pass (2026-11-19, the skills.sh leaderboard and web search, for free animation, voice, editing and music skills; `npx skills find` still returns nothing from the cloud sandbox):
+- **Recommended alongside this skill:** `remotion-dev/skills` (Remotion's official skills, which this skill leans on: `remotion-best-practices` has about 858k installs) and `WyattBlue/auto-editor` (the auto-editor author's five skills, public domain, 1.2k to 1.5k installs for the main four) for editing raw footage into an editor timeline.
+- **Already used:** the `heygen-com/hyperframes` skills (hyperframes.md).
+- **Not recommended:** `browser-use/video-use` still needs an ElevenLabs key; `gencraft-labs/skills@ai-music` (a repo with 3 stars) and `prime-skills/runcomfy-agent-skills@*` (`ai-music`, `ace-step`, `video-edit`) all run through RunComfy's cloud, billed per use (its ACE-Step costs per second of audio, no free tier), while ACE-Step itself is free to run locally (music.md); `*/superpowers@ai-video-generation` and `@ai-avatar-video` are still copies from repos with a handful of stars; `emilkowalski/skills` animation skills are for web UI.
+- **No free skill found** for voiceover or music generation. The free resources went into the skill itself instead: the editing tools and animation resources above, 28 more tracks for the free library, the Kenney sounds, and ACE-Step for original music (music.md).
+- **Sorani:** checked again; every Sorani TTS model found is non-commercial (F5 Central Kurdish CC BY-NC-ND, Vekol CC BY-NC, MMS non-commercial). The free routes for client work stay the person's own recording and Gemini.
 
 ## Claude Code helpers
 

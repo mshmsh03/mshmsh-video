@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-19, free tools for editing, animation and sound
+
+The best free resources found for animation, voiceovers, editing and music (skills.sh and the web, checked 2026-11-19), all free for client work, added to the skill:
+
+- **Your own recordings sound clean.** `clean-voice.mjs` takes background noise out of a recording or a clip's sound with DPDFNet (Apache-2.0, 10 MB, offline, 48 kHz). make-voice runs it on every `"recorded"` scene (`"clean": false` skips it). On a noisy test, DNSMOS went from 2.98 to 3.44 (the clean original: 3.48). This matters most for Sorani, where your own voice is the free route for client work.
+- **Captions from your own clips.** `transcribe.mjs` turns speech into Remotion caption JSON with word times, offline: Parakeet (CC BY 4.0) for English, Whisper (MIT) for Arabic and other languages; neither knows Kurdish. make-voice uses it to time a recorded English take word by word against the script.
+- **Pauses cut out of talking footage.** `cut-silence.mjs` writes the parts to keep, and the new `<CutClip>` plays them straight from the original; it also moves a transcript onto the cut.
+- **Photo cut-outs.** `cutout.mjs` puts a photo's subject on a transparent background (rembg with IS-Net, Apache-2.0). It never uses rembg's default model, which is non-commercial.
+- **Animated emoji.** `free-emoji.mjs` finds and downloads Google's 411 animated emoji (CC BY 4.0, credit Google), and the new `<Emoji>` pops one in like a sticker.
+- **More music:** the free library grows from 16 to 44 public-domain tracks (graduation, lo-fi, corporate and tech, cinematic, mystery, news, sport, desert and world).
+- **Recorded sound effects:** `free-sfx.mjs` has 25 interface sounds by Kenney (CC0). Where remotion.media is blocked, setup now uses them for the click, ding and XP error instead of making those in code.
+- setup installs `sherpa-onnx-node` in every project (it runs the cleaner and the transcriber too) and `@remotion/animated-emoji`; `doctor.mjs` checks a recorded voice's files.
+- Docs: toolbox.md has new "Editing tools" and "Animation resources" sections (Remotion's effect packages, free Lottie and icon sources) and the fourth skills pass; music.md covers ACE-Step 1.5 (MIT) for making an original track on your own PC. README lists the skills that work well with this one.
+- The free-assets workflow now also tests the sound effects, an emoji download, the noise removal and the transcription on GitHub's machines, and attaches `sfx-preview.mp3` to the release.
+
 ## 2026-11-19, the free package
 
 Everything free the skill uses now comes with it, and only what's free to use, client work included (some files ask for a credit; Supertonic has rules on use):

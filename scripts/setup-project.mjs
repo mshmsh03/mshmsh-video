@@ -101,12 +101,12 @@ if (!LOCAL_FONTS && !has("google-fonts")) {
   }
 }
 if (INSTALL) {
-  const wanted = ["@remotion/transitions", "@remotion/google-fonts", "@remotion/media", "@remotion/captions", ...(LOCAL_FONTS ? ["@remotion/fonts"] : [])].filter((p) => !deps[p]);
+  const wanted = ["@remotion/transitions", "@remotion/google-fonts", "@remotion/media", "@remotion/captions", "@remotion/animated-emoji", ...(LOCAL_FONTS ? ["@remotion/fonts"] : [])].filter((p) => !deps[p]);
   if (wanted.length) npx(["remotion", "add", ...wanted], DIR);
   if (SCRIPT === "latin" && !has("no-kokoro") && !deps["kokoro-js"]) npm(["i", "-D", "kokoro-js@1.2.1", "--onnxruntime-node-install-cuda=skip"], DIR);
-  // Supertonic (English, Arabic and more) and Pocket TTS (English) run on
-  // sherpa-onnx; neither speaks Kurdish, so a Sorani project skips it.
-  if (SCRIPT !== "sorani" && !has("no-sherpa") && !deps["sherpa-onnx-node"]) npm(["i", "-D", "sherpa-onnx-node@2.0.1"], DIR);
+  // sherpa-onnx runs Supertonic and Pocket TTS, and for every language the
+  // recording cleaner (clean-voice.mjs) and the transcriber (transcribe.mjs).
+  if (!has("no-sherpa") && !deps["sherpa-onnx-node"]) npm(["i", "-D", "sherpa-onnx-node@2.0.1"], DIR);
 }
 
 // 2. The template. Per-video files are written once; shared components are
@@ -400,12 +400,30 @@ for (const name of SFX) {
     failed.push(name);
   }
 }
-// Where remotion.media is blocked (the Claude app's cloud workspace), make the
-// effects in code instead (make-sfx.mjs); windows-xp-error becomes "error".
+// Where remotion.media is blocked (the Claude app's cloud workspace), the
+// clicks, dings and errors come from the free Kenney recordings on this repo's
+// release (free-sfx.mjs), and the rest are made in code (make-sfx.mjs).
+const KENNEY = { "mouse-click": "click", ding: "confirm", "windows-xp-error": "error" };
+const recorded = [];
+for (const name of failed.filter((n) => KENNEY[n])) {
+  try {
+    execFileSync(process.execPath, ["scripts/free-sfx.mjs", "get", KENNEY[name], "--as", name], { cwd: DIR, stdio: "ignore" });
+    recorded.push(name);
+  } catch {}
+}
+const rest = failed.filter((n) => !recorded.includes(n));
+// <Emoji> pops in with sfx/pop.wav (a Kenney recording, CC0).
+if (!existsSync(join(DIR, "public", "sfx", "pop.wav"))) {
+  try {
+    execFileSync(process.execPath, ["scripts/free-sfx.mjs", "get", "pop"], { cwd: DIR, stdio: "ignore" });
+  } catch {}
+}
 if (failed.length) {
-  const made = writeSfx(failed.map((name) => (name === "windows-xp-error" ? "error" : name)), join(DIR, "public", "sfx"));
-  const missing = failed.filter((name) => !made.includes(name === "windows-xp-error" ? "error" : name));
-  notes.push(`remotion.media couldn't be reached, so these sound effects were made in code (plainer than recorded ones): ${made.join(", ")}.${missing.length ? ` Missing: ${missing.join(", ")}; <Sfx> skips missing files.` : ""}`);
+  const made = rest.length ? writeSfx(rest, join(DIR, "public", "sfx")) : [];
+  const missing = rest.filter((name) => !made.includes(name));
+  notes.push(
+    `remotion.media couldn't be reached, so${recorded.length ? ` ${recorded.join(", ")} came from the free Kenney recordings (free-sfx.mjs) and` : ""}${made.length ? ` these were made in code (plainer than recorded ones): ${made.join(", ")}` : ""}.${missing.length ? ` Missing: ${missing.join(", ")}; <Sfx> skips missing files.` : ""}`,
+  );
 }
 
 // 7b. The approved storyboard is the story: its rows replace the template's

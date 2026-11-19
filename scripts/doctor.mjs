@@ -67,6 +67,17 @@ if (isRaw) {
   const voice = voiceName.split(":")[1];
   if (voiceName.startsWith("f5:") && !existsSync(`tts/f5-repo/${voice}-ema.pt`)) warn("Sorani F5 weights", `tts/f5-repo/${voice}-ema.pt missing (fetch_ema.py)`);
 }
+if (voiceName === "recorded") {
+  const AUDIO = ["flac", "wav", "mp3", "m4a", "ogg", "opus", "webm"];
+  const missing = (story?.scenes ?? []).filter((s) => !AUDIO.some((ext) => existsSync(`out/voice-raw/${s.id}.${ext}`)));
+  if (missing.length) fail("Recordings", `none yet for ${missing.map((s) => s.id).join(", ")}: out/voice-raw/<scene id>.wav (or .m4a, .mp3)`);
+  else ok("Recordings", `one for each of the ${story?.scenes?.length ?? 0} scenes`);
+  const sherpa = existsSync(join("node_modules", "sherpa-onnx-node"));
+  if (story?.clean === false) ok("Cleaning", "off (\"clean\": false)");
+  else if (sherpa) ok("Cleaning", "make-voice takes the noise out (clean-voice.mjs, 10 MB model once)");
+  else warn("Cleaning", "needs sherpa-onnx for the noise removal: npm i -D sherpa-onnx-node@2.0.1 (without it the recordings are used as they are)");
+  if (story?.transcribe !== false && (story?.lang ?? "en") === "en" && sherpa) ok("Word timing", "English lines timed from a transcript (480 MB model once)");
+}
 const engine = engineOf(voiceName);
 if (engine === "pocket" || engine === "supertonic") {
   if (existsSync(join("node_modules", "sherpa-onnx-node"))) ok("sherpa-onnx", `runs ${voiceName}`);

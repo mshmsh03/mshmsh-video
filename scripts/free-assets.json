@@ -1,5 +1,5 @@
 {
-  "about": "Free resources the skill downloads when it needs them, never bundled in the skill itself. The free-assets workflow copies each one to this repo's free-assets release, which the scripts try first (it's on GitHub, so it works where other sites are blocked); 'from' is the original source and the fallback. Music moods come from the titles and a tempo and loudness measurement, not from listening.",
+  "about": "Free resources the skill downloads when it needs them, never bundled in the skill itself. The free-assets workflow copies each one to this repo's free-assets release, which the scripts try first (it's on GitHub, so it works where other sites are blocked); 'from' is the original source and the fallback. Entries with \"mirror\": false are already on GitHub (sherpa-onnx's releases) and aren't copied. Music moods come from the titles and a tempo and loudness measurement, not from listening.",
   "release": "https://github.com/mshmsh03/video-xoshaka/releases/download/free-assets",
   "files": [
     {
@@ -80,6 +80,40 @@
       "use": "Pocket TTS preset voice pocket:stuart_bell",
       "licence": "CC0",
       "credit": "Kyutai's tts-voices (voice-zero)"
+    },
+    {
+      "name": "dpdfnet2_48khz_hr.onnx",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speech-enhancement-models/dpdfnet2_48khz_hr.onnx",
+      "kind": "model",
+      "use": "Takes the noise out of a voice recording (clean-voice.mjs)",
+      "licence": "Apache-2.0",
+      "credit": "DPDFNet by Ceva, exported by sherpa-onnx"
+    },
+    {
+      "name": "silero_vad.onnx",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/silero_vad.onnx",
+      "kind": "model",
+      "use": "Finds the speech in a long file, for transcribe.mjs",
+      "licence": "MIT",
+      "credit": "Silero VAD"
+    },
+    {
+      "name": "sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8.tar.bz2",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8.tar.bz2",
+      "kind": "model",
+      "use": "English speech to text with word times (transcribe.mjs), 480 MB",
+      "licence": "CC BY 4.0: credit NVIDIA",
+      "credit": "NVIDIA Parakeet TDT 0.6B v2, exported by sherpa-onnx",
+      "mirror": false
+    },
+    {
+      "name": "sherpa-onnx-whisper-turbo.tar.bz2",
+      "from": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-whisper-turbo.tar.bz2",
+      "kind": "model",
+      "use": "Speech to text in other languages (transcribe.mjs), 560 MB",
+      "licence": "MIT",
+      "credit": "OpenAI Whisper large-v3-turbo, exported by sherpa-onnx",
+      "mirror": false
     },
     {
       "name": "music-advertime.mp3",
@@ -304,6 +338,740 @@
       ],
       "licence": "Public domain (FreePD.com)",
       "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-city-sunshine.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/City%20Sunshine.mp3",
+      "kind": "music",
+      "title": "City Sunshine",
+      "seconds": 185,
+      "mood": [
+        "upbeat",
+        "bright",
+        "promo"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-gotta-keep-on-movin.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Gotta%20Keep%20On%20Movin.mp3",
+      "kind": "music",
+      "title": "Gotta Keep On Movin",
+      "seconds": 144,
+      "mood": [
+        "upbeat",
+        "energetic",
+        "sport"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-take-the-ride.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Take%20the%20Ride.mp3",
+      "kind": "music",
+      "title": "Take the Ride",
+      "seconds": 262,
+      "mood": [
+        "upbeat",
+        "energetic",
+        "travel"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-pump-up-your-graduation.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Pump%20up%20your%20Graduation.mp3",
+      "kind": "music",
+      "title": "Pump up your Graduation",
+      "seconds": 290,
+      "mood": [
+        "graduation",
+        "celebration",
+        "upbeat"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-lucky-break.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Lucky%20Break.mp3",
+      "kind": "music",
+      "title": "Lucky Break",
+      "seconds": 286,
+      "mood": [
+        "upbeat",
+        "playful",
+        "promo"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-apex.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Apex.mp3",
+      "kind": "music",
+      "title": "Apex",
+      "seconds": 317,
+      "mood": [
+        "electronic",
+        "tech",
+        "energetic"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-motions.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Motions.mp3",
+      "kind": "music",
+      "title": "Motions",
+      "seconds": 117,
+      "mood": [
+        "electronic",
+        "tech",
+        "corporate"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-hippety-hop.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Hippety%20Hop.mp3",
+      "kind": "music",
+      "title": "Hippety Hop",
+      "seconds": 117,
+      "mood": [
+        "playful",
+        "funny",
+        "kids"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-llama-in-pajama.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Llama%20in%20Pajama.mp3",
+      "kind": "music",
+      "title": "Llama in Pajama",
+      "seconds": 97,
+      "mood": [
+        "funny",
+        "quirky",
+        "playful"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-meditating-beat.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Meditating%20Beat.mp3",
+      "kind": "music",
+      "title": "Meditating Beat",
+      "seconds": 157,
+      "mood": [
+        "lo-fi",
+        "calm",
+        "focus"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-sunday-dub.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Sunday%20Dub.mp3",
+      "kind": "music",
+      "title": "Sunday Dub",
+      "seconds": 209,
+      "mood": [
+        "chill",
+        "reggae",
+        "background"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-martini-sunset.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Martini%20Sunset.mp3",
+      "kind": "music",
+      "title": "Martini Sunset",
+      "seconds": 174,
+      "mood": [
+        "chill",
+        "jazz",
+        "evening"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-groovin.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Groovin.mp3",
+      "kind": "music",
+      "title": "Groovin",
+      "seconds": 240,
+      "mood": [
+        "chill",
+        "funky",
+        "steady"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-screen-saver.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Screen%20Saver.mp3",
+      "kind": "music",
+      "title": "Screen Saver",
+      "seconds": 182,
+      "mood": [
+        "calm",
+        "ambient",
+        "tech"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-romantic-inspiration.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Romantic%20Inspiration.mp3",
+      "kind": "music",
+      "title": "Romantic Inspiration",
+      "seconds": 150,
+      "mood": [
+        "sincere",
+        "romantic",
+        "warm"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-finally-see-the-light.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Finally%20See%20The%20Light.mp3",
+      "kind": "music",
+      "title": "Finally See The Light",
+      "seconds": 201,
+      "mood": [
+        "sincere",
+        "hopeful",
+        "inspiring"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-one-step-closer.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/One%20Step%20Closer.mp3",
+      "kind": "music",
+      "title": "One Step Closer",
+      "seconds": 93,
+      "mood": [
+        "emotional",
+        "hopeful",
+        "builds up"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-kings-trailer.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Kings%20Trailer.mp3",
+      "kind": "music",
+      "title": "Kings Trailer",
+      "seconds": 163,
+      "mood": [
+        "epic",
+        "trailer",
+        "powerful"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-novus-initium.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Novus%20Initium.mp3",
+      "kind": "music",
+      "title": "Novus Initium",
+      "seconds": 163,
+      "mood": [
+        "cinematic",
+        "builds up",
+        "epic"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-hidden-truth.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Hidden%20Truth.mp3",
+      "kind": "music",
+      "title": "Hidden Truth",
+      "seconds": 99,
+      "mood": [
+        "mystery",
+        "tense",
+        "documentary"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-mysterious-lights.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Mysterious%20Lights.mp3",
+      "kind": "music",
+      "title": "Mysterious Lights",
+      "seconds": 179,
+      "mood": [
+        "mystery",
+        "ambient",
+        "curious"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-think-about-it.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Think%20About%20It.mp3",
+      "kind": "music",
+      "title": "Think About It",
+      "seconds": 120,
+      "mood": [
+        "calm",
+        "explainer",
+        "thoughtful"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-nomadic-sunset.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Nomadic%20Sunset.mp3",
+      "kind": "music",
+      "title": "Nomadic Sunset",
+      "seconds": 191,
+      "mood": [
+        "desert",
+        "world",
+        "cinematic"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-the-desert.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/The%20Desert.mp3",
+      "kind": "music",
+      "title": "The Desert",
+      "seconds": 130,
+      "mood": [
+        "desert",
+        "world",
+        "adventure"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-ancient-rite.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Ancient%20Rite.mp3",
+      "kind": "music",
+      "title": "Ancient Rite",
+      "seconds": 113,
+      "mood": [
+        "ancient",
+        "world",
+        "mystery"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-bollywood-groove.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Bollywood%20Groove.mp3",
+      "kind": "music",
+      "title": "Bollywood Groove",
+      "seconds": 150,
+      "mood": [
+        "world",
+        "dance",
+        "party"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-stereotype-news.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Stereotype%20News.mp3",
+      "kind": "music",
+      "title": "Stereotype News",
+      "seconds": 66,
+      "mood": [
+        "news",
+        "intro",
+        "broadcast"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "music-hit-n-smash.mp3",
+      "from": "https://raw.githubusercontent.com/SoundSafari/CC0-1.0-Music/main/freepd.com/Hit%20n%20Smash.mp3",
+      "kind": "music",
+      "title": "Hit n Smash",
+      "seconds": 133,
+      "mood": [
+        "rock",
+        "energetic",
+        "sport"
+      ],
+      "licence": "Public domain (FreePD.com)",
+      "credit": "FreePD.com, via SoundSafari/CC0-1.0-Music"
+    },
+    {
+      "name": "sfx-click.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-ui-audio/8c3d81b9159d058c444f89d12d518276b0b09345/addons/kenney_ui_audio/mouseclick1.wav",
+      "kind": "sfx",
+      "title": "click",
+      "use": "A mouse click",
+      "tags": [
+        "click",
+        "mouse",
+        "cursor"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-click-soft.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-ui-audio/8c3d81b9159d058c444f89d12d518276b0b09345/addons/kenney_ui_audio/click1.wav",
+      "kind": "sfx",
+      "title": "click-soft",
+      "use": "A soft button click",
+      "tags": [
+        "click",
+        "button"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-tap.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/select_001.wav",
+      "kind": "sfx",
+      "title": "tap",
+      "use": "A short blip for a tap or a selection",
+      "tags": [
+        "tap",
+        "select",
+        "blip"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-tick.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/tick_002.wav",
+      "kind": "sfx",
+      "title": "tick",
+      "use": "A tick, for counters and clocks",
+      "tags": [
+        "tick",
+        "counter",
+        "clock"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-toggle.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/toggle_001.wav",
+      "kind": "sfx",
+      "title": "toggle",
+      "use": "A switch flipped",
+      "tags": [
+        "toggle",
+        "switch"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-switch.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/switch_002.wav",
+      "kind": "sfx",
+      "title": "switch",
+      "use": "A chunky switch",
+      "tags": [
+        "switch",
+        "toggle"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-hover.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-ui-audio/8c3d81b9159d058c444f89d12d518276b0b09345/addons/kenney_ui_audio/rollover2.wav",
+      "kind": "sfx",
+      "title": "hover",
+      "use": "A light rollover blip",
+      "tags": [
+        "hover",
+        "blip",
+        "appear"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-pop.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/drop_002.wav",
+      "kind": "sfx",
+      "title": "pop",
+      "use": "A soft pop, for something appearing",
+      "tags": [
+        "pop",
+        "appear",
+        "drop"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-drop.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/drop_004.wav",
+      "kind": "sfx",
+      "title": "drop",
+      "use": "A drop into place",
+      "tags": [
+        "drop",
+        "place",
+        "land"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-open.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/open_002.wav",
+      "kind": "sfx",
+      "title": "open",
+      "use": "A window or panel opening",
+      "tags": [
+        "open",
+        "appear"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-close.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/close_002.wav",
+      "kind": "sfx",
+      "title": "close",
+      "use": "A window or panel closing",
+      "tags": [
+        "close",
+        "disappear"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-rise.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/maximize_006.wav",
+      "kind": "sfx",
+      "title": "rise",
+      "use": "A short upward sweep (maximize)",
+      "tags": [
+        "rise",
+        "grow",
+        "up"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-fall.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/minimize_006.wav",
+      "kind": "sfx",
+      "title": "fall",
+      "use": "A short downward sweep (minimize)",
+      "tags": [
+        "fall",
+        "shrink",
+        "down"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-confirm.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/confirmation_002.wav",
+      "kind": "sfx",
+      "title": "confirm",
+      "use": "A success ding",
+      "tags": [
+        "confirm",
+        "success",
+        "ding",
+        "correct"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-success.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/confirmation_004.wav",
+      "kind": "sfx",
+      "title": "success",
+      "use": "A longer success chime",
+      "tags": [
+        "success",
+        "chime",
+        "win"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-error.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/error_006.wav",
+      "kind": "sfx",
+      "title": "error",
+      "use": "An error tone",
+      "tags": [
+        "error",
+        "wrong",
+        "fail"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-buzz.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/error_003.wav",
+      "kind": "sfx",
+      "title": "buzz",
+      "use": "A wrong-answer buzz",
+      "tags": [
+        "error",
+        "buzz",
+        "wrong"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-question.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/question_001.wav",
+      "kind": "sfx",
+      "title": "question",
+      "use": "A curious question tone",
+      "tags": [
+        "question",
+        "hmm",
+        "curious"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-clink.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/glass_001.wav",
+      "kind": "sfx",
+      "title": "clink",
+      "use": "A glass clink",
+      "tags": [
+        "glass",
+        "clink",
+        "toast"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-glitch.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/glitch_002.wav",
+      "kind": "sfx",
+      "title": "glitch",
+      "use": "A digital glitch",
+      "tags": [
+        "glitch",
+        "digital",
+        "error"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-scratch.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/scratch_004.wav",
+      "kind": "sfx",
+      "title": "scratch",
+      "use": "A short scratch",
+      "tags": [
+        "scratch"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-scroll.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/scroll_002.wav",
+      "kind": "sfx",
+      "title": "scroll",
+      "use": "A one-second scroll",
+      "tags": [
+        "scroll",
+        "list"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-pluck.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/pluck_001.wav",
+      "kind": "sfx",
+      "title": "pluck",
+      "use": "A plucked note",
+      "tags": [
+        "pluck",
+        "note",
+        "appear"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-bong.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/bong_001.wav",
+      "kind": "sfx",
+      "title": "bong",
+      "use": "A low bong",
+      "tags": [
+        "bong",
+        "low",
+        "hit"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
+    },
+    {
+      "name": "sfx-back.wav",
+      "from": "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/4596a49eaf5a533948d49a47467f606bcdea70ff/addons/kenney_interface_sounds/back_002.wav",
+      "kind": "sfx",
+      "title": "back",
+      "use": "A step back",
+      "tags": [
+        "back",
+        "undo"
+      ],
+      "licence": "CC0 (Kenney.nl)",
+      "credit": "Kenney.nl, via Calinou's Godot packs (credit optional)"
     }
   ]
 }
