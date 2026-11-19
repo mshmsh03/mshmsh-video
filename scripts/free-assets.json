@@ -16,7 +16,14 @@
       "kind": "model",
       "use": "Pocket TTS voices (pocket:...)",
       "licence": "CC BY 4.0: credit Kyutai",
-      "credit": "Kyutai (Pocket TTS), packaged by k2-fsa/sherpa-onnx"
+      "credit": "Kyutai (Pocket TTS), packaged by k2-fsa/sherpa-onnx",
+      "repack": {
+        "remove": [
+          "sherpa-onnx-pocket-tts-int8-2026-01-26/test_wavs",
+          "sherpa-onnx-pocket-tts-int8-2026-01-26/README.md"
+        ],
+        "notice": "Pocket TTS (Kyutai), exported to ONNX by KevinAHM/pocket-tts-onnx (licence: CC BY 4.0, see LICENSE) and packaged by k2-fsa/sherpa-onnx. In this copy, video-xoshaka removed the demo voice clips (test_wavs), whose licence isn't stated, and the package README."
+      }
     },
     {
       "name": "kokoro-v1.0.onnx",
@@ -33,22 +40,6 @@
       "use": "Kokoro's voices for the Python route",
       "licence": "Apache-2.0",
       "credit": "hexgrad (Kokoro-82M), ONNX by thewh1teagle/kokoro-onnx"
-    },
-    {
-      "name": "vekol-ckb.onnx",
-      "from": "https://huggingface.co/RevgeAI/vekol-tts-ckb-edge/resolve/main/model.onnx",
-      "kind": "model",
-      "use": "Vekol, an offline Central Kurdish (Sorani) voice (vekol)",
-      "licence": "CC BY-NC 4.0: personal videos only, never client or paid work; credit Revge",
-      "credit": "Revge (Vekol TTS, vekol-tts-ckb-edge)"
-    },
-    {
-      "name": "vekol-ckb.onnx.json",
-      "from": "https://huggingface.co/RevgeAI/vekol-tts-ckb-edge/resolve/main/model.onnx.json",
-      "kind": "model",
-      "use": "Vekol's settings and letters",
-      "licence": "CC BY-NC 4.0: personal videos only; credit Revge",
-      "credit": "Revge (Vekol TTS)"
     },
     {
       "name": "pocket-alba.wav",

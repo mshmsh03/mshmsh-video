@@ -2,8 +2,8 @@
 // narrator engines that aren't Kokoro or Edge. The voice name picks one:
 //
 // - pocket:<voice>  Kyutai's Pocket TTS, offline, English. <voice> is a preset
-//   (bill_boerst, caro_davy, peter_yearsley, stuart_bell: CC0; alba: CC BY 4.0;
-//   bria, loona: demo clips that come with the model), or the path to a clean
+//   (bill_boerst, caro_davy, peter_yearsley, stuart_bell: CC0; alba: CC BY 4.0),
+//   or the path to a clean
 //   10 to 20 s recording whose voice it copies. Copy only the person's own
 //   voice, or one they have permission to use.
 // - supertonic:<F1..F5|M1..M5>  Supertonic 3, offline and fast, 31 languages
@@ -29,7 +29,6 @@ export const engineOf = (voice = "") => {
   if (/^pocket:/.test(voice)) return "pocket";
   if (/^supertonic:/.test(voice)) return "supertonic";
   if (/^gemini:/.test(voice)) return "gemini";
-  if (/^vekol(:|$)/.test(voice)) return "vekol";
   if (/^(f5|mms):/.test(voice) || voice === "recorded") return "raw";
   // Edge voice names look like "ar-IQ-RanaNeural"; Kokoro's like "af_heart".
   if (/^[a-z]{2,3}-.+Neural$/.test(voice)) return "edge";
@@ -225,15 +224,13 @@ export const POCKET_MODEL = "sherpa-onnx-pocket-tts-int8-2026-01-26";
 export const POCKET_PRESETS = ["alba", "bill_boerst", "caro_davy", "peter_yearsley", "stuart_bell"];
 const AUDIO_FILE = /\.(wav|flac|mp3|m4a|ogg|opus|webm|aac)$/i;
 
-const pocketReference = (name, modelDir) => {
+const pocketReference = (name) => {
   if (AUDIO_FILE.test(name)) {
     if (!existsSync(name)) throw new Error(`pocket: no recording at ${name}`);
     return resolve(name);
   }
-  const bundled = join(modelDir, "test_wavs", `${name}.wav`);
-  if (existsSync(bundled)) return bundled;
   if (!POCKET_PRESETS.includes(name)) {
-    throw new Error(`pocket:${name} is neither a preset (${[...POCKET_PRESETS, "bria", "loona"].join(", ")}) nor a recording (.wav, .m4a, .mp3)`);
+    throw new Error(`pocket:${name} is neither a preset (${POCKET_PRESETS.join(", ")}) nor a recording (.wav, .m4a, .mp3)`);
   }
   const dir = join(MODELS, "pocket-voices");
   if (!existsSync(join(dir, `${name}.wav`))) console.log(`Downloading the Pocket voice "${name}"`);
@@ -245,7 +242,7 @@ const pocketSpeaker = async (voice) => {
   const dir = ensureModel(POCKET_MODEL, "lm_main.int8.onnx");
   const name = voice.slice("pocket:".length);
   // 20 s of reference is plenty; longer only slows it down.
-  const referenceAudio = decode(pocketReference(name, dir), 24000).slice(0, 20 * 24000);
+  const referenceAudio = decode(pocketReference(name), 24000).slice(0, 20 * 24000);
   const tts = new sherpa.OfflineTts({
     model: {
       pocket: {
@@ -443,101 +440,6 @@ const geminiSpeaker = async (voice, { style, model } = {}) => {
   };
 };
 
-// --- Vekol (Central Kurdish, Sorani) ---------------------------------------------------
-
-// Sorani written the way Vekol was trained: Kurdish letters, no short vowels,
-// Arabic look-alikes folded in, and numbers spelled out.
-const ONES = ["سفر", "یەک", "دوو", "سێ", "چوار", "پێنج", "شەش", "حەوت", "هەشت", "نۆ"];
-const TEENS = ["دە", "یازدە", "دوازدە", "سێزدە", "چواردە", "پازدە", "شازدە", "حەڤدە", "هەژدە", "نۆزدە"];
-const TENS = ["", "", "بیست", "سی", "چل", "پەنجا", "شەست", "حەفتا", "هەشتا", "نەوەد"];
-const belowThousand = (n) => {
-  const parts = [];
-  const hundreds = Math.floor(n / 100);
-  const rest = n % 100;
-  if (hundreds) parts.push(hundreds === 1 ? "سەد" : `${ONES[hundreds]}سەد`);
-  if (rest >= 20) {
-    parts.push(TENS[Math.floor(rest / 10)]);
-    if (rest % 10) parts.push(ONES[rest % 10]);
-  } else if (rest >= 10) parts.push(TEENS[rest - 10]);
-  else if (rest) parts.push(ONES[rest]);
-  return parts.join(" و ");
-};
-export const soraniNumber = (n) => {
-  if (!Number.isInteger(n) || n < 0 || n > 999_999_999) return String(n);
-  if (n === 0) return ONES[0];
-  const millions = Math.floor(n / 1e6);
-  const thousands = Math.floor((n % 1e6) / 1000);
-  const rest = n % 1000;
-  const parts = [];
-  if (millions) parts.push(`${belowThousand(millions)} ملیۆن`);
-  if (thousands) parts.push(thousands === 1 ? "هەزار" : `${belowThousand(thousands)} هەزار`);
-  if (rest) parts.push(belowThousand(rest));
-  return parts.join(" و ");
-};
-export const soraniText = (text) =>
-  text
-    .replace(/ه‌/g, "ە") // ه + zero-width non-joiner, an old way to write ە
-    .replace(/ك/g, "ک") // Arabic kaf → ک
-    .replace(/[يى]/g, "ی") // Arabic yeh, alef maksura → ی (ئ keeps its own)
-    .replace(/ة/g, "ە") // teh marbuta → ە
-    .replace(/\?/g, "؟")
-    .replace(/,/g, "،")
-    .replace(/;/g, "؛")
-    .replace(/[ـً-ْ‌‍]/g, "") // tatweel, short vowels, joiners
-    .replace(/[0-9٠-٩۰-۹]+/g, (digits) =>
-      soraniNumber(Number([...digits].map((d) => (/[0-9]/.test(d) ? d : String(d.charCodeAt(0) % 16))).join(""))),
-    );
-
-const vekolSpeaker = async () => {
-  let ort;
-  try {
-    ort = await import("onnxruntime-node");
-  } catch (error) {
-    throw new Error(`vekol runs on onnxruntime: npm i -D onnxruntime-node@1.21.0 --onnxruntime-node-install-cuda=skip\n(${error.message})`);
-  }
-  const dir = join(MODELS, "vekol-ckb");
-  const model = fetchAsset("vekol-ckb.onnx", dir);
-  const config = JSON.parse(readFileSync(fetchAsset("vekol-ckb.onnx.json", dir), "utf8"));
-  const session = await ort.InferenceSession.create(model);
-  const ids = config.phoneme_id_map;
-  const { noise_scale: noise, length_scale: length, noise_w: noiseW } = config.inference;
-  const rate = config.audio.sample_rate;
-  const int64 = (values) => new ort.Tensor("int64", BigInt64Array.from(values.map(BigInt)), [1, values.length]);
-  return {
-    speak: async (text, speed = 1) => {
-      // Piper's way: one sentence at a time, each letter followed by the pad,
-      // between a start and an end mark. Letters are decomposed (NFD), as in
-      // training: ئ becomes ي followed by a separate hamza.
-      const sentences = soraniText(text).split(/(?<=[.!؟])\s+/).filter((s) => s.trim());
-      const parts = [];
-      for (const sentence of sentences) {
-        const sequence = [ids["^"][0], ids["_"][0]];
-        for (const letter of sentence.normalize("NFD")) {
-          if (!ids[letter]) continue;
-          sequence.push(ids[letter][0], ids["_"][0]);
-        }
-        sequence.push(ids["$"][0]);
-        const feeds = {
-          input: int64(sequence),
-          input_lengths: new ort.Tensor("int64", BigInt64Array.from([BigInt(sequence.length)]), [1]),
-          scales: new ort.Tensor("float32", Float32Array.from([noise, length / speed, noiseW]), [3]),
-        };
-        if (session.inputNames.includes("sid")) feeds.sid = new ort.Tensor("int64", BigInt64Array.from([0n]), [1]);
-        const out = await session.run(feeds);
-        parts.push(Float32Array.from(out[session.outputNames[0]].data), new Float32Array(Math.round(0.25 * rate)));
-      }
-      if (parts.length === 0) throw new Error(`vekol: nothing to say in "${text}" (it reads Sorani in Arabic script)`);
-      const samples = new Float32Array(parts.reduce((n, p) => n + p.length, 0));
-      let at = 0;
-      for (const part of parts) {
-        samples.set(part, at);
-        at += part.length;
-      }
-      return { samples, sampleRate: rate };
-    },
-  };
-};
-
 // --- Kokoro ---------------------------------------------------------------------------
 
 // kokoro-js downloads its model from Hugging Face. Where it can't (the Claude
@@ -595,12 +497,10 @@ export const licenceOf = (voice) => {
   if (engine === "pocket") {
     if (AUDIO_FILE.test(name)) return "Pocket, a copied voice: only with the speaker's permission; model CC BY 4.0 (credit Kyutai)";
     if (name === "alba") return "Pocket, voice CC BY 4.0 (credit Alba Mackenna), model CC BY 4.0 (credit Kyutai): fine for client work";
-    if (POCKET_PRESETS.includes(name)) return "Pocket, voice CC0, model CC BY 4.0 (credit Kyutai): fine for client work";
-    return "Pocket demo clip: for trying only, not for client work";
+    return "Pocket, voice CC0, model CC BY 4.0 (credit Kyutai): fine for client work";
   }
   if (engine === "supertonic") return "Supertonic, OpenRAIL-M: client work allowed, but no imitating real people and label it as an AI voice";
   if (engine === "gemini") return "Gemini free tier: Google may read and keep the text to improve its products, so no confidential scripts";
-  if (engine === "vekol") return "Vekol Sorani, CC BY-NC 4.0 (credit Revge): personal videos only, never client or paid work";
   if (engine === "edge") return "Edge read-aloud: personal videos; for client work use the same voice through Azure Speech (paid)";
   if (/^f5:/.test(voice)) return "F5 Central Kurdish, CC BY-NC-ND 4.0: personal videos only";
   if (/^mms:/.test(voice)) return "MMS, non-commercial: a stand-in while building";
@@ -615,6 +515,5 @@ export const makeSpeaker = async (voice, options = {}) => {
   if (engine === "pocket") return pocketSpeaker(voice);
   if (engine === "supertonic") return supertonicSpeaker(voice, options);
   if (engine === "gemini") return geminiSpeaker(voice, options);
-  if (engine === "vekol") return vekolSpeaker();
-  throw new Error(`${voice} isn't a pocket:, supertonic:, gemini: or vekol voice`);
+  throw new Error(`${voice} isn't a pocket:, supertonic: or gemini: voice`);
 };

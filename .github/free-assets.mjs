@@ -6,11 +6,12 @@
 //   node .github/free-assets.mjs publish <dir>    upload them (replacing old copies) and write the notes
 //
 // A file that fails to download is listed in <dir>/failed.txt; the rest are
-// still published, and the workflow fails afterwards so the failure shows.
+// still published, and the workflow fails afterwards so the failure shows. An
+// entry with "repack" is unpacked, cleaned and packed again before publishing.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 const [command, dir = "dist"] = process.argv.slice(2);
 const free = JSON.parse(readFileSync("scripts/free-assets.json", "utf8"));
@@ -25,6 +26,21 @@ if (command === "download") {
     try {
       execFileSync("curl", ["-fsSL", "--retry", "3", "-o", to, file.from], { stdio: ["ignore", "inherit", "inherit"] });
       if (statSync(to).size < 200) throw new Error(`only ${statSync(to).size} bytes`);
+      // Some archives carry extras that aren't clearly free (Pocket's demo
+      // clips): take them out and say so in a NOTICE.txt.
+      if (file.repack) {
+        const work = join(dir, ".repack");
+        rmSync(work, { recursive: true, force: true });
+        mkdirSync(work, { recursive: true });
+        execFileSync("tar", ["-xjf", resolve(to), "-C", work]);
+        for (const path of file.repack.remove) rmSync(join(work, path), { recursive: true, force: true });
+        const top = file.repack.remove[0].split("/")[0];
+        writeFileSync(join(work, top, "NOTICE.txt"), `${file.repack.notice}\n`);
+        rmSync(to);
+        execFileSync("tar", ["-cjf", resolve(to), "-C", work, top]);
+        rmSync(work, { recursive: true, force: true });
+        console.log(`  without ${file.repack.remove.join(", ")}`);
+      }
       console.log(`${file.name}: ${mb(statSync(to).size)}`);
     } catch (error) {
       console.log(`::error::${file.name} didn't download from ${file.from}: ${error.message.split("\n")[0]}`);

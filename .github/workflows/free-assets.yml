@@ -54,7 +54,7 @@ jobs:
         run: |
           command -v ffmpeg || { sudo apt-get update && sudo apt-get install -y ffmpeg; }
           npm init -y > /dev/null
-          npm i sherpa-onnx-node@2.0.1 onnxruntime-node@1.21.0 --onnxruntime-node-install-cuda=skip
+          npm i sherpa-onnx-node@2.0.1
           python -m pip install kokoro-onnx soundfile
       - name: Every English voice (Kokoro, Supertonic, Pocket), from the release
         run: |
@@ -62,11 +62,6 @@ jobs:
           cp out/voice-samples/all.mp3 samples-english.mp3
           cp out/voice-samples/list.txt samples-english.txt
           test "$(wc -l < samples-english.txt)" -eq 17 || { echo "::error::Only $(wc -l < samples-english.txt) of 17 English voices worked"; exit 1; }
-      - name: The Sorani voice (Vekol)
-        run: |
-          node scripts/voice-samples.mjs "سڵاو، ئەمە نموونەی دەنگی کوردییە. ئەم ڤیدیۆیە لە ساڵی ٢٠٢٦دا دروستکرا." --voices vekol
-          cp out/voice-samples/all.mp3 samples-sorani.mp3
-          cp out/voice-samples/list.txt samples-sorani.txt
       - name: The whole music library, 15 s of each track
         run: |
           node scripts/free-music.mjs preview

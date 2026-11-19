@@ -2,12 +2,13 @@
 
 ## 2026-11-19, the free package
 
-A friend's Sorani video stopped at the voice: in the Claude app nothing free could speak Kurdish there. Now everything free the skill uses comes with it:
+Everything free the skill uses now comes with it, and only what's free to use, client work included (some files ask for a credit; Supertonic has rules on use):
 
-- **A free-assets release** in this repo holds every free model, voice and music track (`scripts/free-assets.json` lists them with licences and credits). The scripts download from it first, because GitHub stays reachable where other sites are blocked, and fall back to each file's original source. The free-assets workflow builds it from the original sources, tests every free voice from the copies, and attaches the samples (`samples-english.mp3`, `samples-sorani.mp3`, `music-preview.mp3`).
-- **Vekol, an offline Sorani voice** (`"voice": "vekol"`): fast on a CPU, no PyTorch, works in the Claude app. Personal videos only (CC BY-NC 4.0, credit Revge). Sorani text is normalised the way it was trained (Arabic look-alike letters folded in, numbers spelled out in Sorani). `--voices sorani` samples it next to Gemini. Setup installs `onnxruntime-node` for Sorani projects.
-- **A free music library** (`scripts/free-music.mjs`): 16 public-domain tracks from FreePD.com by mood, a numbered preview file to pick by ear, and `get` saves the track and prints its gain and offset. Client work allowed, no credit needed.
+- **A free-assets release** in this repo holds every free model, voice and music track (`scripts/free-assets.json` lists them with licences and credits). The scripts download from it first, because GitHub stays reachable where other sites are blocked, and fall back to each file's original source. The free-assets workflow builds it from the original sources, tests every free voice from the copies, and attaches the samples (`samples-english.mp3`, `music-preview.mp3`).
+- **A free music library** (`scripts/free-music.mjs`): 16 public-domain tracks from FreePD.com by mood, a numbered preview file to pick by ear, and `get` saves the track and prints its gain and offset. No credit needed.
 - **Sound effects made in code** (`scripts/make-sfx.mjs`): setup uses them where remotion.media is blocked, under the same file names.
+- Pocket TTS no longer offers the two demo clips that come inside its package (`bria`, `loona`): their licence isn't stated, so the copy on the release leaves them out.
+- Sorani: no fully free voice exists yet (Vekol and the F5 voices are non-commercial), so Sorani still needs Gemini, the person's own recording, or F5 for personal videos.
 - Fixed: make-voice crashed when a line had a number of 1000 or more (a year like 2026) while timing the words.
 
 ## 2026-11-19, ready for friends

@@ -374,9 +374,6 @@ You can't hear the video, so measure it and look at frames:
   Their first run downloads the model with `curl` and `tar` into
   `~/.cache/video-xoshaka/models`. If the connection drops, run it again: the
   download starts over (a half-done file is left as `.part`).
-- **Installing `onnxruntime-node` on Linux** (it runs the Vekol Sorani voice)
-  fails while it tries to download CUDA files; add
-  `--onnxruntime-node-install-cuda=skip`, as setup does.
 - **Gemini's key lives in the terminal**, not in a file: `GEMINI_API_KEY` set in
   the shell that runs make-voice. A new terminal needs it again. The free tier
   allows few requests a minute, so a long video takes a few minutes while

@@ -16,9 +16,8 @@
 //   recording (one take per scene, a breath of silence at each end), or an
 //   ElevenLabs or HeyGen download. Words are timed from the pauses.
 // - Pocket TTS ("pocket:alba", or "pocket:voice/me.wav" to copy a voice),
-//   Supertonic 3 ("supertonic:F2"), Gemini ("gemini:Charon") and Vekol
-//   ("vekol", Sorani, offline): see voice-engines.mjs. Words are timed from
-//   the pauses, as for Kokoro.
+//   Supertonic 3 ("supertonic:F2") and Gemini ("gemini:Charon"): see
+//   voice-engines.mjs. Words are timed from the pauses, as for Kokoro.
 //
 // - Draft (--draft): no voice at all. Each line's length is estimated from its
 //   words and the WAVs are silent, so the Studio preview and the scenes can be
@@ -72,7 +71,7 @@ const EDGE = ENGINE === "edge";
 // times them like Kokoro's.
 const RAW = ENGINE === "raw";
 // pocket:, supertonic: and gemini: voices (voice-engines.mjs).
-const EXTRA = ["pocket", "supertonic", "gemini", "vekol"].includes(ENGINE);
+const EXTRA = ["pocket", "supertonic", "gemini"].includes(ENGINE);
 const engineOptions = { lang: story.lang, style: story.voiceStyle, model: story.voiceModel };
 const rawFile = (id) => {
   for (const ext of ["flac", "wav", "mp3", "m4a", "ogg", "opus", "webm"]) {

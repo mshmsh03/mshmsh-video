@@ -107,8 +107,6 @@ if (INSTALL) {
   // Supertonic (English, Arabic and more) and Pocket TTS (English) run on
   // sherpa-onnx; neither speaks Kurdish, so a Sorani project skips it.
   if (SCRIPT !== "sorani" && !has("no-sherpa") && !deps["sherpa-onnx-node"]) npm(["i", "-D", "sherpa-onnx-node@2.0.1"], DIR);
-  // Vekol, the offline Sorani voice, runs on onnxruntime.
-  if (SCRIPT === "sorani" && !deps["onnxruntime-node"]) npm(["i", "-D", "onnxruntime-node@1.21.0", "--onnxruntime-node-install-cuda=skip"], DIR);
 }
 
 // 2. The template. Per-video files are written once; shared components are
