@@ -16,12 +16,22 @@
 Synthesized music (writing a score in code) sounds cheap next to a real track.
 People notice and say "the music is not nice". Use real music:
 
-1. **HeyGen's catalog** through the `media-use` skill
+1. **The free library** (`scripts/free-music.mjs`): 16 public-domain tracks
+   (FreePD.com) tagged by mood (upbeat, happy, funny, calm, sincere, cinematic,
+   tense, celebration...), downloaded from this skill's GitHub release, so it
+   works with no account and in the Claude app. Public domain: client work is
+   fine and no credit is needed. `preview calm,sincere` makes one numbered file
+   of 15 s from each match for the person to pick by ear; `get <id>` saves it as
+   `public/bgm/track.mp3` and prints the `music` settings (gain for a bed about
+   -24 dBFS between lines, and an offset past any silence at the start). The
+   moods come from the titles and a tempo and loudness measurement, not from
+   listening, so always preview.
+2. **HeyGen's catalog** through the `media-use` skill
    (`npx skills add heygen-com/hyperframes@media-use -g -y`). It has thousands of
    royalty-free tracks searchable by mood, free with a HeyGen sign-in.
-2. ElevenLabs Music (`elevenlabs/skills@music`): composed to a prompt, but needs
+3. ElevenLabs Music (`elevenlabs/skills@music`): composed to a prompt, but needs
    a paid API key.
-3. A track the person supplies. This is fine for WhatsApp, but copyrighted songs
+4. A track the person supplies. This is fine for WhatsApp, but copyrighted songs
    get muted or blocked on Instagram, TikTok and YouTube. Say so.
 
 For a business, a client or a paid post, check the chosen track's licence
@@ -157,6 +167,12 @@ it, so plan sound on purpose.
   under 150 Hz plays as nothing on a phone speaker.
 - Over strong music, a typing-heavy video can drop the clicks and keys. No
   synthesised tones, chimes or dings.
+- **Where the effects come from.** Setup downloads recorded effects from
+  remotion.media. Where that's blocked (the Claude app's cloud workspace), it
+  makes plainer ones in code instead (`scripts/make-sfx.mjs`, no download, same
+  file names): use their noise-based sounds (whoosh, paper, riser, click, boom)
+  and skip their tonal ding and chime, per the line above. Swap in recorded
+  effects when the project moves to a machine that can reach remotion.media.
 
 ## Cutting to music
 
@@ -176,7 +192,7 @@ it, so plan sound on purpose.
 
 ## If HeyGen isn't an option
 
-Ask which of the other two sources the person wants. Don't fall back to
+Use the free library first (`free-music.mjs`), or ask which of the other sources the person wants. Don't fall back to
 synthesized music without telling them it will sound synthetic. If they have
 none, deliver the video silent and say so in one line, with how to add music
 later, rather than spending the session writing music in code that nobody can

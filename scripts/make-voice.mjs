@@ -108,19 +108,21 @@ const findPauses = (samples, sr) => {
 
 const ONES = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 // Roughly how long a word takes to say: its letters, or for "300" the letters
-// of "three hundred".
+// of "three hundred"; a year like 2026 counts about five letters a digit.
 const spokenLength = (word) => {
+  const letters = word.replace(/[^\p{L}]/gu, "").length;
   const digits = word.replace(/[^0-9]/g, "");
-  if (!digits) return word.replace(/[^\p{L}]/gu, "").length;
+  if (!digits) return letters;
   const n = Number(digits);
+  if (n >= 1000) return digits.length * 5 + letters;
   const hundreds = Math.floor(n / 100);
-  return (hundreds ? ONES[hundreds].length + 7 : 0) + (n % 100 ? 7 : 0) || 4;
+  return ((hundreds ? ONES[hundreds].length + 7 : 0) + (n % 100 ? 7 : 0) || 4) + letters;
 };
 // The same for each written word when `say` spells it differently ("٢٠ی" read
 // as "بیستی", "PHP" as "پی ئێچ پی"): the words both share line up, and each
 // run that differs takes the letters of what was actually said.
 const spokenLengths = (words, said) => {
-  const letters = (w) => spokenLength(w.replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x660));
+  const letters = (w) => spokenLength(w.replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x660).replace(/[۰-۹]/g, (d) => d.charCodeAt(0) - 0x6f0));
   const n = words.length;
   const m = said.length;
   const common = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));

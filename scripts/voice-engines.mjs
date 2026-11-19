@@ -2,8 +2,8 @@
 // narrator engines that aren't Kokoro or Edge. The voice name picks one:
 //
 // - pocket:<voice>  Kyutai's Pocket TTS, offline, English. <voice> is a preset
-//   (bill_boerst, caro_davy, peter_yearsley, stuart_bell: CC0; alba: CC BY 4.0;
-//   bria, loona: demo clips that come with the model), or the path to a clean
+//   (bill_boerst, caro_davy, peter_yearsley, stuart_bell: CC0; alba: CC BY 4.0),
+//   or the path to a clean
 //   10 to 20 s recording whose voice it copies. Copy only the person's own
 //   voice, or one they have permission to use.
 // - supertonic:<F1..F5|M1..M5>  Supertonic 3, offline and fast, 31 languages
@@ -21,7 +21,7 @@
 
 import { execFileSync, execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { availableParallelism, homedir, tmpdir } from "node:os";
+import { availableParallelism, devNull, homedir, tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -143,26 +143,63 @@ export const decode = (file, sr) => {
 // --- Model downloads -------------------------------------------------------------
 
 export const MODELS = process.env.VIDEO_XOSHAKA_MODELS ?? join(homedir(), ".cache", "video-xoshaka", "models");
-const RELEASE = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models";
+
+// Every downloadable resource is listed in free-assets.json, with its licence.
+// Each is copied to this repo's free-assets release on GitHub, tried first
+// because GitHub stays reachable where other sites are blocked (the Claude
+// app's cloud workspace); the original source is the fallback.
+export const FREE = JSON.parse(readFileSync(new URL("free-assets.json", import.meta.url), "utf8"));
+const RELEASE = process.env.VIDEO_XOSHAKA_ASSETS ?? FREE.release;
 
 // curl and tar ship with Windows 10 and later, macOS and Linux. Both run from
 // inside the folder with relative names: Git Bash's GNU tar reads "C:\..." as a
 // remote host.
 const download = (url, dir, name) => {
   mkdirSync(dir, { recursive: true });
-  execFileSync("curl", ["-fL", "--retry", "3", "--progress-bar", "-o", `${name}.part`, url], {
-    cwd: dir,
-    stdio: ["ignore", "inherit", "inherit"],
-  });
+  try {
+    execFileSync("curl", ["-fL", "--retry", "2", "--progress-bar", "-o", `${name}.part`, url], {
+      cwd: dir,
+      stdio: ["ignore", "inherit", "inherit"],
+    });
+  } catch (error) {
+    rmSync(join(dir, `${name}.part`), { force: true });
+    throw error;
+  }
   renameSync(join(dir, `${name}.part`), join(dir, name));
   return join(dir, name);
+};
+
+// A file from free-assets.json, saved in `dir` (once; later calls reuse it).
+export const fetchAsset = (name, dir, saveAs = name) => {
+  if (existsSync(join(dir, saveAs))) return join(dir, saveAs);
+  const entry = FREE.files.find((file) => file.name === name);
+  if (!entry) throw new Error(`${name} isn't in free-assets.json`);
+  // A quiet check first, so a missing release copy doesn't print an error.
+  const there = (url) => {
+    try {
+      execFileSync("curl", ["-sfIL", "--max-time", "20", "-o", devNull, url]);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  let failure;
+  for (const url of [`${RELEASE}/${name}`, entry.from]) {
+    if (url !== entry.from && !there(url)) continue;
+    try {
+      return download(url, dir, saveAs);
+    } catch (error) {
+      failure = error;
+    }
+  }
+  throw new Error(`Couldn't download ${name} from GitHub or from ${entry.from}: ${failure.message.split("\n")[0]}`);
 };
 
 export const ensureModel = (name, check) => {
   const dir = join(MODELS, name);
   if (existsSync(join(dir, check))) return dir;
   console.log(`Downloading ${name} (once, about 100 MB) into ${MODELS}`);
-  download(`${RELEASE}/${name}.tar.bz2`, MODELS, `${name}.tar.bz2`);
+  fetchAsset(`${name}.tar.bz2`, MODELS);
   execFileSync("tar", ["-xjf", `${name}.tar.bz2`], { cwd: MODELS, stdio: "inherit" });
   rmSync(join(MODELS, `${name}.tar.bz2`), { force: true });
   if (!existsSync(join(dir, check))) throw new Error(`${name} didn't unpack as expected: ${join(dir, check)} is missing`);
@@ -181,32 +218,23 @@ const THREADS = Math.max(1, Math.min(8, availableParallelism() - 1));
 // --- Pocket TTS --------------------------------------------------------------------
 
 export const POCKET_MODEL = "sherpa-onnx-pocket-tts-int8-2026-01-26";
-// Kyutai's tts-voices: voice-zero is CC0, alba-mackenna CC BY 4.0. Its expresso
-// and ears folders are non-commercial, so they aren't offered.
-export const POCKET_PRESETS = {
-  alba: "alba-mackenna/casual.wav",
-  bill_boerst: "voice-zero/bill_boerst.wav",
-  caro_davy: "voice-zero/caro_davy.wav",
-  peter_yearsley: "voice-zero/peter_yearsley.wav",
-  stuart_bell: "voice-zero/stuart_bell.wav",
-};
+// Kyutai's tts-voices: voice-zero is CC0, alba-mackenna CC BY 4.0 (files
+// pocket-<name>.wav in free-assets.json). Its expresso and ears folders are
+// non-commercial, so they aren't offered.
+export const POCKET_PRESETS = ["alba", "bill_boerst", "caro_davy", "peter_yearsley", "stuart_bell"];
 const AUDIO_FILE = /\.(wav|flac|mp3|m4a|ogg|opus|webm|aac)$/i;
 
-const pocketReference = (name, modelDir) => {
+const pocketReference = (name) => {
   if (AUDIO_FILE.test(name)) {
     if (!existsSync(name)) throw new Error(`pocket: no recording at ${name}`);
     return resolve(name);
   }
-  const bundled = join(modelDir, "test_wavs", `${name}.wav`);
-  if (existsSync(bundled)) return bundled;
-  const preset = POCKET_PRESETS[name];
-  if (!preset) {
-    throw new Error(`pocket:${name} is neither a preset (${[...Object.keys(POCKET_PRESETS), "bria", "loona"].join(", ")}) nor a recording (.wav, .m4a, .mp3)`);
+  if (!POCKET_PRESETS.includes(name)) {
+    throw new Error(`pocket:${name} is neither a preset (${POCKET_PRESETS.join(", ")}) nor a recording (.wav, .m4a, .mp3)`);
   }
   const dir = join(MODELS, "pocket-voices");
-  if (existsSync(join(dir, `${name}.wav`))) return join(dir, `${name}.wav`);
-  console.log(`Downloading the Pocket voice "${name}"`);
-  return download(`https://huggingface.co/kyutai/tts-voices/resolve/main/${preset}`, dir, `${name}.wav`);
+  if (!existsSync(join(dir, `${name}.wav`))) console.log(`Downloading the Pocket voice "${name}"`);
+  return fetchAsset(`pocket-${name}.wav`, dir, `${name}.wav`);
 };
 
 const pocketSpeaker = async (voice) => {
@@ -214,7 +242,7 @@ const pocketSpeaker = async (voice) => {
   const dir = ensureModel(POCKET_MODEL, "lm_main.int8.onnx");
   const name = voice.slice("pocket:".length);
   // 20 s of reference is plenty; longer only slows it down.
-  const referenceAudio = decode(pocketReference(name, dir), 24000).slice(0, 20 * 24000);
+  const referenceAudio = decode(pocketReference(name), 24000).slice(0, 20 * 24000);
   const tts = new sherpa.OfflineTts({
     model: {
       pocket: {
@@ -469,8 +497,7 @@ export const licenceOf = (voice) => {
   if (engine === "pocket") {
     if (AUDIO_FILE.test(name)) return "Pocket, a copied voice: only with the speaker's permission; model CC BY 4.0 (credit Kyutai)";
     if (name === "alba") return "Pocket, voice CC BY 4.0 (credit Alba Mackenna), model CC BY 4.0 (credit Kyutai): fine for client work";
-    if (POCKET_PRESETS[name]) return "Pocket, voice CC0, model CC BY 4.0 (credit Kyutai): fine for client work";
-    return "Pocket demo clip: for trying only, not for client work";
+    return "Pocket, voice CC0, model CC BY 4.0 (credit Kyutai): fine for client work";
   }
   if (engine === "supertonic") return "Supertonic, OpenRAIL-M: client work allowed, but no imitating real people and label it as an AI voice";
   if (engine === "gemini") return "Gemini free tier: Google may read and keep the text to improve its products, so no confidential scripts";
