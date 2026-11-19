@@ -80,7 +80,7 @@ The author's own example video (with real people in it) is not published. Use `a
 
 ## Update
 
-- Claude Code: `npx skills update`, or pull this repo again.
+- Claude Code: run the install command again, `npx skills add mshmsh03/video-xoshaka`; it replaces the old version. (`npx skills update` on its own only updates skills installed inside one project; for a skill installed for the whole computer it's `npx skills update -g`.)
 - Claude app: download [video-xoshaka.zip](https://github.com/mshmsh03/video-xoshaka/releases/download/latest/video-xoshaka.zip) again and upload it in place of the old one.
 
 What changed is in [CHANGELOG.md](CHANGELOG.md).

@@ -7,7 +7,7 @@ So that anyone can install it from this repo and it works in the Claude app as w
 - **Works in the Claude app's cloud workspace.** That workspace blocks some downloads, and three of them used to stop a video there. Now each falls back by itself: Kokoro voices run through Python with the model from GitHub (`kokoro-voice.py`) when kokoro-js can't download from Hugging Face; `stills.mjs` and `render.mjs` use an installed Chrome when Remotion can't download its browser (`find-browser.mjs`); `setup-project.mjs` saves the fonts into the project when Google Fonts can't be reached. All three were tested in that workspace.
 - **A download link for the Claude app.** Every change to `main` rebuilds `video-xoshaka.zip` on the release called "latest" (`.github/workflows/release.yml`).
 - **A check on every push and pull request** (`.github/workflows/check.yml`): every script parses, every JSON file is valid, and every script and reference file the docs name exists (`.github/check-skill.mjs`).
-- README: installing in Claude Code or the Claude app, what works where, updating, and maintaining.
+- README: installing in Claude Code or the Claude app, what works where, updating, and maintaining. To update in Claude Code, run the install command again: `npx skills update` alone skips skills installed for the whole computer (they need `-g`).
 - The promo made with the skill was redone with Kokoro `af_heart` at speed 1.0 and a public-domain music track.
 
 ## 2026-11-18, more free voices
