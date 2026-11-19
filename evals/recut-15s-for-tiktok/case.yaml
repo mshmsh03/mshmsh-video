@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: recut-15s-for-tiktok
+expected_outcome: |
+  Treats it as coming back to a video: reads brief.md, STORYBOARD.md and REVIEW.md first, keeps the approved long version untouched, builds the short one as its own cut (own story.json and voice.json, its own composition in Root.tsx), keeps the hook, the one thing, the payoff and the end card, and checks the cut with its own --voice file.
+context:
+  scaffold_script: place-files.sh

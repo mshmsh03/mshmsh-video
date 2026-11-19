@@ -29,7 +29,7 @@ Each file feeds the next and nothing is built from memory. If something changes,
 
 ## design.md template
 
-Write it from the brief's look-and-feel answers, the picked storyline and the person's real brand assets. Keep it to one screen. Every line is a number or a name, never an adjective (next section).
+Write it from the brief's look-and-feel answers, the picked storyline and the person's real brand assets. Keep it to one screen. Every line is a number or a name, never an adjective (next section). `setup-project.mjs` writes `theme.ts` from two of its lines, so keep their shape: "Palette:" names each colour before its hex (`background #12332F, text #F4EFE6, accent #E8643C`, plus any others such as `paper #F4EFE6`), and "Fonts:" names each font after its role (`headline Bricolage Grotesque 800, ...; body ...; terminal IBM Plex Mono 500`), with a script font in brackets after "script support" if one is wanted.
 
 ```
 # Design
@@ -49,7 +49,7 @@ Write it from the brief's look-and-feel answers, the picked storyline and the pe
 
 Use `@remotion/google-fonts` for fonts, and check by eye that Arabic or Kurdish text renders joined and in the right direction. If the project already has a design spec (`design.md`, `DESIGN.md` or `frame.md` with colours and fonts in its frontmatter), its hex values, fonts and weights are exact; its sizes and spacing are yours to scale for video, since a 1 px border from a web page vanishes on screen.
 
-**The template's look** (`theme.ts`: near-black background, Space Grotesk and JetBrains Mono, a terracotta accent) was made for the "My life with Claude" story. Keep it for that kind of video; for anything else, take the look from the brief, the brand or the subject.
+**The template's look** (`theme.ts`: near-black background, Space Grotesk and JetBrains Mono, a terracotta accent) was made for the "My life with Claude" story. Keep it for that kind of video; for anything else, take the look from the brief, the brand or the subject. `theme.ts` is where `design.md`'s palette and fonts become code (`setup-project.mjs --brand` writes it from a brand kit); keep the two in step.
 
 **Ready-made looks.** If the `hyperframes` skill is installed, `<skills>/hyperframes/assets/frame-presets/` has 13 slide-deck looks, each a `FRAME.md` spec (palette, fonts, rules) with a contact sheet: `biennale-yellow` (museum catalogue), `blockframe` and `creative-mode` (neobrutalist), `blue-professional` (consulting), `bold-poster` (vintage poster), `broadside` (protest poster), `capsule` (friendly pills), `cartesian` (quiet catalogue), `cobalt-grid` (two-colour risograph), `code-editorial` (developer brand book), `coral` (bold magazine), `daisy-days` (picture book), `editorial-forest` (literary). Use one when the person names it or wants that feel, never as the fallback for a video without a brand. Read its `FRAME.md` into `design.md`; fonts it names that aren't on Google Fonts need their files.
 
@@ -108,7 +108,7 @@ One row per scene, written before any scene component:
 | 1 | freeze | "Yep. That's me." | Their clip freezes, white flash, sticker | record scratch | "me" | 3.2 |
 ```
 
-Fill "Seconds" only after the voice step; never guess it. Mark scenes that need a file the person hasn't sent yet ("needs: logo.svg"). Use the storyboard to spot problems early: a scene with two ideas, a scene with no visual, two gags in a row, a hook that takes more than three seconds.
+Fill "Seconds" only after the voice step, with `sync-story.mjs --seconds`; never guess it. `sync-story.mjs` turns the approved table into `story.json` (the "Line" column becomes the captions, "On screen" the placeholder's `board`), so the words live in one place: change them here, then sync. Mark scenes that need a file the person hasn't sent yet ("needs: logo.svg"). Use the storyboard to spot problems early: a scene with two ideas, a scene with no visual, two gags in a row, a hook that takes more than three seconds.
 
 ## Approval gates
 
@@ -125,7 +125,7 @@ In an unattended session (the person is away), do the preparatory work, write do
 
 ## Parallel scene workers
 
-Up to about six short scenes, build them yourself in one context: HyperFrames measured about 9 minutes for five scenes in one context against about 21 minutes split across subagents. Beyond that (a recap with 10 scenes, a long explainer), build in parallel, giving each subagent two or three scenes and starting them all at once; a second wave nearly doubles the time. On a PC with little memory, keep it to three workers at a time. Give each one only `brief.md`, `design.md`, its storyboard rows, the shared components (`PhotoCard`, `Devices`, `Counter`, `Narration`, `motion.ts`), motion.md and the voice timings for its scenes. Each returns its scene components. The main session then assembles `StoryVideo.tsx`, runs the review sheets, and fixes the seams (transitions, music ducking, repeated visuals).
+Up to about six short scenes, build them yourself in one context: HyperFrames measured about 9 minutes for five scenes in one context against about 21 minutes split across subagents. Beyond that (a recap with 10 scenes, a long explainer), build in parallel, giving each subagent two or three scenes and starting them all at once; a second wave nearly doubles the time. On a PC with little memory, keep it to three workers at a time. Give each one only `brief.md`, `design.md`, its storyboard rows, the shared components (`layout.ts`, `Title`, `EndCard`, `PhotoFill`, `PhotoCard`, `Devices`, `Cursor`, `Stamp`, `Counter`, `Sfx`, `Narration`, `motion.ts`), motion.md and the voice timings for its scenes. Each returns its scene components. The main session then adds them to `scenes.tsx`, sets each scene's `enter` and the music's silences in `story.json`, runs the review sheets, and fixes the seams (transitions, music ducking, repeated visuals).
 
 ## Captions that earn their place
 

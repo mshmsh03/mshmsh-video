@@ -169,7 +169,7 @@ The person already has footage and wants captions, trims, a reframe or a new cut
 
 ## Formats and safe zones
 
-Set the composition size from where it will be posted, then keep text inside the safe area.
+Set the composition size from where it will be posted, then keep text inside the safe area. `setup-project.mjs --format <ratio> --platform <reels|whatsapp|landscape|feed>` sets both, and every shared component reads its position from `useLayout()`.
 
 | Where | Format | Size |
 | --- | --- | --- |

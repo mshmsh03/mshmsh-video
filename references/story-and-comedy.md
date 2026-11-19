@@ -125,8 +125,8 @@ a CV.
 
 ```json
 {
-  "voice": "bm_george",
-  "speed": 1.1,
+  "voice": "<the voice the person picked from the samples>",
+  "speed": 1.0,
   "fps": 30,
   "transitionFrames": 15,
   "leadIn": 0.35,
@@ -154,8 +154,9 @@ a CV.
   the clip first). `hold` is breathing room after the line, for the visual
   punchline to land. Give a scene whose gag finishes after the voice (a terminal
   that answers "oh.") 1.5 to 2 s of hold.
-- Keep lines short: 10 to 20 words, two or three sentences. Speed 1.05 to 1.1
-  with `bm_george` gives snappy comedic delivery.
+- Keep lines short: 10 to 20 words, two or three sentences. Keep `speed` at 1.0:
+  sped-up voices sound rushed and robotic (the test promo at 1.1 did). For
+  snappier comedy, cut words instead, or try 1.05 and listen.
 - Each scene's length is computed from its voice. Never hand-set durations;
   re-run `make-voice.mjs` after every text change.
 
@@ -220,14 +221,14 @@ visual landing on a specific word of the narration.
 | Freeze-frame opener | clip freezes, record scratch, white flash, desaturate, slight zoom, sticker with an arrow | `scenes/FreezeScene.tsx` |
 | The tiny terminal joke | `> what is a terminal?` → "You're looking at one." → `> oh.` | `Terminal` |
 | Failed command | `$ git push` → red `error:` with the Windows XP error sound → `> claude, help` → "✓ Pushed. You're welcome." | `Terminal` with `kind: "error"` |
-| Reaction zoom | "I asked how much. This was his reaction." Their photo slams full screen, shakes, vine boom, music cuts out for about 1.3 s | `examples/scenes/AdviceScene.tsx` |
-| Labels as jokes | "BEGINNER #1 / #2" stickers, "combined coding knowledge: 2%" meter | `examples/scenes/FriendsScene.tsx` |
-| Stress stamp | "No pressure." → shaking red "STRESS LEVEL: 99%" sticker | `examples/scenes/WebsitesScene.tsx` |
-| Deadpan stamp | "BUILT IN 1 DAY / sleep: not invited" | `examples/scenes/PosScene.tsx` |
-| Fake-serious status line | "Iron Man approval: ..." → "probably" | (was in a JARVIS scene) |
+| Reaction zoom | "I asked how much. This was his reaction." Their photo slams full screen, shakes, vine boom, music cuts out for about 1.3 s | `PhotoFill` with `slamAt`, a `Sfx` boom, `"silence"` on the word in `story.json` |
+| Labels as jokes | "BEGINNER #1 / #2" stickers, "combined coding knowledge: 2%" meter | `PhotoCard`s with stickers (`popIn`) |
+| Stress stamp | "No pressure." → shaking red "STRESS LEVEL: 99%" sticker | `Stamp` with `shake` |
+| Deadpan stamp | "BUILT IN 1 DAY / sleep: not invited" | `Stamp` with `note` |
+| Fake-serious status line | "Iron Man approval: ..." → "probably" | `Terminal` lines, or a `Title` that lands the last word late |
 | Joke counter | "∞ times I asked how to center a div" after real counters | `Counter` with `finalText` |
-| Receipt | "status ...... active / wallet ...... crying" | (first version of AdviceScene) |
-| Self-aware ending | "Even the jokes. Especially the bad ones." | `examples/scenes/OutroScene.tsx` |
+| Receipt | "status ...... active / wallet ...... crying" | `Terminal` with `output` lines on a paper-white panel |
+| Self-aware ending | "Even the jokes. Especially the bad ones." | a `BeatScene` with the thank-you `PhotoCard`s, captions off |
 
 Use meme sound effects at most three or four times per video: a record
 scratch, a vine boom, the Windows XP error. More than that stops being funny.

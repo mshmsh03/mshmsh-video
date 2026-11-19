@@ -1,8 +1,9 @@
 // Narrates a story.json. Writes one WAV per scene and a voice.json with each
 // scene's length in frames and word timings for the captions. The voice name
 // picks the engine:
-// - Kokoro ("bm_george"): local and free, offline after the first ~330 MB
-//   model download. Needs `npm i -D kokoro-js`.
+// - Kokoro ("af_heart"): local and free, offline after the first ~330 MB
+//   model download. Needs `npm i -D kokoro-js`; where kokoro-js can't download
+//   its model, the same voices run through Python (kokoro-voice.py).
 // - Microsoft Edge ("ar-IQ-RanaNeural"): free and online, many languages
 //   including Arabic, with measured word timings. Needs Python with
 //   `python -m pip install edge-tts` (scripts/edge-voice.py), and ffmpeg or the
@@ -10,14 +11,33 @@
 // - Sorani Kurdish ("f5:studio-male"): spoken beforehand by tts/speak_story.py
 //   (F5-TTS Central Kurdish, offline, slow on a CPU); this script reads its
 //   files. See toolbox.md, "Sorani voices".
+// - Recorded ("recorded"): audio made elsewhere, one file per scene in
+//   out/voice-raw/<id>.wav (or .flac, .mp3, .m4a, .ogg): the person's own
+//   recording (one take per scene, a breath of silence at each end), or an
+//   ElevenLabs or HeyGen download. Words are timed from the pauses.
+// - Pocket TTS ("pocket:alba", or "pocket:voice/me.wav" to copy a voice),
+//   Supertonic 3 ("supertonic:F2") and Gemini ("gemini:Charon"): see
+//   voice-engines.mjs. Words are timed from the pauses, as for Kokoro.
+//
+// - Draft (--draft): no voice at all. Each line's length is estimated from its
+//   words and the WAVs are silent, so the Studio preview and the scenes can be
+//   built the moment the script is approved, before a voice is picked or
+//   downloaded. Run it again without --draft for the real voice; every
+//   wordAt(...) keeps working, only the times shift.
+//
+// Scenes whose words, voice and speed haven't changed since the last run are
+// reused from public/voice/ instead of spoken again (a one-line fix re-speaks
+// one scene). --fresh speaks everything again.
 //
 // Run from the Remotion project root:
-//   node scripts/make-voice.mjs [--story src/story/story.json]
+//   node scripts/make-voice.mjs [--draft] [--fresh] [--story src/story/story.json]
 //     [--out src/story/voice.json] [--audio public/voice] [--raw out/voice-raw]
 
-import { execFileSync, execSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { decode, engineOf, kokoroSpeaker, makeSpeaker, normalize, speechRange, trim, writeWav } from "./voice-engines.mjs";
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -30,44 +50,35 @@ const AUDIO_DIR = arg("audio", "public/voice");
 const RAW_DIR = arg("raw", "out/voice-raw");
 // voice.json refers to the WAVs relative to public/.
 const AUDIO_SRC = AUDIO_DIR.replace(/^public\//, "");
+const DRAFT = process.argv.includes("--draft");
+const FRESH = process.argv.includes("--fresh");
 
 const story = JSON.parse(readFileSync(STORY, "utf8"));
 const { fps, transitionFrames, leadIn, tail } = story;
-// Edge voice names look like "ar-IQ-RanaNeural"; Kokoro's like "bm_george".
-const EDGE = /^[a-z]{2,3}-.+Neural$/.test(story.voice);
+// The last run, to reuse scenes that haven't changed.
+let previous = null;
+try {
+  previous = JSON.parse(readFileSync(OUT, "utf8"));
+} catch {}
+// Edge voice names look like "ar-IQ-RanaNeural"; Kokoro's like "af_heart".
+const ENGINE = engineOf(story.voice);
+const EDGE = ENGINE === "edge";
 // Sorani voices ("f5:studio-male") are spoken beforehand by tts/speak_story.py
-// (from the skill's scripts/sorani/) into out/voice-raw/<id>.flac; this script
-// trims, normalizes and times them like Kokoro's.
-const RAW = /^(f5|mms):/.test(story.voice);
-
-// Where the speech starts and ends, keeping a little air around it.
-const speechRange = (samples, sr) => {
-  let peak = 0;
-  for (const v of samples) peak = Math.max(peak, Math.abs(v));
-  const threshold = peak * 0.02;
-  let first = 0;
-  while (first < samples.length && Math.abs(samples[first]) < threshold) first++;
-  let last = samples.length - 1;
-  while (last > first && Math.abs(samples[last]) < threshold) last--;
-  return [
-    Math.max(0, first - Math.round(0.03 * sr)),
-    Math.min(samples.length, last + Math.round(0.08 * sr)),
-  ];
-};
-
-// Cut the model's leading and trailing silence, keeping a little air.
-const trim = (samples, sr) => samples.slice(...speechRange(samples, sr));
-
-// Every scene at the same loudness (-20 dBFS RMS), never above -1 dBFS.
-const normalize = (samples) => {
-  let sum = 0;
-  let peak = 0;
-  for (const v of samples) {
-    sum += v * v;
-    peak = Math.max(peak, Math.abs(v));
+// (from the skill's scripts/sorani/) into out/voice-raw/<id>.flac. "recorded"
+// takes any audio already made, one file per scene in out/voice-raw/<id>.*
+// (wav, flac, mp3, m4a, ogg, opus, webm): the person's own recording, or an
+// ElevenLabs or HeyGen download. Either way this script trims, normalizes and
+// times them like Kokoro's.
+const RAW = ENGINE === "raw";
+// pocket:, supertonic: and gemini: voices (voice-engines.mjs).
+const EXTRA = ["pocket", "supertonic", "gemini"].includes(ENGINE);
+const engineOptions = { lang: story.lang, style: story.voiceStyle, model: story.voiceModel };
+const rawFile = (id) => {
+  for (const ext of ["flac", "wav", "mp3", "m4a", "ogg", "opus", "webm"]) {
+    const path = `${RAW_DIR}/${id}.${ext}`;
+    if (existsSync(path)) return path;
   }
-  const gain = Math.min(0.1 / Math.sqrt(sum / samples.length), 0.89 / peak);
-  return samples.map((v) => v * gain);
+  throw new Error(`No audio for scene "${id}": put it in ${RAW_DIR}/${id}.wav (or .flac, .mp3, .m4a, .ogg).`);
 };
 
 // Gaps of at least 90 ms inside the speech, in seconds.
@@ -249,57 +260,6 @@ const timeWords = (text, pauses, duration, spoken = text) => {
   return { captions, matched: `${m}/${breaks.length} breaks` };
 };
 
-const writeWav = (path, samples, sr) => {
-  const buf = Buffer.alloc(44 + samples.length * 2);
-  buf.write("RIFF", 0);
-  buf.writeUInt32LE(36 + samples.length * 2, 4);
-  buf.write("WAVE", 8);
-  buf.write("fmt ", 12);
-  buf.writeUInt32LE(16, 16);
-  buf.writeUInt16LE(1, 20);
-  buf.writeUInt16LE(1, 22);
-  buf.writeUInt32LE(sr, 24);
-  buf.writeUInt32LE(sr * 2, 28);
-  buf.writeUInt16LE(2, 32);
-  buf.writeUInt16LE(16, 34);
-  buf.write("data", 36);
-  buf.writeUInt32LE(samples.length * 2, 40);
-  samples.forEach((v, i) => {
-    buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, v)) * 32767), 44 + i * 2);
-  });
-  writeFileSync(path, buf);
-};
-
-// npx is a .cmd on Windows, which Node only runs through a shell: pass one
-// quoted command string there instead of an argument list.
-const npx = (args, options) =>
-  process.platform === "win32"
-    ? execSync(`npx ${args.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)).join(" ")}`, options)
-    : execFileSync("npx", args, options);
-
-// Decodes an audio file to mono samples with ffmpeg, or with the copy bundled
-// with Remotion when ffmpeg isn't on the PATH. That copy can't write raw
-// samples, so both go through a 16-bit WAV next to the file.
-const decode = (file, sr) => {
-  const wav = file.replace(/\.\w+$/, ".wav");
-  const args = ["-v", "error", "-y", "-i", file, "-ac", "1", "-ar", String(sr), "-c:a", "pcm_s16le", wav];
-  try {
-    execFileSync("ffmpeg", args);
-  } catch (error) {
-    if (error.code !== "ENOENT") throw error;
-    npx(["remotion", "ffmpeg", ...args]);
-  }
-  const buf = readFileSync(wav);
-  let pos = 12;
-  while (buf.toString("ascii", pos, pos + 4) !== "data") {
-    const size = buf.readUInt32LE(pos + 4);
-    pos += 8 + size + (size % 2);
-  }
-  const samples = new Float32Array(buf.readUInt32LE(pos + 4) / 2);
-  for (let i = 0; i < samples.length; i++) samples[i] = buf.readInt16LE(pos + 8 + i * 2) / 32768;
-  return samples;
-};
-
 const PYTHON = process.env.PYTHON ?? (process.platform === "win32" ? "python" : "python3");
 const EDGE_SCRIPT = fileURLToPath(new URL("edge-voice.py", import.meta.url));
 
@@ -360,27 +320,86 @@ const edgeCaptions = (text, spoken, words, shift, pauses) => {
   return { captions, matched: `${times.filter(Boolean).length}/${said.length} words timed by Edge` };
 };
 
-let tts;
-if (!EDGE && !RAW) {
-  const { KokoroTTS } = await import("kokoro-js");
-  tts = await KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX", {
-    dtype: "fp32",
-    device: "cpu",
-  });
-}
+// Kokoro loads only when a scene really has to be spoken (kokoro-js, or the
+// same model through Python where kokoro-js can't download it).
+const kokoro = kokoroSpeaker();
+
+// A draft line's length: about 15 letters a second at speed 1, plus the stops.
+const draftSeconds = (text, speed) => {
+  const words = text.trim().split(/\s+/);
+  const letters = spokenLengths(words, words).reduce((a, b) => a + b, 0);
+  const stops = words.filter((w, i) => i < words.length - 1 && /[.,:;?!،؛؟]$/.test(w)).length;
+  return (0.15 + letters * 0.066 + words.length * 0.05 + stops * 0.25) / (speed || 1);
+};
+
+// What a scene's sound depends on. Same key, same WAV: reuse it.
+const keyOf = (scene, spoken) => {
+  let source = "";
+  if (RAW && !DRAFT) {
+    try {
+      const { size, mtimeMs } = statSync(rawFile(scene.id));
+      source = `${size}:${Math.round(mtimeMs)}`;
+    } catch {}
+  }
+  // A copied Pocket voice changes when its recording does; Gemini's sound
+  // depends on its style and model, Supertonic's on the language.
+  const extra = [];
+  if (EXTRA && !DRAFT) {
+    const reference = story.voice.slice("pocket:".length);
+    if (ENGINE === "pocket" && existsSync(reference)) {
+      const { size, mtimeMs } = statSync(reference);
+      extra.push(`${size}:${Math.round(mtimeMs)}`);
+    }
+    if (ENGINE === "gemini") extra.push(story.voiceStyle ?? "", story.voiceModel ?? "");
+    if (ENGINE === "supertonic") extra.push(story.lang ?? "");
+  }
+  return createHash("sha1")
+    .update(JSON.stringify([DRAFT ? "draft" : story.voice, story.speed ?? 1, spoken, scene.text, source, ...extra]))
+    .digest("hex")
+    .slice(0, 12);
+};
+
+// The pocket:, supertonic: or gemini: engine loads only when a scene really
+// has to be spoken.
+let speaker;
+const extraSpeaker = async () => (speaker ??= await makeSpeaker(story.voice, engineOptions));
 
 mkdirSync(AUDIO_DIR, { recursive: true });
 // Edge's own MP3s, kept for reference; the video plays the WAVs.
 const EDGE_DIR = "out/voice-edge";
-if (EDGE) mkdirSync(EDGE_DIR, { recursive: true });
+if (EDGE && !DRAFT) mkdirSync(EDGE_DIR, { recursive: true });
 const scenes = [];
 let cursor = 0;
-for (const scene of story.scenes) {
+for (const [index, scene] of story.scenes.entries()) {
+  // A scene overlaps the one before it by the transition, unless it enters on
+  // a hard cut ("enter": "cut").
+  const overlap = index === 0 || scene.enter === "cut" ? 0 : transitionFrames;
+  cursor -= overlap;
   const spoken = scene.say ?? scene.text;
+  const key = keyOf(scene, spoken);
+  const lead = scene.lead ?? leadIn;
+  const cached = FRESH ? null : previous?.scenes?.find((s) => s.id === scene.id && s.key === key);
+  if (cached && existsSync(`${AUDIO_DIR}/${scene.id}.wav`)) {
+    const durationInFrames = Math.ceil((lead + cached.voiceSeconds + tail + (scene.hold ?? 0)) * fps);
+    scenes.push({
+      ...cached,
+      src: `${AUDIO_SRC}/${scene.id}.wav`,
+      durationInFrames,
+      overlap,
+      voiceFrom: Math.round(lead * fps),
+      startSeconds: Number((cursor / fps).toFixed(3)),
+    });
+    console.log(`${scene.id}: ${cached.voiceSeconds.toFixed(2)}s voice, ${durationInFrames} frames, unchanged (reused)`);
+    cursor += durationInFrames;
+    continue;
+  }
   let sr;
   let samples;
   let edgeTimed = null;
-  if (EDGE) {
+  if (DRAFT) {
+    sr = 24000;
+    samples = new Float32Array(Math.round(draftSeconds(spoken, story.speed) * sr));
+  } else if (EDGE) {
     sr = 24000;
     const mp3 = `${EDGE_DIR}/${scene.id}.mp3`;
     const words = edgeSpeak(spoken, story.voice, story.speed ?? 1, mp3);
@@ -390,41 +409,45 @@ for (const scene of story.scenes) {
     edgeTimed = edgeCaptions(scene.text, spoken, words, start / sr, findPauses(samples, sr));
   } else if (RAW) {
     sr = 24000;
-    samples = normalize(trim(decode(`${RAW_DIR}/${scene.id}.flac`, sr), sr));
+    samples = normalize(trim(decode(rawFile(scene.id), sr), sr));
+  } else if (EXTRA) {
+    const audio = await (await extraSpeaker()).speak(spoken, story.speed ?? 1);
+    sr = audio.sampleRate;
+    samples = normalize(trim(audio.samples, sr));
   } else {
-    const audio = await tts.generate(spoken, {
-      voice: story.voice,
-      speed: story.speed,
-    });
-    sr = audio.sampling_rate;
-    samples = normalize(trim(audio.audio, sr));
+    const audio = await kokoro.speak(spoken, story.voice, story.speed ?? 1);
+    sr = audio.sampleRate;
+    samples = normalize(trim(audio.samples, sr));
   }
   writeWav(`${AUDIO_DIR}/${scene.id}.wav`, samples, sr);
 
   const voiceSeconds = samples.length / sr;
-  // Kokoro and the Sorani voices give no word times, so they're estimated from
-  // the pauses; so are Edge's when `say` and `text` differ in word count.
-  const { captions, matched } =
-    edgeTimed ?? timeWords(scene.text, findPauses(samples, sr), voiceSeconds, spoken);
+  // Kokoro, Pocket, Supertonic, Gemini and the Sorani voices give no word
+  // times, so they're estimated from the pauses; so are Edge's when `say` and `text` differ in word count. A
+  // draft has no pauses, so its words are spread by length.
+  const timed = edgeTimed ?? timeWords(scene.text, DRAFT ? [] : findPauses(samples, sr), voiceSeconds, spoken);
+  const { captions } = timed;
+  const matched = DRAFT ? "draft (estimated, silent)" : timed.matched;
   // A scene can hold the voice back with its own "lead" (seconds).
-  const lead = scene.lead ?? leadIn;
-  const durationInFrames = Math.ceil((lead + voiceSeconds + tail + scene.hold) * fps);
+  const durationInFrames = Math.ceil((lead + voiceSeconds + tail + (scene.hold ?? 0)) * fps);
   scenes.push({
     id: scene.id,
+    key,
     src: `${AUDIO_SRC}/${scene.id}.wav`,
     durationInFrames,
+    overlap,
     voiceFrom: Math.round(lead * fps),
     voiceSeconds: Number(voiceSeconds.toFixed(3)),
     startSeconds: Number((cursor / fps).toFixed(3)),
     captions,
   });
   console.log(`${scene.id}: ${voiceSeconds.toFixed(2)}s voice, ${durationInFrames} frames, ${matched}`);
-  cursor += durationInFrames - transitionFrames;
+  cursor += durationInFrames;
 }
 
-const totalFrames = cursor + transitionFrames;
+const totalFrames = cursor;
 writeFileSync(
   OUT,
-  `${JSON.stringify({ fps, transitionFrames, totalFrames, scenes }, null, 2)}\n`,
+  `${JSON.stringify({ fps, transitionFrames, totalFrames, ...(DRAFT ? { draft: true } : {}), scenes }, null, 2)}\n`,
 );
-console.log(`total: ${(totalFrames / fps).toFixed(2)}s (${totalFrames} frames)`);
+console.log(`total: ${(totalFrames / fps).toFixed(2)}s (${totalFrames} frames)${DRAFT ? ", DRAFT timings: run again without --draft for the real voice" : ""}`);

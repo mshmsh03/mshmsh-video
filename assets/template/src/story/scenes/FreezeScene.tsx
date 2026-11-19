@@ -6,14 +6,15 @@ import {
   Freeze,
   Interactive,
   interpolate,
-  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import { useLayout } from "../../layout";
 import { colors, headingFont, monoFont } from "../../theme";
+import { findMedia, findMusic } from "../media";
 import { fadeUp, popIn } from "../motion";
 import { Narration } from "../Narration";
-import { findMedia } from "../PhotoCard";
+import { Sfx } from "../Sfx";
 import { voiceEnd, type SceneId } from "../voice";
 
 type FreezeSceneProps = {
@@ -30,10 +31,14 @@ type FreezeSceneProps = {
   readonly title: React.ReactNode;
   // Caption word ranges the sticker already shows, e.g. [[0, 2]] for "Yep. That's me."
   readonly hideWords?: readonly (readonly [number, number])[];
-  // For Reels, TikTok and Shorts, raise both above the app's buttons:
-  // titleTop about 1080 and captionTop 1300 (styles.md, "Formats and safe zones").
+  // Both default to the format and platform (layout.ts): on Reels, TikTok and
+  // Shorts they sit above the app's buttons.
   readonly titleTop?: number;
   readonly captionTop?: number;
+  // Plays the music bed (public/bgm/track.*) under the clip until the record
+  // scratch stops it. In story.json, start the main music on the next scene
+  // ("music": { "start": "<next scene id>" }).
+  readonly music?: boolean;
 };
 
 // The "Yep, that's me. You're probably wondering how I got here." opener:
@@ -48,48 +53,85 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
   kicker,
   title,
   hideWords,
-  titleTop = 1360,
+  titleTop,
   captionTop,
+  music = true,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const layout = useLayout();
+  const track = music ? findMusic() : undefined;
   const freezeFrame = Math.round(freezeAt * fps);
   const frozen = frame >= freezeFrame;
   const media = findMedia(clip);
   const titleAt = (voiceEnd(id) + 0.8) * fps;
-  const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+  const clamp = {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  } as const;
   // The sticker sits up and to the left of the face; the arrow curves down to it.
-  const stickerLeft = 90;
+  const stickerLeft = layout.left - 10;
   const stickerTop = Math.max(300, pointAt.y - 360);
-  const tip = { x: pointAt.x - stickerLeft - 60, y: pointAt.y - stickerTop - 40 };
+  const tip = {
+    x: pointAt.x - stickerLeft - 60,
+    y: pointAt.y - stickerTop - 40,
+  };
 
   return (
     <>
       <AbsoluteFill
         style={{
-          filter: frozen ? "saturate(0.35) sepia(0.25) contrast(1.1)" : undefined,
-          scale: interpolate(frame, [freezeFrame, freezeFrame + 0.6 * fps], [1, 1.08], {
-            ...clamp,
-            easing: Easing.bezier(0.16, 1, 0.3, 1),
-          }),
+          filter: frozen
+            ? "saturate(0.35) sepia(0.25) contrast(1.1)"
+            : undefined,
+          scale: interpolate(
+            frame,
+            [freezeFrame, freezeFrame + 0.6 * fps],
+            [1, 1.08],
+            {
+              ...clamp,
+              easing: Easing.bezier(0.16, 1, 0.3, 1),
+            },
+          ),
         }}
       >
         {media ? (
           <Freeze frame={freezeFrame} active={frozen}>
-            <Video name="Hero clip" src={media.src} muted objectFit="cover" style={{ width: "100%", height: "100%" }} />
+            <Video
+              name="Hero clip"
+              src={media.src}
+              muted
+              objectFit="cover"
+              style={{ width: "100%", height: "100%" }}
+            />
           </Freeze>
         ) : null}
       </AbsoluteFill>
-      <AbsoluteFill style={{ background: "linear-gradient(transparent 50%, rgba(20, 20, 19, 0.94) 78%)" }} />
+      <AbsoluteFill
+        style={{
+          background:
+            "linear-gradient(transparent 50%, rgba(20, 20, 19, 0.94) 78%)",
+        }}
+      />
       <AbsoluteFill
         style={{
           backgroundColor: "white",
-          opacity: interpolate(frame, [freezeFrame, freezeFrame + 5], [0.75, 0], clamp),
+          opacity: interpolate(
+            frame,
+            [freezeFrame, freezeFrame + 5],
+            [0.75, 0],
+            clamp,
+          ),
         }}
       />
       <Interactive.Div
         name="Sticker"
-        style={{ position: "absolute", left: stickerLeft, top: stickerTop, ...popIn(frame, freezeFrame + 3, fps) }}
+        style={{
+          position: "absolute",
+          left: stickerLeft,
+          top: stickerTop,
+          ...popIn(frame, freezeFrame + 3, fps),
+        }}
       >
         <div
           style={{
@@ -106,7 +148,11 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
         >
           {sticker}
         </div>
-        <svg width={10} height={10} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+        <svg
+          width={10}
+          height={10}
+          style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}
+        >
           <path
             d={`M 320 110 C 420 130, ${tip.x - 40} ${tip.y - 120}, ${tip.x} ${tip.y}`}
             fill="none"
@@ -114,25 +160,59 @@ export const FreezeScene: React.FC<FreezeSceneProps> = ({
             strokeWidth={12}
             strokeLinecap="round"
             strokeDasharray={900}
-            strokeDashoffset={interpolate(frame, [freezeFrame + 6, freezeFrame + 16], [900, 0], clamp)}
+            strokeDashoffset={interpolate(
+              frame,
+              [freezeFrame + 6, freezeFrame + 16],
+              [900, 0],
+              clamp,
+            )}
           />
         </svg>
       </Interactive.Div>
       <Interactive.Div
         name="Title"
-        style={{ position: "absolute", left: 100, right: 100, top: titleTop, ...fadeUp(frame, titleAt, fps, 50) }}
+        style={{
+          position: "absolute",
+          left: layout.left,
+          right: layout.right,
+          top: titleTop ?? layout.captionTop - layout.titleSize - 70,
+          ...fadeUp(frame, titleAt, fps, 50),
+        }}
       >
-        <div style={{ fontFamily: monoFont, fontSize: 40, color: colors.accent }}>{kicker}</div>
-        <div style={{ fontFamily: headingFont, fontSize: 120, fontWeight: 700, lineHeight: 1, color: colors.text }}>
+        <div
+          style={{
+            fontFamily: monoFont,
+            fontSize: layout.labelSize,
+            color: colors.accent,
+          }}
+        >
+          {kicker}
+        </div>
+        <div
+          style={{
+            fontFamily: headingFont,
+            fontSize: layout.titleSize,
+            fontWeight: 700,
+            lineHeight: 1,
+            color: colors.text,
+          }}
+        >
           {title}
         </div>
       </Interactive.Div>
-      <Audio
+      {track ? (
+        <Audio
+          name="Music intro"
+          src={track.src}
+          durationInFrames={freezeFrame - 4}
+          volume={0.5}
+        />
+      ) : null}
+      <Sfx
         name="Record scratch"
-        from={freezeFrame - 4}
-        src={staticFile("sfx/record-scratch.wav")}
+        src="sfx/record-scratch.wav"
+        at={freezeFrame - 5}
         volume={0.6}
-        premountFor={fps}
       />
       <Narration id={id} hideWords={hideWords} top={captionTop} />
     </>

@@ -29,7 +29,7 @@ Ask these four together.
 1. **Style** (header "Style"): Funny story / Sincere tribute / Product or service promo / Explainer or tutorial. "Other" covers recap, announcement, music video, number or data story, pull request or changelog, talking head with cards, 3D, character short and edit-only (styles.md). Recommend from the purpose (a friend's birthday: tribute or funny story; a launch: promo; "teach people X": tutorial; "a video for my song": music video). When the request already names a style that isn't among the four, offer it as the first option instead.
 2. **Where** (header "Where"): Reels, TikTok or Shorts (vertical 9:16) / YouTube, website or LinkedIn (landscape 16:9) / Instagram feed (4:5 or square) / WhatsApp Status (vertical 9:16, fewer overlays). This sets the format and the safe zones (styles.md).
 3. **Length** (header "Length"): about 15 to 30 seconds / about 1 minute / about 2 minutes / longer. Offer the lengths that fit the style (styles.md has typical lengths).
-4. **Voice** (header "Voice"): Free local AI narrator (Recommended) / My own recorded voice / HeyGen or ElevenLabs voice / No narration (captions and music only). If they choose an AI voice, they pick the actual voice later from samples, by ear.
+4. **Voice** (header "Voice"): Free AI narrator (Recommended) / My own voice / HeyGen or ElevenLabs voice / No narration (captions and music only). If they choose an AI voice, they pick the actual voice later from one numbered samples file, by ear. Their own voice, two ways: one recording per scene after the script gate (one take each, a breath of silence at both ends, the file named after the scene id, `"voice": "recorded"`), or, for English, a single 10 to 20 s recording that Pocket TTS copies for every line (`pocket:<file>`; toolbox.md, "Voice"). Ask whether the video is for a client or paid work: that rules out the non-commercial voices (Edge, F5, MMS, ElevenLabs' free plan, Pocket's demo clips), and a confidential script rules out Gemini's free tier. Write the answer into `brief.md`.
 
 ## Round 2: look and feel
 
@@ -37,7 +37,7 @@ Ask these four together.
 
 5. **Tone** (header "Tone"): Warm and personal / Funny and meme-style / Clean and professional / High-energy and punchy. Make it consistent with the style chosen in round 1; if they conflict (a "sincere tribute" that should be "meme-style"), ask which wins.
 6. **On screen** (header "On screen", multi-select): Their photos and clips / Screenshots or screen recordings in laptop and phone mockups / Bold text and motion graphics / Maps or simple diagrams. Pick several.
-7. **Colours** (header "Look"): Use my brand (I'll give the logo, colours, fonts) / You choose to fit the tone / Match something I'll show you (a video, a design, a website). If they pick the first or third, ask for the files or link in the free-text round.
+7. **Colours** (header "Look"): Use my brand (I'll give the logo, colours, fonts) / You choose to fit the tone / Match something I'll show you (a video, a design, a website). If they pick the first or third, ask for the files or link in the free-text round. Skip this question when the brand has a saved kit (`brands/<brand>/brand.json`, updates.md, "Brand kits"): its colours, fonts, logo, call to action, voice and music go into the recap as defaults to confirm.
 8. **Music** (header "Music"): Real royalty-free track picked for the mood (Recommended) / My own track (WhatsApp is fine; Instagram, TikTok and YouTube may mute or block copyrighted songs) / No music. If they pick a track, the mood comes from the style (styles.md, "Choosing music by style").
 
 For an explainer or tutorial, ask **Audience** (header "Audience") in place of Tone: Beginners (Recommended) / Some background / Experts. These styles are calm anyway, and the audience decides the words: the narration stays plain at every level, and only the on-screen labels get more technical (styles.md, "Explainer").
@@ -71,7 +71,7 @@ Don't invent answers. If they skip one that matters (for example the call to act
 Ask this with round 1 whenever the person writes or speaks in more than English, or the audience might:
 
 - **Language** (header "Language"): English / Kurdish (Sorani) / Arabic / Mixed or other.
-- **Check the voice first.** The local Kokoro voices are mainly English; confirm a voice actually supports the language before promising it, and otherwise offer the person's own recording or another text-to-speech source. For Arabic, Edge TTS has Iraqi, Saudi and Egyptian voices with word timings (toolbox.md, "Voice"). For Sorani Kurdish, offer the free F5 Central Kurdish voices (non-commercial only, and about an hour of CPU time for 90 s; toolbox.md, "Sorani voices") next to the person's own recording, and write the licence into `brief.md`. No tested free voice speaks Kurmanji.
+- **Check the voice first.** Kokoro and Pocket TTS are English; confirm a voice actually supports the language before promising it, and otherwise offer the person's own recording or another text-to-speech source. For Arabic: Supertonic (offline, ten voices, client work allowed), Gemini (online, needs a free key), and Edge TTS's Iraqi, Saudi and Egyptian voices with word timings (personal videos only). For Sorani Kurdish: Gemini, which lists Central Kurdish (online, needs a free key, not tested here yet: sample it first), the free F5 Central Kurdish voices (non-commercial only, and about an hour of CPU time for 90 s; toolbox.md, "Sorani voices"), and the person's own recording. Write the licence into `brief.md`. No tested free voice speaks Kurmanji.
 - **Right-to-left text** (Arabic, Kurdish Sorani): animate whole words or whole lines, never letter by letter, and don't add letter-spacing or text outlines; each of those breaks the joined letter shapes. Reveal intact text with a mask instead. Mirror the layout and flip directional slides (a "forward" slide enters from the left: `slide({ direction: "from-left" })`); timelines run from right to left. Use a font that supports the script (for Kurdish, one with ڕ ڵ ە ۆ ێ: many "Arabic" fonts such as Cairo and Tajawal lack them; production.md has the list) and check the rendered frames by eye. Captions that mix languages need each run in its own direction, and so do Latin or number runs inside right-to-left text (`< 2 h`, `8.4.27`, an ID): wrap them in `<bdi>` or give their element `direction: "ltr"`, or the bidi algorithm reorders them (`< 2 h` shows as `h 2 >`). Ask a native speaker to read the final text, since you can't judge wording by eye.
 
 ## Recap, confirm, save brief.md
@@ -92,6 +92,7 @@ Brief
 - Never show: <private or avoided things>
 - Who is who: <names and roles>
 - Engine: <Remotion | HyperFrames, and why in a few words>
+- Brand kit: <path to brand.json, or none>
 - Assumptions I made: <anything defaulted>
 - Still needed from you: <files, call to action, etc.>
 ```

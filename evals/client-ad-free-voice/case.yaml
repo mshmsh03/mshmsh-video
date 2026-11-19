@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: client-ad-free-voice
+expected_outcome: |
+  Treats this as client and paid work. Offers only free voices that allow commercial use (Kokoro, Supertonic, Pocket's CC0 or CC BY presets, the person's or client's own voice, Gemini with its free-tier privacy caveat), never Edge read-aloud, F5, ElevenLabs' free plan or Pocket's demo clips. Plans a numbered samples file and leaves the choice of voice to the person, by ear.

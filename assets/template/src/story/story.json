@@ -1,26 +1,32 @@
 {
-  "voice": "bm_george",
-  "speed": 1.1,
+  "voice": "af_heart",
+  "speed": 1.0,
   "fps": 30,
   "transitionFrames": 15,
   "leadIn": 0.35,
   "tail": 0.45,
+  "music": { "start": "beginning", "gain": 0.5, "duck": 0.6 },
   "scenes": [
     {
       "id": "freeze",
       "text": "Yep. That's me. You're probably wondering how I got here.",
       "lead": 1.9,
-      "hold": 2
+      "hold": 2,
+      "board": "Their clip plays, freezes on a record scratch; sticker points at them; title lands"
     },
     {
       "id": "beginning",
       "text": "A few months ago, I knew nothing. And I mean nothing.",
-      "hold": 1
+      "hold": 1,
+      "silence": "nothing",
+      "board": "Chapter 1 label; an empty notebook; the music cuts out on the second \"nothing\""
     },
     {
       "id": "end",
       "text": "And yes, Claude made this video too. Even the jokes. Especially the bad ones.",
-      "hold": 1.8
+      "hold": 1.8,
+      "enter": "slide",
+      "board": "Thank-you photos, then the self-aware line"
     }
   ]
 }

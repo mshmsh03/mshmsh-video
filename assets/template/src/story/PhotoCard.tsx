@@ -1,14 +1,12 @@
 import { Video } from "@remotion/media";
 import type React from "react";
-import { AnimatedImage, getStaticFiles, Img, useVideoConfig } from "remotion";
+import { AnimatedImage, Img, useVideoConfig } from "remotion";
 import { colors, headingFont } from "../theme";
+import { findMedia, isGifFile, isVideoFile } from "./media";
 
 // Photos and clips are optional: drop public/photos/<base>.jpg (or .png,
 // .webp, .gif, .mp4, .mov, .webm) in and it replaces the initial.
-export const findMedia = (base: string) =>
-  getStaticFiles().find((file) =>
-    new RegExp(`^photos/${base}\\.(jpe?g|png|webp|gif|mp4|mov|webm)$`, "i").test(file.name),
-  );
+export { findMedia };
 
 type PhotoCardProps = {
   readonly base: string;
@@ -33,8 +31,8 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
 }) => {
   const { fps } = useVideoConfig();
   const media = findMedia(base);
-  const isVideo = media ? /\.(mp4|mov|webm)$/i.test(media.name) : false;
-  const isGif = media ? /\.gif$/i.test(media.name) : false;
+  const isVideo = media ? isVideoFile(media.name) : false;
+  const isGif = media ? isGifFile(media.name) : false;
   const mediaHeight = mediaAspect ? size * mediaAspect : size;
   const fill: React.CSSProperties = {
     position: "absolute",

@@ -1,5 +1,6 @@
+import { Video } from "@remotion/media";
 import type React from "react";
-import { Img, staticFile } from "remotion";
+import { Img, staticFile, useVideoConfig } from "remotion";
 
 type DeviceProps = {
   readonly width: number;
@@ -25,6 +26,38 @@ export const Shot: React.FC<{
     }}
   />
 );
+
+// A screen recording from public/ playing inside a device (a ui-demo capture
+// converted to a constant-rate MP4: toolbox.md, "Screenshots, screen
+// recordings"). `trimBefore` skips the first frames of the file.
+export const ShotVideo: React.FC<{
+  readonly src: string;
+  readonly trimBefore?: number;
+  readonly playbackRate?: number;
+  readonly loop?: boolean;
+  readonly style?: React.CSSProperties;
+}> = ({ src, trimBefore, playbackRate, loop = false, style }) => {
+  const { fps } = useVideoConfig();
+  return (
+    <Video
+      src={staticFile(src)}
+      muted
+      loop={loop}
+      trimBefore={trimBefore}
+      playbackRate={playbackRate}
+      objectFit="cover"
+      premountFor={fps}
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        objectPosition: "top",
+        ...style,
+      }}
+    />
+  );
+};
 
 export const Laptop: React.FC<DeviceProps> = ({ width, children, style }) => (
   <div style={{ width, ...style }}>

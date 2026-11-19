@@ -11,64 +11,135 @@
 
 ## Project setup
 
-Follow the `remotion-create` skill to scaffold (blank, no Tailwind) into a
-new subfolder of the person's projects folder. Then:
+One command, run with the skill's own copy of the script, into a new
+subfolder of the person's projects folder:
+
+```bash
+node <skill>/scripts/setup-project.mjs <projects>/<video-name> --format 9:16 --platform reels
+#   --format 9:16 | 16:9 | 1:1 | 4:5        the composition size (styles.md, "Formats")
+#   --platform reels | whatsapp | landscape | feed   the safe zones every component follows
+#   --script sorani | arabic               a font with the Arabic-script letters, right-to-left story
+#   --brand <brands>/<brand>/brand.json    the brand's colours, fonts and logo (updates.md)
+#   --no-kokoro                            skip the Kokoro package (an Edge, Sorani or no-voice video)
+```
+
+It scaffolds a blank Remotion project around the plan files already in the
+folder (`brief.md`, `design.md`, `STORYBOARD.md`), adds the packages, copies
+the template and the scripts, writes `Root.tsx` for the size and platform,
+writes `theme.ts` from `design.md`'s "Palette:" and "Fonts:" lines (then the
+brand kit, then the template's own look, with a note), patches
+`tsconfig.json`, makes the `public/` folders, downloads the sound effects,
+turns `STORYBOARD.md` into `story.json` with every scene a placeholder, and
+writes draft timings, so `npx remotion studio` plays the storyboard as an
+animatic straight away. `--local-fonts` downloads the fonts' files from
+Google's font repository into `public/fonts/` and loads them with
+`@remotion/fonts`, so renders never need the internet; setup does this by itself when it can't reach Google Fonts (`--google-fonts` keeps them online anyway). `node scripts/doctor.mjs` then checks the machine and the
+project. On an older project, `--update` replaces the shared components and
+scripts (with a backup) and leaves the per-video files alone.
+
+By hand, if the script isn't there: follow the `remotion-create` skill to
+scaffold (blank, no Tailwind), then:
 
 ```bash
 npx remotion add @remotion/transitions @remotion/google-fonts @remotion/media @remotion/captions
 npm i -D kokoro-js@1.2.1   # Kokoro voices; an Edge voice needs `python -m pip install edge-tts` instead
-mkdir -p public/photos public/shots public/sfx public/bgm scripts
+npm i -D sherpa-onnx-node@2.0.1   # Supertonic and Pocket TTS voices
+mkdir -p public/photos public/shots public/sfx public/bgm public/brand scripts
 ```
 
 Copy from this skill:
-- `assets/template/src/*` → `src/`. You get `theme.ts`, `ChapterLabel.tsx`, and
-  `story/` with the components, `StoryVideo.tsx`, `voice.ts` and a sample
-  `story.json`.
+- `assets/template/src/*` → `src/`. You get `Root.tsx`, `theme.ts`,
+  `layout.ts`, `ChapterLabel.tsx`, and `story/` with the components,
+  `StoryVideo.tsx`, `scenes.tsx`, `voice.ts` and a sample `story.json`.
+  Delete create-video's `src/Composition.tsx`.
 - `scripts/*` (the `.mjs` scripts and `edge-voice.py`) → the project's
   `scripts/`. They have to live inside the project: Node resolves `kokoro-js`
   from the script's own folder, so running them from the skill folder fails
   with `ERR_MODULE_NOT_FOUND`.
 
-Add `"resolveJsonModule": true` to tsconfig `compilerOptions`. Register the
-composition in `src/Root.tsx`:
+Add `"resolveJsonModule": true` to tsconfig `compilerOptions` (and `"lib":
+["es2022"]`). Set the size and platform in `src/Root.tsx`:
 
 ```tsx
 <Composition id="StoryVideo" component={StoryVideo}
-  durationInFrames={STORY_VOICE.totalFrames} fps={30} width={1080} height={1920} />
+  durationInFrames={STORY_VOICE.totalFrames} fps={STORY_VOICE.fps} width={1080} height={1920}
+  defaultProps={{ platform: "reels" as const }} />
 ```
+
+Then `node scripts/make-voice.mjs --draft` for timings before the voice.
 
 Download the sound effects you'll use into `public/sfx/` (`curl -sfo
 public/sfx/<name>.wav https://remotion.media/<name>.wav`). Good ones are
 `whoosh`, `mouse-click`, `record-scratch`, `vine-boom`, `windows-xp-error` and
 `ding`. The full list is in the remotion-markup skill's `sfx.md`.
 
-Voice: run `node scripts/voice-samples.mjs "<a line from their story>"`, open
-`out/voice-samples/`, and let the person choose. Don't pick a voice from their
-name. Put the choice in `story.json`, then `node scripts/make-voice.mjs`. The
-first run downloads the model (about 330 MB). For Arabic, or another language
-Kokoro doesn't speak, sample Edge voices with `--voices`; for Sorani Kurdish,
-use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
+Voice: run `node scripts/voice-samples.mjs "<a line from their story>" --voices
+kokoro,supertonic,pocket` (setup-project installs `sherpa-onnx-node` for
+them; an older project needs `npm i -D sherpa-onnx-node@2.0.1`), send `out/voice-samples/all.mp3`, and let the
+person choose by number. Don't pick a voice from its name. Put the choice in
+`story.json`, then `node scripts/make-voice.mjs`. Each engine downloads its
+model once (Kokoro about 330 MB, Supertonic and Pocket about 100 MB each). For
+Arabic, sample `supertonic` and `edge-ar`; for Sorani Kurdish, `gemini` and the
+F5 voices (toolbox.md, "Voice" and "Sorani voices").
 
 ## Files and what they do
 
 | File | Role |
 | --- | --- |
-| `src/story/story.json` | the script: scenes, text/say, lead/hold, voice, speed |
-| `scripts/make-voice.mjs` | TTS per scene (Kokoro; Edge for a voice like `ar-IQ-RanaNeural`; for `f5:studio-male`, the Sorani files from `tts/speak_story.py`) → `public/voice/<id>.wav` + `src/story/voice.json` (durations, word timings) |
-| `src/story/voice.ts` | `sceneVoice`, `wordAt`, `voiceEnd` |
-| `src/story/StoryVideo.tsx` | the timeline: scenes in a `TransitionSeries`, music with ducking/silences, whooshes |
-| `src/story/Narration.tsx` | plays a scene's voice and shows the captions (phrase pages, current word in accent, right to left for Arabic script) |
+| `src/story/story.json` | the script: scenes (`text`/`say`, `lead`/`hold`, `enter`, `silence`, `board`), voice, speed, `music`, `direction`; for some voices `lang` (Supertonic), `voiceStyle` and `voiceModel` (Gemini) |
+| `scripts/make-voice.mjs` | TTS per scene (Kokoro; `supertonic:F2`, `pocket:alba` or `pocket:me.wav`, `gemini:Charon` through `voice-engines.mjs`; Edge for a voice like `ar-IQ-RanaNeural`; for `f5:studio-male`, the Sorani files from `tts/speak_story.py`; `--draft` for silent estimated timings) → `public/voice/<id>.wav` + `src/story/voice.json` (durations, word timings, each scene's overlap). Re-speaks only the scenes whose words, voice or speed changed; `--fresh` re-speaks all. |
+| `src/story/voice.ts` | `sceneVoice`, `wordAt`, `voiceEnd`, `overlapOf`, `IS_DRAFT_VOICE` |
+| `src/story/scenes.tsx` | **the file you write per video:** one component per scene id. A missing id plays as a placeholder. |
+| `scripts/sync-story.mjs` | `STORYBOARD.md` → `story.json` scenes (keeps `say`, `hold`, `enter`, `silence`); `--seconds` writes the real scene lengths back into the storyboard |
+| `scripts/pronounce.mjs` | each scene's names and odd words as the Kokoro voice will pronounce them (phonemes); compare spellings for `say` |
+| `src/story/StoryVideo.tsx` | the timeline, built from `story.json` and `voice.json`: scenes in a `TransitionSeries` with each scene's `enter`, the music bed with ducking, silences and the fade-out, whooshes on slides and wipes, a "draft timing" label while the voice is a draft. Not edited per video. |
+| `src/layout.ts` | `useLayout()`: margins, chapter, visual band, caption position and size, title size and the smallest readable text for the composition's size and platform |
+| `src/story/Narration.tsx` | plays a scene's voice and shows the captions (phrase pages, current word in accent, right to left for Arabic script, optional scrim) |
+| `src/story/Placeholder.tsx` | a scene not built yet: its number, id and `board` line, with the narration |
 | `src/story/scenes/*` | `FreezeScene` (cold open), `BeatScene` (chapter + visuals + narration) |
-| `assets/examples/` (skill) | the full "My life with Claude" scenes and timeline to copy gags from |
 
 ## Components cheat sheet
 
-- `<Narration id hideWords={[[5, 8]]} showCaptions />`: hide the words the scene
-  shows itself (a quote); turn captions off where on-screen text says the same.
+- **Every scene with a line plays its narration.** `BeatScene`, `FreezeScene`
+  and `Placeholder` include `<Narration>`; a scene built without them must
+  render `<Narration id="…" />` itself (with `showCaptions={false}` if
+  captions don't fit), or its line is silent.
+- `const layout = useLayout()`: place visuals between `layout.visualTop` and
+  `layout.visualBottom`, inside `layout.left`/`layout.right`, text at least
+  `layout.minText`. Typed-in pixel positions don't follow a second format.
+- `<Title text="Fresh every morning" at={wordAt(id, "fresh")} entrance="words" accent="fresh" outAt={…} />`:
+  entrances `words` (per-word blur-in), `line`, `grey` (grey to ink), `rise`;
+  lands, then holds dead still; right to left and never per letter for
+  Kurdish and Arabic. Without `top` it flows in its parent.
+- `<EndCard name="…" cta="@handle" at={…} />`: the logo from
+  `public/brand/logo.svg|png|webp` carried in once, then the name, then the
+  call to action. Give its scene 2 s or more of `hold`. `ctaMono` sets an
+  install command, URL or handle in the mono font. Without a logo file the
+  name becomes the hero (1.7 times the title size).
+- `<Terminal lines={[{ at: -2, kind: "typed", text: "$ npm run build" }, …]} />`:
+  a typed line with `at` below zero is already typed on the scene's first
+  frame, so a terminal scene doesn't open on an empty window.
+- `<PhotoFill base="shop" from={1} to={1.08} scrim />`: a full-frame photo or
+  clip with a slow push; `slamAt={wordAt(id, "reaction") + 0.25}` is the
+  reaction zoom (hit, shake), with a boom and `"silence"` on that word.
+- `<Cursor path={[{ at: 0, x: 1200, y: 1500 }, { at: wordAt(id, "open"), x: 520, y: 700, click: true }]} />`:
+  a cursor about 5% of the frame that enters from off screen and clicks with a
+  sound; make the click cause the next thing on the same frame.
+- `<Stamp at={…} text="STRESS LEVEL: 99%" shake />`, `note` for a second line:
+  the deadpan and stress stamps.
+- `<Sfx src="sfx/whoosh.wav" at={frame} />` or `src={["sfx/whoosh.wav", "sfx/whoosh-2.wav"]} take={n}`:
+  a sound effect that is skipped when its file is missing, peaking one frame
+  after `at`. Use it instead of `staticFile` for every sound.
+- `<Narration id hideWords={[[5, 8]]} showCaptions scrim />`: hide the words the scene
+  shows itself (a quote); turn captions off where on-screen text says the same;
+  `scrim` backs the words over a bright picture.
 - **Arabic and Kurdish captions.** `Narration` reads each caption page right to
-  left when its first letter is Arabic script, and also breaks pages at `،` `؛`
-  `؟`. The template's fonts have no Arabic letters, so load one and put it after
-  the heading font in `theme.ts` (tested with Noto Kufi Arabic):
+  left when most of its words are Arabic script, and also breaks pages at `،` `؛`
+  `؟`; `ChapterLabel`, `Title` and `Stamp` drop letter-spacing and uppercase on
+  right-to-left text. The template's fonts have no Arabic letters:
+  `setup-project.mjs --script sorani` (IBM Plex Sans Arabic) or `--script arabic`
+  (Noto Kufi Arabic) writes this into `theme.ts`; by hand, load one and put it
+  after the heading font:
 
   ```ts
   import { loadFont as loadArabic } from "@remotion/google-fonts/NotoKufiArabic";
@@ -93,7 +164,8 @@ use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
   through `getStaticFiles()`, which works in Studio and in renders. It falls
   back to a big initial. Video is muted and looped. `mediaAspect` (height/width)
   plus `focusY` (0 top, 1 bottom) crop a portrait clip to the square.
-- `<Laptop width>`, `<Phone width>`, `<Shot src="shots/x.png" />`: device mockups.
+- `<Laptop width>`, `<Phone width>`, `<Shot src="shots/x.png" />`, and
+  `<ShotVideo src="rec/demo.mp4" trimBefore={…} />` for a screen recording: device mockups.
   Animate a 3D tilt on the wrapper with
   `transform: perspective(2200px) rotateY(...)`. Slide in a new `Shot` with
   `translate: "100% 0%" → "0% 0%"` on a narration word.
@@ -102,11 +174,14 @@ use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
   appears.
 - `<Counter at value suffix label finalText="∞" />`: counts up over 0.9 s, then
   can swap to a joke value.
-- `fadeUp(frame, start, fps, distance)`, `popIn(frame, start, fps)` (sticker slap
-  with overshoot), `appear(...)`.
-- Layout for 1080×1920: chapter label at y 180, visuals between 300 and 1400,
-  captions from 1470. Keep 100 px side margins. Headlines are at least 84 px;
-  supporting text at least 44 px.
+- `motion.ts`: `ease.arrive` / `ease.camera` / `ease.exit` (eases by job),
+  `blurIn`, `blurOut`, `springBy(frame, start, fps, bounce)` (a spring named by
+  its bounce ratio), `kenBurns`, `moveBlur`, `beatFrame(i, bpm, fps)`, and the
+  older `fadeUp`, `popIn` (sticker slap with overshoot), `appear`.
+- Layout comes from `useLayout()`. For 1080×1920 on WhatsApp: chapter label at
+  y 180, visuals between 300 and 1400, captions from 1470, 100 px side margins;
+  on Reels the captions move up to 1300 and the right margin widens to 160.
+  Headlines are at least 84 px; supporting text at least 44 px.
 - Caption pages: `Narration` breaks pages at punctuation, splits a phrase
   longer than `maxChars` (26 by default) into pages of even length, and
   doesn't end a page on a word of one or two letters ("of", «لە»). Set
@@ -114,21 +189,22 @@ use the F5 voices (toolbox.md, "Voice" and "Sorani voices").
   worked (Sorani, IBM Plex Sans Arabic), passed from `BeatScene`:
   `<Narration id={id} top={892} left={160} right={160} fontSize={56}
   maxChars={46} align="center" />`, with the chapter label at y 70, 120 px
-  side margins and the visuals between y 160 and 840.
+  side margins and the visuals between y 160 and 840. `useLayout()` gives
+  these numbers by default in landscape (with 120 px margins).
 - **Platform safe zones.** Instagram Reels, TikTok and Shorts lay their own
   username, caption and buttons over roughly the bottom 400 px and the right
-  140 px. For those, pass `top={1300}` to `Narration` (or `captionTop` to
-  `BeatScene` and `FreezeScene`), move titles up (`FreezeScene`'s
-  `titleTop={1080}`; its default 1360 sits under the buttons), and keep
-  stickers off the right edge. WhatsApp
-  Status covers far less, so the default 1470 is fine there. Tell the person to
-  turn off the app's auto-captions and not to add the app's music on top.
+  140 px. With `platform: "reels"` in `Root.tsx` (`--platform reels`),
+  `Narration`, `ChapterLabel`, `FreezeScene` and the rest move up and in by
+  themselves; keep your own stickers off the right edge and words above y 1330
+  (review-check flags a `top` below that). WhatsApp Status covers far less.
+  Tell the person to turn off the app's auto-captions and not to add the app's
+  music on top.
 
 ## Formats and preview
 
-The composition size sets the format (styles.md, "Formats and safe zones"). The `Root.tsx` example in "Project setup" is vertical; for landscape use `width={1920} height={1080}`, for square `1080 x 1080`, for portrait feed `1080 x 1350`, and reposition captions, titles and visuals for that size instead of reusing the 1080 x 1920 layout numbers.
+The composition size sets the format (styles.md, "Formats and safe zones"): `setup-project.mjs --format` writes it, or set `width={1920} height={1080}` for landscape, `1080 x 1080` for square, `1080 x 1350` for portrait feed. The shared components follow `useLayout()`; anything you positioned by hand in a scene has to be repositioned for a new size, not reused from the 1080 x 1920 numbers.
 
-Start `npx remotion studio` as soon as the project runs and keep the preview open while building. Render the MP4 when the person asks for the file or when delivering a video to post.
+Start `npx remotion studio` as soon as the project runs and keep the preview open while building; with draft timings and placeholders it plays as an animatic from the start. `node scripts/render.mjs --draft` makes a half-size file in about a third of the time, for a person who can't open the Studio. Render the full MP4 when the person asks for the file or when delivering a video to post.
 
 ## No narration: the music is the clock
 
@@ -200,15 +276,28 @@ You can't hear the video, so measure it and look at frames:
    too. `node scripts/stills.mjs StoryVideo review` renders every scene's
    start and middle and every seam, and tiles them into
    `out/stills/review/scenes.png`, `seams.png` and `phone.png` (360 px wide);
-   that is the input to the review pass (review.md). It took 2 min 20 s for a
-   7-scene, 45 s reel on the laptop (2026-11-17).
-2. **Render to a new filename** each time (`out/<name>-v2.mp4`, `-v3`). On
-   Windows, a video open in the player locks the file, and Remotion's final
-   rename fails with `EPERM`. The finished render is then still in
-   `*.remotion-in-progress`, and you can just rename it.
+   that is the input to the review pass (review.md). It bundles once and renders
+   every frame in one browser, three at a time (32 frames in 19 s in a 2-core
+   sandbox, 2026-11-18; one browser per frame took 2 min 20 s for a 7-scene
+   reel on the laptop). Review frames are half size; `--full` for full size.
+   When Remotion can't download its own browser (the Claude app's cloud
+   workspace), stills.mjs and render.mjs use a Chrome or Edge already installed
+   (`find-browser.mjs`); `--browser-executable <path>` (or
+   `REMOTION_BROWSER_EXECUTABLE`) picks one by hand.
+2. **Render with `node scripts/render.mjs`** (`--name`, `--draft`). It writes
+   the next free `out/<name>-vN.mp4`: on Windows, a video open in the player
+   locks the file and Remotion's final rename fails with `EPERM`, so a render
+   never reuses a name. If it still happens, the finished render is in
+   `*.remotion-in-progress`; rename it. It then runs `review-check.mjs` on the
+   file: the length against `voice.json`, an empty first frame, black and
+   frozen stretches, silence, loudness and true peak, with the script and code
+   checks.
 3. **Audio.** Run `node scripts/check-audio.mjs out/<file>.mp4 --at 1.25-1.9`.
    Speech should be around -20 dBFS, with the music bed 8 to 12 dB under it, no
-   clipped samples, and quiet spots where you planned silences.
+   clipped samples, and quiet spots where you planned silences. For anything
+   posted, `node scripts/master-audio.mjs out/<file>.mp4` brings the mix to
+   about -14 LUFS, true peak under -1 dBTP, in `<file>-master.mp4` (tested
+   2026-11-18: -18.1 to -13.9 LUFS, the picture copied, not re-encoded).
 4. **Frames from the final file** for anything time-sensitive:
    `ffmpeg -ss <sec> -i out/x.mp4 -frames:v 1 -vf scale=540:-1 out/check.png`,
    or the whole video on one contact sheet (toolbox.md, "Verification tools").
@@ -261,15 +350,42 @@ You can't hear the video, so measure it and look at frames:
 - **Hand-held clips pan.** Something hidden in one frame shows up in the
   next. Check at least four frames across the clip before choosing `focusY`.
 - **A second cut in the same project** (a longer class version next to the
-  social one): give it its own folder (`src/class/` with its own
-  `story.json`, `voice.json`, `voice.ts`, `useWord.ts`, a copy of
-  `Narration.tsx` and its scenes) and register one composition per cut in
-  `Root.tsx`. Narrate with `speak_story.py --story src/class/story.json --out
-  out/voice-raw-class`, then `make-voice.mjs --story src/class/story.json
-  --out src/class/voice.json --audio public/voice-class --raw
-  out/voice-raw-class`. Pass `--voice src/class/voice.json` to `stills.mjs`
-  and `check-audio.mjs` as well: without it, check-audio measured with the
-  first cut's timing and reported the music louder than the speech.
+  social one): copy `src/story/` to its own folder and register one
+  composition per cut (updates.md, "A second cut in the same project"). Pass
+  its `--voice` (and `--story`) to `stills.mjs`, `review-check.mjs` and
+  `check-audio.mjs` as well: without it, check-audio measured with the first
+  cut's timing and reported the music louder than the speech.
+- **Renders need the internet for Google Fonts.** `loadFont` fetches the font
+  files at render time; offline (or behind a filter) the render stops after
+  30 s with "Timeout ... Fetching <font> font". `setup-project.mjs
+  --local-fonts` saves the files in `public/fonts/` and loads them with
+  `@remotion/fonts` instead (setup turns it on by itself when Google Fonts
+  can't be reached); by hand, `loadFont({ family, url:
+  staticFile("fonts/x.ttf"), weight: "200 800" })` from `@remotion/fonts`, with
+  the files from `raw.githubusercontent.com/google/fonts/main/ofl/<name>/`
+  (its `METADATA.pb` lists them). Seen 2026-11-18 in a sandbox without Google
+  Fonts; the GitHub copy worked there.
+- **`npm i kokoro-js` fails on Linux and WSL** with "Failed to download the
+  binaries: 404" from `onnxruntime-node`'s CUDA step. Add
+  `--onnxruntime-node-install-cuda=skip` (setup-project does); Windows and
+  macOS don't download CUDA.
+- **Pocket and Supertonic need `sherpa-onnx-node`** in the project (`npm i -D
+  sherpa-onnx-node@2.0.1`); without it make-voice stops with that command.
+  Their first run downloads the model with `curl` and `tar` into
+  `~/.cache/video-xoshaka/models`. If the connection drops, run it again: the
+  download starts over (a half-done file is left as `.part`).
+- **Gemini's key lives in the terminal**, not in a file: `GEMINI_API_KEY` set in
+  the shell that runs make-voice. A new terminal needs it again. The free tier
+  allows few requests a minute, so a long video takes a few minutes while
+  make-voice waits and retries; scenes already spoken are kept.
+- **A product name broke across two lines at its hyphen** ("video-" /
+  "xoshaka"). Caption words never break inside now; in a title or a card, wrap
+  the name in `<span style={{ whiteSpace: "nowrap" }}>`.
+- **A scene's line is silent** when the scene doesn't use `BeatScene`,
+  `FreezeScene` or `Narration` (see "Components cheat sheet").
+- **A sound effect file that isn't there** fails the whole render when it's
+  played through `staticFile`; `<Sfx>` skips it instead. review-check and
+  doctor list every `staticFile(...)` path that doesn't exist.
 - **The length creeps up** as jokes are added. Tell the person the length and
   offer the easiest scene to cut.
 - **`hf capture` drops a HyperFrames scaffold** (`CLAUDE.md`, `AGENTS.md`,

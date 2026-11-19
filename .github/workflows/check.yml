@@ -1,0 +1,27 @@
+# Runs on every push and pull request: catches a broken script or a doc that
+# names a file the skill doesn't have, before friends install it.
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Every script parses
+        run: for f in scripts/*.mjs .github/*.mjs; do node --check "$f"; done
+      - name: The Python scripts compile
+        run: python3 -m py_compile scripts/*.py scripts/sorani/*.py
+      - name: Every JSON file parses
+        run: |
+          git ls-files '*.json' | while read -r f; do
+            node -e 'JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"))' "$f" || { echo "::error file=$f::not valid JSON"; exit 1; }
+          done
+      - name: SKILL.md and the files the docs name
+        run: node .github/check-skill.mjs

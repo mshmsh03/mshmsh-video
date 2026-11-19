@@ -1,10 +1,5 @@
 import type React from "react";
-import {
-  Easing,
-  interpolate,
-  useCurrentFrame,
-  useVideoConfig,
-} from "remotion";
+import { Easing, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { colors, headingFont, monoFont } from "../theme";
 
 type CounterProps = {
@@ -43,11 +38,16 @@ export const Counter: React.FC<CounterProps> = ({
           extrapolateLeft: "clamp",
           extrapolateRight: "clamp",
         }),
-        translate: interpolate(frame, [start - 4, start + 12], ["0px 40px", "0px 0px"], {
-          extrapolateLeft: "clamp",
-          extrapolateRight: "clamp",
-          easing: Easing.bezier(0.16, 1, 0.3, 1),
-        }),
+        translate: interpolate(
+          frame,
+          [start - 4, start + 12],
+          ["0px 40px", "0px 0px"],
+          {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+            easing: Easing.bezier(0.16, 1, 0.3, 1),
+          },
+        ),
         ...style,
       }}
     >
@@ -65,7 +65,9 @@ export const Counter: React.FC<CounterProps> = ({
           transformOrigin: "left center",
         }}
       >
-        {finalText && landed ? finalText : `${Math.round(value * progress)}${suffix}`}
+        {finalText && landed
+          ? finalText
+          : `${Math.round(value * progress)}${suffix}`}
       </div>
       <div
         style={{
