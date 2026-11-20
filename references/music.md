@@ -51,10 +51,13 @@ show huge install counts from repos with a handful of stars.
 ## HeyGen setup (incl. Windows/WSL sign-in)
 
 The CLI is Linux/macOS only. On Windows, install it in WSL. Check with
-`wsl -l -v` that Ubuntu exists. Read the install script before running it.
+`wsl -l -v` that Ubuntu exists. Download the install script, read it, then run
+it. Don't pipe it straight into bash.
 
 ```bash
-wsl -e bash -lc "curl -fsSL https://static.heygen.ai/cli/install.sh | bash"   # -> ~/.local/bin/heygen
+wsl -e bash -lc "curl -fsSL https://static.heygen.ai/cli/install.sh -o ~/heygen-install.sh"
+wsl -e bash -lc "cat ~/heygen-install.sh"                                # read it first
+wsl -e bash -lc "bash ~/heygen-install.sh && rm ~/heygen-install.sh"     # -> ~/.local/bin/heygen
 ```
 
 Sign-in has to happen in the person's browser, but from WSL no browser opens,

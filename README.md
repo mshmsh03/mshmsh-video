@@ -1,5 +1,7 @@
 # mshmsh-video
 
+[![skills.sh](https://skills.sh/b/mshmsh03/mshmsh-video)](https://skills.sh/mshmsh03/mshmsh-video) [![Check](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml/badge.svg)](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml)
+
 A Claude skill that makes a whole video with you, from "make me a video" to a finished MP4. It was called video-xoshaka until 2026-11-19. It works in [Remotion](https://www.remotion.dev) (videos written as React code), so every video is a real project you can change and re-render.
 
 It asks you questions first, writes a short brief, pitches three different storylines when the story is still open, then writes a design file, a script and a storyboard. Nothing is built until you approve the words. Then the whole video plays straight away as an animatic (placeholders with the real captions) while it adds a narrator, music and sound effects and builds the scenes one by one, reviews them frame by frame (contact sheets of every scene, every cut and the phone view, plus an automatic check of the script, the code and the rendered file) and hands you the file, loudness-matched for social apps.
