@@ -153,12 +153,15 @@ F5 voices (toolbox.md, "Voice" and "Sorani voices").
   `maxChars` to `Narration` if that crowds the frame.
 
   For Kurdish, the font needs the Sorani letters ڕ ڵ ە ۆ ێ, and Google's
-  `arabic` subset doesn't promise them. Noto Kufi Arabic, Noto Sans Arabic,
-  Noto Naskh Arabic, IBM Plex Sans Arabic and Vazirmatn have them all. Cairo,
-  Tajawal, Almarai, Alexandria, Rubik and Readex Pro don't: the missing letters
-  fall back to another font in the middle of a word (checked against the font
-  files on 2026-10-22). If the designa-xoshaka skill is installed, its
-  `references/catalogs.md` §4 has the full checked list.
+  `arabic` subset doesn't promise them. Checked against the font files on
+  2026-10-22, these Google fonts have every Sorani letter: Noto Kufi Arabic,
+  Noto Sans Arabic, Noto Naskh Arabic, IBM Plex Sans Arabic, Vazirmatn, Mada,
+  Beiruti, Fustat, Estedad, Zain (check its joins by eye), Kufam, Reem Kufi,
+  Amiri, Scheherazade New, Lateef, Harmattan, Parastoo, Playpen Sans Arabic,
+  Aref Ruqaa, Jomhuria and Katibeh. Cairo, Tajawal, Almarai, Alexandria,
+  Changa, El Messiri, Lalezar, Lemonada, Markazi Text, Rakkas, Rubik, Baloo
+  Bhaijaan 2, Alyamama and Readex Pro don't: the missing letters fall back to
+  another font in the middle of a word.
 - `<PhotoCard base="friend1" name initial size mediaAspect={640/360} focusY={0.78} />`:
   a polaroid that finds `public/photos/<base>.(jpg|png|webp|gif|mp4|mov|webm)`
   through `getStaticFiles()`, which works in Studio and in renders. It falls

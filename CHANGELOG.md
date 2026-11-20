@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-20, works on its own
+
+- The skill no longer points to another skill for anything. The checked list of Google fonts that have every Kurdish (Sorani) letter is now written out in `references/production.md`.
+
 ## 2026-11-19, renamed to mshmsh-video
 
 The skill is now called **mshmsh-video** (it was video-xoshaka), and the repo is mshmsh03/mshmsh-video. GitHub sends the old repo links to the new one.
