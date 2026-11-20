@@ -13,12 +13,22 @@
 
 import { execFileSync, execSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { pickBrowser } from "./find-browser.mjs";
 
-const npx = (args, options) =>
-  process.platform === "win32"
-    ? execSync(`npx ${args.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)).join(" ")}`, options)
-    : execFileSync("npx", args, options);
+// On Windows npx is a .cmd file, and Node only runs those through cmd.exe,
+// where no quoting is safe for every argument. So run npm's own npx script
+// with Node instead: the arguments go to it as a list and never touch a shell.
+const npxCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js");
+const npx = (args, options) => {
+  if (process.platform !== "win32") return execFileSync("npx", args, options);
+  if (existsSync(npxCli)) return execFileSync(process.execPath, [npxCli, ...args], options);
+  // No npx script next to Node (an unusual install): cmd.exe it is, so refuse
+  // any argument cmd.exe would read as syntax instead of text.
+  const unsafe = args.find((a) => /[&|<>^%!"\r\n]/.test(a));
+  if (unsafe) throw new Error(`Won't pass ${JSON.stringify(unsafe)} through cmd.exe. Remove & | < > ^ % ! and quotes from it.`);
+  return execSync(`npx ${args.map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(" ")}`, options);
+};
 
 const all = process.argv.slice(2);
 const dash = all.indexOf("--");
@@ -36,11 +46,20 @@ const browserExecutable = pickBrowser(takeFlag("browser-executable"));
 const draft = argv.includes("--draft");
 const check = !argv.includes("--no-check");
 const composition = argv.find((a) => !a.startsWith("--")) ?? "StoryVideo";
+// The name becomes a file in out/, so it must be a plain file name: no folders,
+// nothing that climbs out of out/.
+const plainName = /^[\p{L}\p{N}][\p{L}\p{N} _.-]*$/u;
+for (const [flag, value] of [["--name", name], ["the composition id", composition]]) {
+  if (value !== undefined && !plainName.test(value)) {
+    throw new Error(`${flag} must be a plain file name (letters, numbers, spaces, - _ .), not ${JSON.stringify(value)}`);
+  }
+}
 const base = `${name ?? composition}${draft ? "-draft" : ""}`;
+const baseRe = base.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 mkdirSync("out", { recursive: true });
 const taken = readdirSync("out")
-  .map((f) => f.match(new RegExp(`^${base}-v(\\d+)\\.mp4$`))?.[1])
+  .map((f) => f.match(new RegExp(`^${baseRe}-v(\\d+)\\.mp4$`))?.[1])
   .filter(Boolean)
   .map(Number);
 const output = `out/${base}-v${Math.max(0, ...taken) + 1}.mp4`;

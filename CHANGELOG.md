@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-20, safer render script
+
+- On Windows, `scripts/render.mjs` no longer builds a cmd.exe command line. It runs npm's npx script with Node, so a file name or path can't be read as a shell command.
+- `--name` and the composition id must be plain file names, so a render can't land outside `out/`.
+
 ## 2026-11-20, safer HeyGen install
 
 - `references/music.md` now downloads the HeyGen CLI's install script, shows it, then runs it. Before, it piped the script straight into bash, which skipped the "read it first" step its own text asks for.
