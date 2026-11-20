@@ -3,7 +3,7 @@
 ## 2026-11-20, safer HeyGen install
 
 - `references/music.md` now downloads the HeyGen CLI's install script, shows it, then runs it. Before, it piped the script straight into bash, which skipped the "read it first" step its own text asks for.
-- The README shows the skills.sh install count and the check status.
+- The README shows the check status.
 
 ## 2026-11-20, works on its own
 
