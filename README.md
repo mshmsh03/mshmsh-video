@@ -1,6 +1,6 @@
 # mshmsh-video
 
-[![skills.sh](https://skills.sh/b/mshmsh03/mshmsh-video)](https://skills.sh/mshmsh03/mshmsh-video) [![Check](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml/badge.svg)](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml)
+[![Check](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml/badge.svg)](https://github.com/mshmsh03/mshmsh-video/actions/workflows/check.yml)
 
 A Claude skill that makes a whole video with you, from "make me a video" to a finished MP4. It was called video-xoshaka until 2026-11-19. It works in [Remotion](https://www.remotion.dev) (videos written as React code), so every video is a real project you can change and re-render.
 
