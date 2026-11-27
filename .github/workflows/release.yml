@@ -22,9 +22,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build mshmsh-video.zip
         run: |
-          mkdir -p dist/mshmsh-video
-          git archive HEAD | tar -x -C dist/mshmsh-video
-          rm -rf dist/mshmsh-video/.github dist/mshmsh-video/.gitignore dist/mshmsh-video/.gitattributes
+          # The Claude app takes at most 200 files, so the zip is the app copy
+          # (app-zip.sh says what it leaves out). Claude Code installs the full
+          # skill from the repo with npx skills add.
+          bash .github/app-zip.sh dist
           cd dist && zip -qr mshmsh-video.zip mshmsh-video
           # The same zip under the old name, so links shared before the rename
           # still give the current skill.
@@ -38,7 +39,7 @@ jobs:
           cat > notes.md <<NOTES
           The whole skill in one zip, rebuilt on every change to main (this one: ${GITHUB_SHA::7}, $(date -u +%Y-%m-%d)).
 
-          - **Claude app:** download mshmsh-video.zip and upload it in your skill settings. To update, upload the new zip in place of the old one.
+          - **Claude app:** download mshmsh-video.zip and upload it in your skill settings. To update, upload the new zip in place of the old one. The app takes at most 200 files, so this zip leaves out the test cases and the HyperFrames scripts, sounds and fonts, which only run in Claude Code on a PC.
           - **Claude Code:** \`npx skills add mshmsh03/mshmsh-video\`. To update, run the same command again.
 
           The skill was called video-xoshaka until 2026-11-19. If you have that copy, remove it after installing this one (in the Claude app, delete video-xoshaka; in Claude Code, \`npx skills remove video-xoshaka -g\`). video-xoshaka.zip here is the same zip, kept for links shared before the rename.

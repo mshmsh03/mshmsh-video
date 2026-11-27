@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-27, Claude app zip under 200 files
+
+- The Claude app refused the new zip ("Zip contains too many files (maximum 200)"): the full skill has about 490. `mshmsh-video.zip` is now a lighter app copy (about 190 files, built by `.github/app-zip.sh`): it keeps every reference and every HyperFrames guide that plans a video, and leaves out `evals/`, the HyperFrames scripts, sounds, fonts and test files, and the `reverse-any-video` and `remotion-to-hyperframes` guides, which only run with the CLI on a PC. Claude Code still installs the full skill.
+- Every push now checks that the app copy stays under 200 files.
+
 ## 2026-11-27, one skill for everything
 
 mshmsh-video no longer needs any other video skill. Remove the separate ones if you have them (`npx skills remove <name> -g`); `node scripts/doctor.mjs` lists any still installed.
