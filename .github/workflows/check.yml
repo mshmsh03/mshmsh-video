@@ -25,3 +25,5 @@ jobs:
           done
       - name: SKILL.md and the files the docs name
         run: node .github/check-skill.mjs
+      - name: The Claude app copy stays under 200 files
+        run: bash .github/app-zip.sh /tmp/app-zip

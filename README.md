@@ -107,7 +107,7 @@ The author's own example video (with real people in it) is not published. Use `a
 ## Update
 
 - Claude Code: run the install command again, `npx skills add mshmsh03/mshmsh-video`; it replaces the old version. (`npx skills update` on its own only updates skills installed inside one project; for a skill installed for the whole computer it's `npx skills update -g`.)
-- Claude app: download [mshmsh-video.zip](https://github.com/mshmsh03/mshmsh-video/releases/download/latest/mshmsh-video.zip) again and upload it in place of the old one.
+- Claude app: download [mshmsh-video.zip](https://github.com/mshmsh03/mshmsh-video/releases/download/latest/mshmsh-video.zip) again and upload it in place of the old one. The app takes at most 200 files, so the zip is a lighter copy: it plans every kind of video, but the HyperFrames scripts, sounds and fonts and the test cases are left out (they only run in Claude Code).
 - **Had it as video-xoshaka?** That's this skill's old name. Install it under the new name as above, then remove the old copy so the two don't compete: in Claude Code, `npx skills remove video-xoshaka -g` (or delete the `video-xoshaka` folder in `.claude/skills`); in the Claude app, delete the video-xoshaka skill after uploading mshmsh-video.zip. The voice models it already downloaded are reused.
 
 What changed is in [CHANGELOG.md](CHANGELOG.md).

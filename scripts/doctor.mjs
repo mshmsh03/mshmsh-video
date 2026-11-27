@@ -111,7 +111,7 @@ const skillDirs = [join(homedir(), ".claude", "skills"), join(homedir(), ".agent
 const hasSkill = (name) => skillDirs.some((d) => existsSync(join(d, name, "SKILL.md")));
 const bundledHf = new URL("../hyperframes/hyperframes/scripts/plugin-cli.mjs", import.meta.url);
 if (existsSync(bundledHf)) ok("HyperFrames tools", "bundled in this skill: beats, audio sections, capture, transcribe");
-else warn("HyperFrames tools", "this copy of the skill has no hyperframes/ folder: reinstall mshmsh-video");
+else warn("HyperFrames tools", "not in this copy (the Claude app zip leaves them out): build HyperFrames videos in Claude Code, where `npx skills add mshmsh03/mshmsh-video` installs the full skill");
 // Everything these did is now inside this skill; a separate copy competes for the same requests.
 const overlapping = ["hyperframes", "hyperframes-cli", "media-use", "ui-demo", "remotion-best-practices", "remotion-create", "remotion-markup"].filter(hasSkill);
 if (overlapping.length) warn("Overlapping skills", `${overlapping.join(", ")} installed separately; mshmsh-video already includes them`);

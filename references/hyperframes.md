@@ -81,3 +81,5 @@ All in `hyperframes/`, each with a `GUIDE.md` to read first. Inside them, `<SKIL
 | `remotion-to-hyperframes/` | an existing Remotion video (often one made by this skill) should become editable in HyperFrames Studio, checked frame by frame |
 
 Not included: HeyGen's `figma` and `slideshow` guides.
+
+**In the Claude app** (`mshmsh-video.zip`), the copy is lighter, because the app takes at most 200 files: it keeps every guide that plans a video (the `.md` files) but leaves out the HyperFrames scripts, sounds and fonts, and the `reverse-any-video` and `remotion-to-hyperframes` guides. Those only run with the CLI on a PC, so in the app, plan the HyperFrames video there and build it in Claude Code, where the full skill is installed.
