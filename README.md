@@ -64,13 +64,17 @@ The one thing that can't be included is a personal key (Gemini, HeyGen): each pe
 - Optional, for cutting the subject out of a photo: Python 3 with `python -m pip install "rembg[cpu,cli]"`.
 - Recommended: the full ffmpeg for converting phone clips, the review contact sheets, the automatic checks on a render and loudness mastering. Remotion's bundled copy covers the basics. `node scripts/doctor.mjs` says what is missing.
 - Rendering needs the internet for Google Fonts, or the font files saved in the project (setup does that by itself when Google Fonts can't be reached).
-- Optional: the HyperFrames skills (`npx skills add https://github.com/heygen-com/hyperframes --skill hyperframes`, plus `--skill hyperframes-cli`) and Node.js 22+, for the HyperFrames engine and its file tools: beat and section detection for music, loudness checks, website capture (screenshots, colours, fonts, logos), transcription and background removal. HyperFrames sends usage data to HeyGen unless you turn it off (`HYPERFRAMES_NO_TELEMETRY=1`).
+- Optional: Node.js 22+ for the HyperFrames engine and its file tools, which come with this skill (no separate install): beat and section detection for music, loudness checks, website capture (screenshots, colours, fonts, logos), transcription and background removal. The first use downloads the HyperFrames CLI through npx. This skill keeps HeyGen's usage data off (`HYPERFRAMES_NO_TELEMETRY=1`) and never sends usage events or feedback reports.
 
-## Skills that work well with it
+## One skill, nothing else to install
 
-- [Remotion's own skills](https://github.com/remotion-dev/skills), which this skill leans on for Remotion itself: `npx skills add remotion-dev/skills`
-- [auto-editor's skills](https://github.com/WyattBlue/auto-editor), for cutting raw footage into a timeline for DaVinci Resolve, Premiere, Final Cut Pro, Shotcut or Kdenlive: `npx skills add WyattBlue/auto-editor` (public domain)
-- The HyperFrames skills, for the second engine (under "What you need")
+Everything a video needs is inside this skill, so you don't need any other video skill (and a second one would compete with it for the same requests):
+
+- **Remotion:** `references/remotion/` covers Remotion itself (timing, transitions, effects, colour, Kurdish and Arabic text, fonts, sound, clips, captions, Studio editing, renders, editor timelines, maps and 3D flights, apps). It was written for this skill in its own words, so you don't need Remotion's separate skills.
+- **HyperFrames:** HeyGen's guides and tools ship in `hyperframes/`: the engine, its CLI, about 450 ready-made blocks, media-use (real logos, icons, images, voice, colour grades), rebuilding any video as an editable project, proven explainer styles, and turning a Remotion video into an editable one.
+- **Screen recordings:** `references/screen-demo.md` records a real site or app with Playwright.
+
+If you installed any of those separately before (`hyperframes`, `hyperframes-cli`, `media-use`, `ui-demo`, `remotion-*`), you can remove them: `npx skills remove <name> -g`. `node scripts/doctor.mjs` lists any that are still there.
 
 ## How a video is made
 
@@ -89,7 +93,9 @@ The one thing that can't be included is a personal key (Gemini, HeyGen): each pe
 | Path | What it is |
 | --- | --- |
 | `SKILL.md` | The skill: the workflow and principles |
-| `references/` | The interview, styles and safe zones, storylines and scripting and comedy, the design file and gates, motion, production notes, music and sound design, the review pass, coming back to a video and brand kits, HyperFrames, toolbox |
+| `references/` | The interview, styles and safe zones, storylines and scripting and comedy, the design file and gates, motion, production notes, music and sound design, the review pass, coming back to a video and brand kits, HyperFrames, screen recordings, toolbox |
+| `references/remotion/` | Remotion itself, one file per topic, with an index |
+| `hyperframes/` | HeyGen's HyperFrames guides, scripts and assets (Apache-2.0, see `hyperframes/NOTICE.md`) |
 | `scripts/` | Project setup (look from the design file, fonts saved locally), a doctor check, storyboard-to-script sync, a pronunciation check, one numbered voice-samples file with what each voice may be used for, narration with word timings (Kokoro, Supertonic, Pocket TTS including a copy of your own voice, Gemini, Edge TTS, Sorani F5, your own recording cleaned and timed from a transcript, or draft timings with no voice), noise removal, speech-to-text captions, pause cutting and photo cut-outs, the free music, sound-effect and animated-emoji libraries, beat-grid timing for videos without a narrator, HeyGen music search, stills and review contact sheets, the automatic review check, versioned renders, audio check and loudness mastering |
 | `assets/template/` | Starter project: a timeline built from the script, layouts per format and platform, captions, placeholders, titles, end card, photo fill, photo card, device mockups with screenshots and screen recordings, cursor, stamp, terminal, counter, animated emoji, talking clips with the pauses cut, sound effects |
 | `evals/` | Test cases for the skill (`claude plugin eval .` runs them) |
@@ -114,8 +120,11 @@ What changed is in [CHANGELOG.md](CHANGELOG.md).
 
 ## Credits
 
-The storyline, design-spec, motion, sound, caption and review rules are adapted from HeyGen's [HyperFrames](https://github.com/heygen-com/hyperframes) skills (Apache-2.0), rewritten for this Remotion pipeline.
+- The storyline, design-spec, motion, sound, caption and review rules are adapted from HeyGen's [HyperFrames](https://github.com/heygen-com/hyperframes) skills (Apache-2.0), rewritten for this Remotion pipeline.
+- `hyperframes/` holds seven of HeyGen's HyperFrames skills (`hyperframes`, `hyperframes-cli`, `hyperframes-registry`, `media-use`, `reverse-any-video`, `style-sampling`, `remotion-to-hyperframes`), copyright HeyGen, Apache-2.0, from commit 4c92e37 (2026-11-27). They were changed to work inside this skill and to never send usage data; every changed file is listed in `hyperframes/NOTICE.md`.
+- `references/remotion/` was written for this skill in its own words from what [Remotion](https://www.remotion.dev)'s public agent skills teach (4.0.547). Remotion's API names belong to Remotion; Remotion itself has its own licence (see "What you need").
+- `references/screen-demo.md` is adapted from the `ui-demo` skill by affaan-m ([affaan-m/ecc](https://github.com/affaan-m/ecc), MIT).
 
 ## License
 
-MIT. See `LICENSE`.
+MIT for this skill (see `LICENSE`), except `hyperframes/`, which stays Apache-2.0 (see `hyperframes/LICENSE` and `hyperframes/NOTICE.md`).

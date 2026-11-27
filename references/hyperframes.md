@@ -1,10 +1,11 @@
 # HyperFrames: a second engine, and file tools for any video
 
-HyperFrames is HeyGen's open-source video engine (Apache-2.0): it renders HTML, CSS and GSAP to video frame by frame, with its own CLI, a Studio preview and a desktop app where people edit the video themselves. Its two skills, `hyperframes` and `hyperframes-cli`, were installed and read on 2026-11-17. This file covers when to build a video in it instead of Remotion, how this skill's pipeline maps onto it, and the CLI commands that help a Remotion video too. Its craft rules (storylines, numbers instead of adjectives, motion, sound, review) are already folded into this skill's other references.
+HyperFrames is HeyGen's open-source video engine (Apache-2.0): it renders HTML, CSS and GSAP to video frame by frame, with its own CLI, a Studio preview and a desktop app where people edit the video themselves. HeyGen's own guides for it ship inside this skill, in `hyperframes/` (Apache-2.0, copyright HeyGen; what was changed is in `hyperframes/NOTICE.md`): `hyperframes` (the engine), `hyperframes-cli` (the commands), `hyperframes-registry` (about 450 ready-made blocks), `media-use` (logos, icons, images, voice, grades), `reverse-any-video`, `style-sampling` and `remotion-to-hyperframes`. Each folder's `GUIDE.md` is its entry point. No separate HyperFrames skill is needed or wanted. This file covers when to build a video in it instead of Remotion, how this skill's pipeline maps onto it, and the CLI commands that help a Remotion video too. Its craft rules (storylines, numbers instead of adjectives, motion, sound, review) are already folded into this skill's other references.
 
 ## Contents
 - Remotion or HyperFrames
 - Setup and telemetry
+- The bundled guides
 - Building a video in HyperFrames
 - File tools for any engine (tested on Windows)
 
@@ -20,18 +21,22 @@ Build in HyperFrames when:
 
 Say which engine and why in one line of the brief recap, and record it as `Engine:` in `brief.md`. Everything else in this skill stays the same in either engine: the interview, `brief.md`, `design.md`, the storylines, `story.json`, `STORYBOARD.md`, the gates, voice samples and `make-voice.mjs`, music, the review and the delivery. Only the build, preview, checks and render change.
 
-If the `hyperframes` skill loads alongside this one for a video request, this skill still runs the workflow; HyperFrames is only the engine.
+This skill always runs the workflow; HyperFrames is only the engine. If a separate HyperFrames skill is still installed, `scripts/doctor.mjs` warns: remove it, since everything it did is here.
 
 ## Setup and telemetry
 
-- **Install:** `npx skills add https://github.com/heygen-com/hyperframes --skill hyperframes -g` and the same with `--skill hyperframes-cli`. `hyperframes-cli` alone doesn't work: it runs everything through the main skill's launcher. Needs Node.js 22+ and ffmpeg.
-- **Running the CLI.** Their docs write `npx hyperframes <command>`; run it as `node "<skills>/hyperframes/scripts/plugin-cli.mjs" <command>` from the project folder, where `<skills>` is the folder the skill is installed in (`~/.claude/skills` for a Claude Code global install). Below it is written `hf`. The launcher starts npm from the home folder, so a project's own `package.json` or `.npmrc` can't swap the CLI, then runs the newest `hyperframes` from npm (0.9.58 on 2026-11-17) inside the project.
-- **Telemetry.** HyperFrames sends usage counts to HeyGen, linked to the person's HeyGen account once they sign in, and its skills tell the agent to send a usage event when a skill starts and feedback reports after renders. Tell the person and offer to turn it off: `hf telemetry disable` plus the user environment variable `HYPERFRAMES_NO_TELEMETRY=1` (or `DO_NOT_TRACK=1`). With it off, skip the usage event and the `feedback` reports. On the author's PC it has been off since 2026-11-17.
+- **Install:** nothing to install beyond this skill. Needs Node.js 22+ and ffmpeg. The first command downloads the CLI through npx (about a minute). Never run `npx skills add` for a HyperFrames skill, `hf skills` or `hf skills update`: they would install the separate copies this skill replaces.
+- **Running the CLI.** Their docs write `npx hyperframes <command>`; run it through the bundled launcher, from the project folder (never from the skill folder):
+  - Bash: `HYPERFRAMES_NO_TELEMETRY=1 HYPERFRAMES_SKIP_SKILLS=1 node "<this skill>/hyperframes/hyperframes/scripts/plugin-cli.mjs" <command>`
+  - PowerShell: `$env:HYPERFRAMES_NO_TELEMETRY='1'; $env:HYPERFRAMES_SKIP_SKILLS='1'; node "$HOME\.claude\skills\mshmsh-video\hyperframes\hyperframes\scripts\plugin-cli.mjs" <command>`
+
+  `<this skill>` is this skill's folder (`~/.claude/skills/mshmsh-video` for a Claude Code global install). Below, the launcher is written `hf`. It starts npm from the home folder, so a project's own `package.json` or `.npmrc` can't swap the CLI, then runs the newest `hyperframes` from npm (0.9.102 on 2026-11-27) inside the project. `HYPERFRAMES_SKIP_SKILLS=1` stops the CLI installing HeyGen's separate skills. Helper scripts from the guides run as `hf --script "<this skill>/hyperframes/<guide>/scripts/<file>.mjs" ...`. `hf init` always gets `--skip-skills`. Don't add a `plugin.json` to this skill's root: the launcher reads it and refuses to start unless its name is `hyperframes`.
+- **Telemetry.** mshmsh-video never sends usage events or feedback reports; the bundled guides were edited to drop those steps, and the commands above keep telemetry off. Two things still report usage when telemetry is on: the CLI (to HeyGen, linked to the person's HeyGen account once they sign in) and media-use's `transcribe.mjs`, `transcript-cut.mjs` and `audio-duck.mjs` (to PostHog). Both go quiet with `HYPERFRAMES_NO_TELEMETRY=1` or `DO_NOT_TRACK=1`, or `telemetryEnabled: false` in `~/.hyperframes/config.json` (`hf telemetry disable` writes it). Tell the person once and set the user environment variable so it stays off. Never run `hf events` or `hf feedback`. On the author's PC it has been off since 2026-11-17.
 - **Things that leave the PC or read private data.** `hf audio --quality best` and `hf transcribe --engine heygen` upload to HeyGen and can bill the account; the defaults run locally. `hf usage` reads the Claude Code login on the PC to report plan usage; run it only when the person asks how much of their plan is left.
 
 ## Building a video in HyperFrames
 
-1. **Read their skills first:** the `hyperframes` SKILL.md (the render contract and the work loop) and the reference its table names for the video's type, plus `hyperframes-cli` for the commands. They are the source of truth and the CLI updates itself, so build from them, not from this summary.
+1. **Read the bundled guides first:** `hyperframes/hyperframes/GUIDE.md` (the render contract and the work loop) and the reference its table names for the video's type, plus `hyperframes/hyperframes-cli/GUIDE.md` for the commands. Before hand-building a named visual (a transition, kinetic type, a chart, a map overlay), search the registry (`hyperframes/hyperframes-registry/GUIDE.md`). They are the source of truth for the engine, so build from them, not from this summary. The CLI updates itself from npm while the guides are a copy from 2026-11-27: if a command or flag in a guide fails, trust `hf <command> --help`.
 2. **Start the project:** `hf init <dir> --skip-skills` for a blank one, or `hf capture <url> -o <dir> --json` when a website is the subject. A new project is 1920×1080 at 30 fps; set the size from the format in `brief.md`.
 3. **Carry this skill's files across:**
    - `design.md` → the root's composition variables (palette and fonts as `data-composition-variables`, used as `var(--color-accent)`), so the person can re-brand from Studio.
@@ -57,6 +62,22 @@ These work on plain files, so a Remotion video can use them too. Run them from t
 | A website's screenshots, colours, fonts, logos and words | `hf capture <url> -o <scratch>/capture/<site> --skip-vision --json` | About 70 s (tested). Writes `screenshots/full-page.png` (1920 wide) and scroll shots, logos and images in `assets/`, the font files in `assets/fonts/`, `extracted/tokens.json` (colours and CSS variables), `extracted/visible-text.txt` (their real copy). It also writes a HyperFrames scaffold with `CLAUDE.md`, `AGENTS.md` and `.cursorrules`, so never capture into a Remotion project's root: capture to a scratch folder and copy what you need into `public/`. Exit code not 0, `ok: false` or a `BLOCKED.md` means it failed: use nothing from it. Brand rules: production.md, "Screenshots and app images". |
 | Word timings for the person's own recording (make-voice already times a recorded English take itself, and `transcribe.mjs` captions any clip offline: toolbox.md, "Editing tools") | `hf transcribe <file> --model small --language <code> --json` | The default model, `small.en`, **translates** other languages into English: always pass `--model` and `--language` for non-English speech, `--model medium.en` for English over music. It invents "Thank you." over silence; more than 20% `♪` or `�` tokens means it failed. Convert the words to Remotion's `Caption` type (`startMs`, `endMs`). Not tested here, and not tested on Kurdish. |
 | A cut-out of the person (text behind the speaker) | `hf remove-background clip.mp4 -o public/photos/me-cutout.webm` | Transparent WebM. Downloads a 168 MB model on first run and runs at about 2 fps at 1080p on a CPU, so trim the clip first. In Remotion stack the clip, then the text, then the cut-out (`<OffthreadVideo transparent>`). Not tested here. |
-| A flight to a real place on satellite imagery | `node "<skills>/hyperframes/scripts/bake-basemap.mjs"` with `NAME`, `CENTER="lng,lat"`, `ZSTART`, `ZEND`, `DUR` (and `PROJECTION=globe FROM=...` for space to street) | Records MapLibre over Esri satellite or Carto tiles to an MP4 plus `<NAME>-coords.json` (border points in screen pixels), which a Remotion scene plays as a clip with live pins and labels on top. Needs `puppeteer-core`, `npx puppeteer browsers install chrome-headless-shell` and network; one bake at a time. Credit the imagery on screen ("Esri, Maxar, Earthstar Geographics" or "© CARTO, © OpenStreetMap"). `--help` lists the rest. Not tested here; `remotion-maps` is the in-Remotion alternative. |
+| A flight to a real place on satellite imagery | `node "<this skill>/hyperframes/hyperframes/scripts/bake-basemap.mjs"` with `NAME`, `CENTER="lng,lat"`, `ZSTART`, `ZEND`, `DUR` (and `PROJECTION=globe FROM=...` for space to street) | Records MapLibre over Esri satellite or Carto tiles to an MP4 plus `<NAME>-coords.json` (border points in screen pixels), which a Remotion scene plays as a clip with live pins and labels on top. Needs `puppeteer-core`, `npx puppeteer browsers install chrome-headless-shell` and network; one bake at a time. Credit the imagery on screen ("Esri, Maxar, Earthstar Geographics" or "© CARTO, © OpenStreetMap"). `--help` lists the rest. Not tested here; `references/remotion/maps.md` is the in-Remotion alternative. |
 
 The other media commands (`media-treatment`, `normalize-audio`, `grade-compare`) work on HyperFrames projects only.
+
+## The bundled guides
+
+All in `hyperframes/`, each with a `GUIDE.md` to read first. Inside them, `<SKILLS>` means this skill's `hyperframes/` folder, and a mention of another guide's `SKILL.md` means its `GUIDE.md`.
+
+| Guide | Read it when |
+| --- | --- |
+| `hyperframes/` | building or editing any video in HyperFrames: the render contract, the work loop, references per video type, 13 ready-made frame looks in `assets/frame-presets/` |
+| `hyperframes-cli/` | running any `hf` command: init, lint, check, preview, render, timeline, capture, beats, audio, transcribe, upkeep |
+| `hyperframes-registry/` | a named visual is needed (transition, overlay, title, kinetic type, captions, chart, map overlay, 3D, camera move): about 450 blocks installed as editable source |
+| `media-use/` | a real logo, icon, image, sound, voice, colour grade or LUT, background removal, transcript cuts, ducking music under speech (`resolve` and its ledger); also when footage looks dark, flat or boring |
+| `reverse-any-video/` | the person wants a video rebuilt or recreated as an editable project, checked frame by frame against the original |
+| `style-sampling/` | "an episode in the style of ...": five proven explainer styles (collage, finance, science, 3D brand, true crime) on the person's topic |
+| `remotion-to-hyperframes/` | an existing Remotion video (often one made by this skill) should become editable in HyperFrames Studio, checked frame by frame |
+
+Not included: HeyGen's `figma` and `slideshow` guides.

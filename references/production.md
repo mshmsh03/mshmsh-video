@@ -37,8 +37,8 @@ Google's font repository into `public/fonts/` and loads them with
 project. On an older project, `--update` replaces the shared components and
 scripts (with a backup) and leaves the per-video files alone.
 
-By hand, if the script isn't there: follow the `remotion-create` skill to
-scaffold (blank, no Tailwind), then:
+By hand, if the script isn't there: scaffold as in `remotion/setup-and-upkeep.md`
+(blank, no Tailwind), then:
 
 ```bash
 npx remotion add @remotion/transitions @remotion/google-fonts @remotion/media @remotion/captions
@@ -71,7 +71,7 @@ Then `node scripts/make-voice.mjs --draft` for timings before the voice.
 Download the sound effects you'll use into `public/sfx/` (`curl -sfo
 public/sfx/<name>.wav https://remotion.media/<name>.wav`). Good ones are
 `whoosh`, `mouse-click`, `record-scratch`, `vine-boom`, `windows-xp-error` and
-`ding`. The full list is in the remotion-markup skill's `sfx.md`.
+`ding`. The full list is in `remotion/audio.md`.
 
 Voice: run `node scripts/voice-samples.mjs "<a line from their story>" --voices
 kokoro,supertonic,pocket` (setup-project installs `sherpa-onnx-node` for
@@ -223,7 +223,7 @@ With no voice, `make-voice.mjs` is skipped and nothing else sets the scene lengt
 
 When the person (or their staff) will change words, prices or the monthly offer themselves after delivery:
 
-- **Remotion:** a Zod `schema` on the `<Composition>` with `defaultProps` turns every field into a form in Remotion Studio's props panel, and saving there writes the values back to the code (`remotion-interactivity`). It needs Node and the Studio running on their PC; a double-click `.bat` that starts the Studio and another that renders to a new file name help a non-coder.
+- **Remotion:** a Zod `schema` on the `<Composition>` with `defaultProps` turns every field into a form in Remotion Studio's props panel, and saving there writes the values back to the code (`remotion/interactivity.md`, `remotion/project-compositions.md`). It needs Node and the Studio running on their PC; a double-click `.bat` that starts the Studio and another that renders to a new file name help a non-coder.
 - **HyperFrames:** the same fields as composition variables, edited in its Studio or desktop app, which also lets them move and trim clips on a timeline (hyperframes.md, "Remotion or HyperFrames").
 - **Either way, timing doesn't follow their edits.** Cap each field's length, hold every line long enough for its longest allowed text, let text shrink between its design size and a floor (never under 28 px at 1080 wide), and give a field that can be empty (no offer this month) a fixed fallback. Don't narrate editable text: a recorded line can't change when the text does. Test the longest allowed text and the empty case in the review sheets before delivery.
 

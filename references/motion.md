@@ -102,7 +102,7 @@ Build these inside the scenes (the outgoing scene ends on the move, the incoming
 | An animated emoji or icon | `<Emoji>` (Google's animated emoji, `free-emoji.mjs get <name>`), or a Lottie file through `@remotion/lottie`; both follow the frame, unlike a GIF from the web (toolbox.md, "Animation resources") |
 | Remove pauses from a talking clip | `cut-silence.mjs`, then `<CutClip>` plays the kept parts (toolbox.md, "Editing tools") |
 
-CSS `transition`, CSS `animation` and Tailwind animation classes do not render in Remotion (remotion-markup); drive everything from `useCurrentFrame()`.
+CSS `transition`, CSS `animation` and Tailwind animation classes do not render in Remotion (`remotion/animation-timing.md`); drive everything from `useCurrentFrame()`.
 
 ## Moves that look generated
 

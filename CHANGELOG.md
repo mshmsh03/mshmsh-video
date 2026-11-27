@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-27, one skill for everything
+
+mshmsh-video no longer needs any other video skill. Remove the separate ones if you have them (`npx skills remove <name> -g`); `node scripts/doctor.mjs` lists any still installed.
+
+- **Remotion, built in.** `references/remotion/` (23 topic files and an index) covers Remotion itself: timing and transitions, effects, light leaks and colour, Kurdish and Arabic text animated by hand, fonts, images, GIFs and Lottie, sound, clips and cut-outs, captions, compositions and props forms, Studio editing, renders and transparent video, OpenTimelineIO exports for Resolve and Premiere, 2D maps and 3D flights, Elements and apps. Written for this skill in its own words (Remotion's skills have no licence to copy), from Remotion 4.0.547. Where Remotion's general advice and this pipeline differ, the index says which wins and why.
+- **HyperFrames, built in.** Seven of HeyGen's skills ship in `hyperframes/` (Apache-2.0, credited, changes listed in `hyperframes/NOTICE.md`): the engine, its CLI, the registry of about 450 ready-made blocks, media-use, reverse-any-video (rebuild any video as an editable project), style-sampling (five proven explainer styles) and remotion-to-hyperframes. The CLI runs through the bundled launcher; tested on Windows 11 (HyperFrames 0.9.102).
+- **Telemetry stays off.** The bundled guides no longer send usage events or feedback reports, and the documented commands keep `HYPERFRAMES_NO_TELEMETRY=1` set.
+- **Screen recordings.** `references/screen-demo.md`, adapted from the `ui-demo` skill (MIT), records a real site or app with Playwright and places it in a device frame.
+- `doctor.mjs` checks the bundled tools and warns about separately installed video skills. The repo check now covers `references/remotion/` and `hyperframes/`.
+
 ## 2026-11-20, safer render script
 
 - On Windows, `scripts/render.mjs` no longer builds a cmd.exe command line. It runs npm's npx script with Node, so a file name or path can't be read as a shell command.

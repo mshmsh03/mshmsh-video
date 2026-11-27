@@ -29,8 +29,8 @@ People notice and say "the music is not nice". Use real music:
    -24 dBFS between lines, and an offset past any silence at the start). The
    moods come from the titles and a tempo and loudness measurement, not from
    listening, so always preview.
-2. **HeyGen's catalog** through the `media-use` skill
-   (`npx skills add heygen-com/hyperframes@media-use -g -y`). It has thousands of
+2. **HeyGen's catalog** through media-use, bundled in this skill
+   (`hyperframes/media-use/GUIDE.md`). It has thousands of
    royalty-free tracks searchable by mood, free with a HeyGen sign-in.
 3. ElevenLabs Music (`elevenlabs/skills@music`): composed to a prompt, but needs
    a paid API key.
