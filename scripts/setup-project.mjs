@@ -23,11 +23,12 @@
 // replaces in .mshmsh-video-backup/<time>/.
 
 import { execFileSync, execSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeSfx } from "./make-sfx.mjs";
+import { moveScaffoldIn, scaffoldClash, subsetsFor } from "./setup-lib.mjs";
 
 const SKILL = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TEMPLATE = join(SKILL, "assets", "template", "src");
@@ -70,17 +71,14 @@ const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 // scaffolds next door and the project is moved in around those files.
 if (!existsSync(join(DIR, "package.json"))) {
   const existing = existsSync(DIR) ? readdirSync(DIR) : [];
-  const SCAFFOLD = new Set(["package.json", "package-lock.json", "node_modules", "src", "public", "tsconfig.json", "remotion.config.ts", ".gitignore", ".prettierrc", "eslint.config.mjs", "README.md"]);
-  const clash = existing.filter((name) => SCAFFOLD.has(name));
+  const clash = scaffoldClash(existing);
   if (clash.length) throw new Error(`${DIR} already has ${clash.join(", ")} but no package.json: move those out or pick a new folder`);
   mkdirSync(dirname(DIR), { recursive: true });
   const temp = `${basename(DIR)}-scaffold-${STAMP}`;
   log(`Scaffolding a blank Remotion project in ${DIR}${existing.length ? ` (keeping ${existing.join(", ")})` : ""}`);
   npx(["create-video@latest", "--yes", "--blank", "--no-tailwind", temp], dirname(DIR));
   mkdirSync(DIR, { recursive: true });
-  for (const name of readdirSync(join(dirname(DIR), temp))) {
-    renameSync(join(dirname(DIR), temp, name), join(DIR, name));
-  }
+  moveScaffoldIn(join(dirname(DIR), temp), DIR);
   rmSync(join(dirname(DIR), temp), { recursive: true, force: true });
   // create-video names the package after its folder.
   const scaffolded = readJson(join(DIR, "package.json"));
@@ -311,7 +309,8 @@ if (!existsSync(themePath)) {
       }
       const cap = role.key[0].toUpperCase() + role.key.slice(1);
       imports.add(`import { loadFont as load${cap} } from "@remotion/google-fonts/${g.id}";`);
-      const subset = g.info?.subsets?.includes(role.subset) ? `, subsets: ["${role.subset}"]` : "";
+      const subsets = subsetsFor(role, g);
+      const subset = subsets.length ? `, subsets: [${subsets.map((s) => `"${s}"`).join(", ")}]` : "";
       loads.push(`const { fontFamily: ${role.key}Family } = load${cap}("normal", { weights: [${pickWeights(g.info, role.weights).map((w) => `"${w}"`).join(", ")}]${subset} });`);
       family[role.key] = `\${${role.key}Family}`;
     }
@@ -343,7 +342,8 @@ mkdirSync(join(DIR, "scripts"), { recursive: true });
 for (const name of readdirSync(join(SKILL, "scripts"))) {
   // Scripts, and free-assets.json: the voice and music scripts read it.
   if (!/\.(mjs|py)$/.test(name) && name !== "free-assets.json") continue;
-  if (name === "setup-project.mjs") continue;
+  // The two that only run from the skill's own copy.
+  if (name === "setup-project.mjs" || name === "setup-lib.mjs") continue;
   const to = join(DIR, "scripts", name);
   if (existsSync(to)) {
     if (!UPDATE || readFileSync(to, "utf8") === readFileSync(join(SKILL, "scripts", name), "utf8")) continue;
