@@ -23,11 +23,12 @@
 // replaces in .mshmsh-video-backup/<time>/.
 
 import { execFileSync, execSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeSfx } from "./make-sfx.mjs";
+import { lacksSorani, moveScaffoldIn, scaffoldClash, subsetsFor } from "./setup-lib.mjs";
 
 const SKILL = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TEMPLATE = join(SKILL, "assets", "template", "src");
@@ -66,22 +67,23 @@ const npm = (args, cwd) =>
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 
 // 1. Remotion itself. The folder may already hold the plan (brief.md,
-// design.md, STORYBOARD.md...): create-video wants an empty folder, so it
-// scaffolds next door and the project is moved in around those files.
+// design.md, STORYBOARD.md...) and the person's photos in public/photos:
+// create-video wants an empty folder, so it scaffolds next door and the
+// project is moved in around those files.
 if (!existsSync(join(DIR, "package.json"))) {
   const existing = existsSync(DIR) ? readdirSync(DIR) : [];
-  const SCAFFOLD = new Set(["package.json", "package-lock.json", "node_modules", "src", "public", "tsconfig.json", "remotion.config.ts", ".gitignore", ".prettierrc", "eslint.config.mjs", "README.md"]);
-  const clash = existing.filter((name) => SCAFFOLD.has(name));
+  const clash = scaffoldClash(existing);
   if (clash.length) throw new Error(`${DIR} already has ${clash.join(", ")} but no package.json: move those out or pick a new folder`);
   mkdirSync(dirname(DIR), { recursive: true });
   const temp = `${basename(DIR)}-scaffold-${STAMP}`;
   log(`Scaffolding a blank Remotion project in ${DIR}${existing.length ? ` (keeping ${existing.join(", ")})` : ""}`);
   npx(["create-video@latest", "--yes", "--blank", "--no-tailwind", temp], dirname(DIR));
   mkdirSync(DIR, { recursive: true });
-  for (const name of readdirSync(join(dirname(DIR), temp))) {
-    renameSync(join(dirname(DIR), temp, name), join(DIR, name));
-  }
+  // Around what is already there: public/ with the person's photos is merged,
+  // and a file of theirs is never replaced.
+  const stayed = moveScaffoldIn(join(dirname(DIR), temp), DIR);
   rmSync(join(dirname(DIR), temp), { recursive: true, force: true });
+  if (stayed.length) notes.push(`Kept your own ${stayed.join(", ")}: the blank project's file of the same name was left out.`);
   // create-video names the package after its folder.
   const scaffolded = readJson(join(DIR, "package.json"));
   writeFileSync(join(DIR, "package.json"), `${JSON.stringify({ ...scaffolded, name: basename(DIR).toLowerCase().replace(/[^a-z0-9-]+/g, "-") }, null, 2)}\n`);
@@ -210,7 +212,7 @@ const parseDesign = (path) => {
       (/sorani|kurdish/i.test(scriptPart) ? "IBM Plex Sans Arabic" : /arabic/i.test(scriptPart) ? "Noto Kufi Arabic" : undefined),
   };
   for (const k of Object.keys(fonts)) if (!fonts[k]) delete fonts[k];
-  return { named, fonts };
+  return { named, fonts, kurdish: /sorani|kurdish/i.test(scriptPart) };
 };
 const mix = (a, b, t) => {
   const rgb = (h) => (h.length === 4 ? [...h.slice(1)].map((c) => parseInt(c + c, 16)) : [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)));
@@ -264,6 +266,9 @@ if (!existsSync(themePath)) {
   if (!design?.fonts?.heading && !brand?.fonts?.heading) notes.push("No design.md fonts: theme.ts has the template's look (Space Grotesk, near-black), which is on the banned list for anything but the funny story. Write design.md first, or edit theme.ts.");
   const scriptName = design?.fonts?.script ?? brand?.fonts?.script ?? SCRIPT_FONT;
   chosenScriptFont = scriptName;
+  // The video's script, for which letters each font loads: --script, else what
+  // design.md's "script support" says, else Arabic when a script font is named.
+  const videoScript = SCRIPT !== "latin" ? SCRIPT : design?.kurdish ? "sorani" : scriptName ? "arabic" : "latin";
   const n = design?.named ?? {};
   const background = n.background ?? n.bg ?? brand?.colors?.background ?? "#141413";
   const text = n.text ?? n.ink ?? brand?.colors?.text ?? "#F5F1E8";
@@ -287,6 +292,7 @@ if (!existsSync(themePath)) {
   const imports = new Set();
   const loads = [];
   const family = {};
+  const ownArabic = [];
   for (const role of roles) {
     let done = false;
     if (LOCAL_FONTS) {
@@ -311,7 +317,12 @@ if (!existsSync(themePath)) {
       }
       const cap = role.key[0].toUpperCase() + role.key.slice(1);
       imports.add(`import { loadFont as load${cap} } from "@remotion/google-fonts/${g.id}";`);
-      const subset = g.info?.subsets?.includes(role.subset) ? `, subsets: ["${role.subset}"]` : "";
+      const subsets = subsetsFor(role, g, videoScript);
+      if (role.key !== "script" && subsets.includes("arabic")) ownArabic.push(role.key);
+      if (role.key !== "script" && videoScript === "sorani" && lacksSorani(g)) {
+        notes.push(`"${role.name}" isn't on the checked list of fonts with every Sorani letter (production.md), so Kurdish words in ${role.key}Font come from ${scriptName}. For Kurdish in its own font, name one from that list in design.md.`);
+      }
+      const subset = subsets.length ? `, subsets: [${subsets.map((s) => `"${s}"`).join(", ")}]` : "";
       loads.push(`const { fontFamily: ${role.key}Family } = load${cap}("normal", { weights: [${pickWeights(g.info, role.weights).map((w) => `"${w}"`).join(", ")}]${subset} });`);
       family[role.key] = `\${${role.key}Family}`;
     }
@@ -325,7 +336,9 @@ if (!existsSync(themePath)) {
     "",
     ...loads,
     "",
-    family.script ? "// Latin letters from the Latin fonts, Arabic-script letters (Kurdish, Arabic) from the script font." : null,
+    family.script
+      ? `// Latin letters from the Latin fonts, Arabic-script letters (Kurdish, Arabic) from the script font${ownArabic.length ? `; ${ownArabic.map((key) => `${key}Font`).join(" and ")} from ${ownArabic.length > 1 ? "their" : "its"} own font, which has them` : ""}.`
+      : null,
     `export const headingFont = ${stack("heading", "sans-serif")};`,
     `export const monoFont = ${stack("mono", "monospace")};`,
     family.body ? `export const bodyFont = ${stack("body", "sans-serif")};` : null,
@@ -343,7 +356,8 @@ mkdirSync(join(DIR, "scripts"), { recursive: true });
 for (const name of readdirSync(join(SKILL, "scripts"))) {
   // Scripts, and free-assets.json: the voice and music scripts read it.
   if (!/\.(mjs|py)$/.test(name) && name !== "free-assets.json") continue;
-  if (name === "setup-project.mjs") continue;
+  // The two that only run from the skill's own copy.
+  if (name === "setup-project.mjs" || name === "setup-lib.mjs") continue;
   const to = join(DIR, "scripts", name);
   if (existsSync(to)) {
     if (!UPDATE || readFileSync(to, "utf8") === readFileSync(join(SKILL, "scripts", name), "utf8")) continue;
@@ -355,6 +369,8 @@ for (const name of readdirSync(join(SKILL, "scripts"))) {
 if (SCRIPT === "sorani") {
   mkdirSync(join(DIR, "tts"), { recursive: true });
   for (const name of readdirSync(join(SKILL, "scripts", "sorani"))) {
+    // Files only: Python leaves a __pycache__ folder beside scripts it has compiled.
+    if (!statSync(join(SKILL, "scripts", "sorani", name)).isFile()) continue;
     const to = join(DIR, "tts", name);
     if (!existsSync(to)) {
       copyFileSync(join(SKILL, "scripts", "sorani", name), to);
