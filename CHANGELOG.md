@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-28, three fixes from the first video made with the all-in-one skill
+
+- **Setup keeps a `public/` folder that is already there.** The interview has the person's photos put in `public/photos` before the project exists, and `setup-project.mjs` then refused the folder ("already has public but no package.json"). The blank project now moves in around it, and a file of the person's is never replaced.
+- **A whole script in one Gemini request.** Gemini's free tier allowed ten speech requests a day for each model (2026-11-19), and make-voice spends one a scene. New: `scripts/gemini-take.mjs` speaks every scene in a single request (it checks what could fail before spending it, and never writes over a take), and `scripts/split-take.mjs` cuts the take at its pauses into `out/voice-raw/<id>.wav` for `"voice": "recorded"`. A one-scene take (`--only <id>`, for a line that changed) is saved as that scene's file; the splitter two videos had borrowed crashed on those. Both run on Node alone, no Python.
+- **A body or heading font with Arabic letters loads them.** `design.md`'s "body IBM Plex Sans Arabic" was loaded with its Latin letters only, so Kurdish in `bodyFont` quietly came from the script font. In a Kurdish video this goes for the fonts checked to have every Sorani letter; for any other, setup keeps Kurdish in the script font and says so in a note. A project set up before today keeps its `theme.ts`: add `"arabic"` to that font's `subsets` by hand.
+- Gemini's voices are no longer "tested against a mock only": two Sorani videos used them against Google itself (`references/toolbox.md`, "Voice").
+- The repo now has tests (`.github/tests/`, run on every push): setup's offline steps, and the one-take route against a stand-in for Google's API, with no key and no internet.
+
 ## 2026-11-27, Claude app zip under 200 files
 
 - The Claude app refused the new zip ("Zip contains too many files (maximum 200)"): the full skill has about 490. `mshmsh-video.zip` is now a lighter app copy (about 190 files, built by `.github/app-zip.sh`): it keeps every reference and every HyperFrames guide that plans a video, and leaves out `evals/`, the HyperFrames scripts, sounds, fonts and test files, and the `reverse-any-video` and `remotion-to-hyperframes` guides, which only run with the CLI on a PC. Claude Code still installs the full skill.

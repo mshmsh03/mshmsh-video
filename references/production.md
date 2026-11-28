@@ -23,8 +23,9 @@ node <skill>/scripts/setup-project.mjs <projects>/<video-name> --format 9:16 --p
 #   --no-kokoro                            skip the Kokoro package (an Edge, Sorani or no-voice video)
 ```
 
-It scaffolds a blank Remotion project around the plan files already in the
-folder (`brief.md`, `design.md`, `STORYBOARD.md`), adds the packages, copies
+It scaffolds a blank Remotion project around what is already in the folder
+(the plan files `brief.md`, `design.md` and `STORYBOARD.md`, and the person's
+photos in `public/photos`; nothing of theirs is replaced), adds the packages, copies
 the template and the scripts, writes `Root.tsx` for the size and platform,
 writes `theme.ts` from `design.md`'s "Palette:" and "Fonts:" lines (then the
 brand kit, then the template's own look, with a note), patches
@@ -88,6 +89,7 @@ F5 voices (toolbox.md, "Voice" and "Sorani voices").
 | --- | --- |
 | `src/story/story.json` | the script: scenes (`text`/`say`, `lead`/`hold`, `enter`, `silence`, `board`), voice, speed, `music`, `direction`; for some voices `lang` (Supertonic), `voiceStyle` and `voiceModel` (Gemini) |
 | `scripts/make-voice.mjs` | TTS per scene (Kokoro; `supertonic:F2`, `pocket:alba` or `pocket:me.wav`, `gemini:Charon` through `voice-engines.mjs`; Edge for a voice like `ar-IQ-RanaNeural`; for `f5:studio-male`, the Sorani files from `tts/speak_story.py`; `--draft` for silent estimated timings) → `public/voice/<id>.wav` + `src/story/voice.json` (durations, word timings, each scene's overlap). Re-speaks only the scenes whose words, voice or speed changed; `--fresh` re-speaks all. |
+| `scripts/gemini-take.mjs`, `scripts/split-take.mjs` | a Gemini voice for the whole script in one request (the free tier allows about ten a day), kept in `out/voice-takes/`, then cut per scene into `out/voice-raw/<id>.wav` for `"voice": "recorded"` (toolbox.md, "Gemini") |
 | `src/story/voice.ts` | `sceneVoice`, `wordAt`, `voiceEnd`, `overlapOf`, `IS_DRAFT_VOICE` |
 | `src/story/scenes.tsx` | **the file you write per video:** one component per scene id. A missing id plays as a placeholder. |
 | `scripts/sync-story.mjs` | `STORYBOARD.md` → `story.json` scenes (keeps `say`, `hold`, `enter`, `silence`); `--seconds` writes the real scene lengths back into the storyboard |
@@ -162,6 +164,15 @@ F5 voices (toolbox.md, "Voice" and "Sorani voices").
   Changa, El Messiri, Lalezar, Lemonada, Markazi Text, Rakkas, Rubik, Baloo
   Bhaijaan 2, Alyamama and Readex Pro don't: the missing letters fall back to
   another font in the middle of a word.
+
+  Captions (`Narration`) are set in `headingFont`. When `design.md` names a
+  font that has Arabic letters for the headline or the body ("body IBM Plex
+  Sans Arabic"), setup loads those letters with it, so Kurdish or Arabic in
+  `bodyFont` is set in that font and not in the script font. In a Kurdish
+  video that goes only for the fonts on the list above: for any other, setup
+  keeps its Kurdish in the script font and says so in a note. A project set up
+  before 2026-11-28 loads such a font with `subsets: ["latin"]` only; add
+  `"arabic"` to that line of `theme.ts` by hand.
 - `<PhotoCard base="friend1" name initial size mediaAspect={640/360} focusY={0.78} />`:
   a polaroid that finds `public/photos/<base>.(jpg|png|webp|gif|mp4|mov|webm)`
   through `getStaticFiles()`, which works in Studio and in renders. It falls
@@ -381,6 +392,11 @@ You can't hear the video, so measure it and look at frames:
   the shell that runs make-voice. A new terminal needs it again. The free tier
   allows few requests a minute, so a long video takes a few minutes while
   make-voice waits and retries; scenes already spoken are kept.
+- **Gemini's free tier ran out half way through a video.** It allowed ten
+  speech requests a day for each model (2026-11-19) and make-voice spends one
+  a scene: a Sorani advert stopped after five scenes. Speak the whole script
+  in one request (`gemini-take.mjs`), cut it per scene (`split-take.mjs`) and
+  use `"voice": "recorded"` (toolbox.md, "Gemini").
 - **A product name broke across two lines at its hyphen** ("video-" /
   "xoshaka"). Caption words never break inside now; in a title or a card, wrap
   the name in `<span style={{ whiteSpace: "nowrap" }}>`.

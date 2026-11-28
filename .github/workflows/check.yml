@@ -15,7 +15,9 @@ jobs:
         with:
           node-version: 22
       - name: Every script parses
-        run: for f in scripts/*.mjs .github/*.mjs; do node --check "$f"; done
+        run: for f in scripts/*.mjs .github/*.mjs .github/tests/*.mjs; do node --check "$f"; done
+      - name: The tests pass
+        run: node --test .github/tests/*.test.mjs
       - name: The Python scripts compile
         run: python3 -m py_compile scripts/*.py scripts/sorani/*.py
       - name: Every JSON file parses
