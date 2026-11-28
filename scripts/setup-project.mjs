@@ -369,6 +369,8 @@ for (const name of readdirSync(join(SKILL, "scripts"))) {
 if (SCRIPT === "sorani") {
   mkdirSync(join(DIR, "tts"), { recursive: true });
   for (const name of readdirSync(join(SKILL, "scripts", "sorani"))) {
+    // Files only: Python leaves a __pycache__ folder beside scripts it has compiled.
+    if (!statSync(join(SKILL, "scripts", "sorani", name)).isFile()) continue;
     const to = join(DIR, "tts", name);
     if (!existsSync(to)) {
       copyFileSync(join(SKILL, "scripts", "sorani", name), to);
